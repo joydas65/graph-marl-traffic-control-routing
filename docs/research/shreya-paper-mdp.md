@@ -69,16 +69,16 @@ The paper converts each queue length into a three-level feature:
 ```math
 \sigma_q(q)=
 \begin{cases}
-0, & q<L_1,\\
+0, & q\lt L_1,\\
 0.5, & L_1\leq q\leq L_2,\\
-1, & q>L_2.
+1, & q\gt L_2.
 \end{cases}
 ```
 
 Elapsed waiting time is converted into a binary feature:
 
 ```math
-\sigma_w(w)=0\ \text{when }w<T_1,
+\sigma_w(w)=0\ \text{when }w\lt T_1,
 \qquad
 \sigma_w(w)=1\ \text{when }w\geq T_1.
 ```
