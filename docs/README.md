@@ -7,7 +7,8 @@ This directory is the durable, public-safe research memory for the dissertation.
 - [`project-context.md`](project-context.md): stable problem definition, scope, mentorship, research lineage, and current questions.
 - [`research/roadmap.md`](research/roadmap.md): gated research programme from inherited baseline to final evaluation.
 - [`research/baseline-audit.md`](research/baseline-audit.md): complete technical assessment of the inherited repository.
-- [`research/shreya-paper-mdp.md`](research/shreya-paper-mdp.md): complete MDP formulation of the paper and its dissertation extension points.
+- [`research/shreya-paper-mdp.md`](research/shreya-paper-mdp.md): GitHub-rendered MDP formulation of the paper and its dissertation extension points.
+- [`research/shreya-paper-mdp.tex`](research/shreya-paper-mdp.tex): standalone LaTeX source that can be uploaded directly to Overleaf.
 
 ## Evidence and decisions
 

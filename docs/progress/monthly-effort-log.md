@@ -64,6 +64,7 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Established chapter evidence requirements: explain-back notes, equations, traffic-control mapping, questions, and related code/experiments.
 - Formalised the complete MDP described in the Salmalge-Bhatnagar paper.
 - Reworked the MDP note using rendered LaTeX and rewrote the Chapter 1, mentor-question, and joint-meeting notes in a more natural first-person research voice.
+- Corrected cross-platform equation rendering by adopting GitHub fenced-math blocks and adding a standalone, Overleaf-ready LaTeX source.
 - Created a question bank; the exact wording of Arghya's questions remains to be reconstructed and will not be invented.
 - Inspected the paper-linked `traffic-signal-control/RL_signals` repository and established that it is a general resource catalogue rather than the GCQN/GCAC implementation.
 - Prepared the first weekly update and the `EXP-DQN-000` inherited-baseline preflight.
