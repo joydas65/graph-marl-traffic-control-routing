@@ -1,64 +1,29 @@
-# RL and Graph Traffic-Control Question Bank
+# Questions Raised by the Research
 
-## How to use this document
+This is a working record of the questions I need to answer confidently during mentor discussions. I did not write down Arghya's questions word for word during the meeting on 27 July, so I will not present reconstructed wording as a quotation. Instead, I have recorded the areas that his questions showed I need to understand more deeply. When a question comes up again, I will add its exact wording and the evidence behind my answer.
 
-For every question raised by a mentor, record the exact wording, the initial answer, the corrected answer, one equation or experiment supporting it, and the remaining uncertainty. Do not present theme-based preparation questions as verbatim mentor questions.
+## What the first joint discussion made me examine
 
-## Questions from the 27 July meeting
+The first group of questions concerns the RL formulation itself. I need to be able to justify why traffic control is a sequential decision problem, what makes the formulation an MDP, and whether the paper's aggregated traffic observation is genuinely Markov. I also need a precise distinction between immediate reward, discounted return, state value, and action value—not just their definitions, but what each one means for a traffic signal.
 
-The exact wording was not captured. Joy should add recalled questions below rather than guessing.
+The discussion also exposed gaps around learning algorithms. I want to be able to derive the Bellman expectation and optimality equations, compare Monte Carlo and temporal-difference learning, and explain on-policy versus off-policy methods. For DQN, I should be ready to explain exploration, replay memory, and the target network, as well as the instability created by combining function approximation, bootstrapping, and off-policy learning. For actor-critic methods, I need to describe separately what the actor, critic, and advantage estimate contribute.
 
-| Exact question | Initial answer | Corrected answer/evidence | Remaining gap |
-|---|---|---|---|
-| To be reconstructed by Joy |  |  |  |
+## Questions about the graph formulation
 
-## Preparation questions: RL foundations
+The graph model needs more than an intuitive explanation. I should be able to identify the node features, edges, adjacency matrix, and self-loops in Shreya's formulation, then show what information becomes available after one or more graph-convolution layers. I also need to explain why a central DQN has $4^m$ joint actions for $m$ four-phase junctions, why independent DQNs scale more easily but may fail to coordinate, and how node-level rewards with a summed loss are intended to support cooperative behaviour.
 
-1. What makes a problem an MDP, and is the aggregated traffic state truly Markov?
-2. What is the difference between immediate reward, return, state value, and action value?
-3. Why is traffic-signal control a sequential decision problem rather than supervised prediction?
-4. What is the Bellman expectation equation versus the Bellman optimality equation?
-5. What is the difference between on-policy and off-policy learning?
-6. What do Monte Carlo and temporal-difference methods estimate differently?
-7. Why are exploration, replay memory, and a target network used in DQN?
-8. What is the deadly triad of function approximation, bootstrapping, and off-policy learning?
-9. What does an actor learn, what does a critic learn, and what is an advantage estimate?
-10. Why are multiple seeds and non-learning baselines necessary before claiming improvement?
+Some questions remain open rather than merely educational. Does a trained GCN generalise when a road is closed or the topology changes? How should unavailable roads and invalid actions be masked? How much message passing is useful before node representations become oversmoothed? Most importantly, what ablation would show that an improvement comes from graph structure rather than simply from a larger network or additional parameters?
 
-## Preparation questions: graph control
+## Questions that shape the dissertation
 
-1. Why can a fully connected DNN not use road topology as explicitly as a GCN?
-2. What are the node features, edges, adjacency matrix, and self-loops in Shreya's formulation?
-3. What information is shared after one, two, or more graph-convolution layers?
-4. Why does the central DQN action space grow as `4^m` for `m` four-phase junctions?
-5. Why can independent DQNs scale yet fail to coordinate?
-6. How do node-level rewards and summed losses encourage cooperative behaviour?
-7. What is graph oversmoothing, and why did it matter on the small 2x2 experiment?
-8. Can a trained GCN generalise to a changed topology or road closure without retraining?
-9. How should unavailable roads and invalid signal/routing actions be masked?
-10. What evidence would isolate the value of graph message passing from model size alone?
+For the proposed extension, I need a rigorous reason for placing signal control and vehicle routing on different timescales. That decision affects whether the problem remains an ordinary MDP or is better described as a semi-MDP, hierarchical MDP, or partially observable multi-agent problem. I also need to decide what information the routing and signal policies exchange, how they receive credit for a shared outcome, and how invalid routing choices are represented after a disruption.
 
-## Preparation questions: proposed dissertation
+The central research question must eventually be stated more sharply than “combine graph RL, signals, and routing.” I need to identify the testable novelty, define training and held-out incident scenarios, and specify the evidence needed to claim generalisation to unseen disruptions. I should also maintain a useful fallback contribution—such as a reproducible graph signal-control baseline and disruption benchmark—if end-to-end learned routing proves infeasible within the dissertation schedule.
 
-1. Why should signal control and routing operate at different timescales?
-2. Is the resulting process an MDP, semi-MDP, hierarchical MDP, or another formulation?
-3. How will routing and signal policies exchange information and receive credit?
-4. What is the precise novelty beyond combining existing components?
-5. How will unseen incident locations and severities be separated from training?
-6. What is the fallback contribution if learned joint routing is not feasible?
+## How I will work through a question
 
-## Answer template
+For each important question, I will first try to give a two- or three-sentence answer in plain language. I will then write the relevant definition or equation, connect it to the paper, and locate supporting code or an experiment. Finally, I will record any assumption or unresolved point instead of hiding it behind a confident-sounding answer.
 
-### Question
-
-### Short answer
-
-### Definitions and assumptions
-
-### Mathematical explanation
-
-### Connection to Shreya's paper
-
-### Supporting code or experiment
-
-### Limitation or unresolved point
+| Date | Question as asked | My first answer | Evidence or corrected answer | Remaining uncertainty |
+|---|---|---|---|---|
+| 27 Jul 2026 | Exact wording not recorded | — | The themes above were identified from the discussion. | Add the exact question if it is recalled or asked again. |

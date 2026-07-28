@@ -1,48 +1,23 @@
-# Joint Mentor Meeting: 27 July 2026
+# Joint Mentor Meeting — 27 July 2026
 
-## Participants
+I met with Arghya Roy Chaudhuri, my primary company mentor, and Shreya Salmalge, my technical co-mentor, to introduce the inherited research and discuss the preparation needed for its reproduction and extension.
 
-- Joy Das
-- Arghya Roy Chaudhuri, primary company mentor
-- Shreya Salmalge, technical co-mentor
+Shreya explained the intuition behind the graph representation. Junctions are treated as nodes and their road connections as edges. Graph convolution then allows the decision at a junction to use traffic information from neighbouring junctions instead of considering only its own queues. This provides a middle ground between a central DQN, whose joint action space grows exponentially with the number of signals, and completely independent DQNs, which do not naturally coordinate through neighbouring congestion.
 
-## Purpose
+Arghya explored the reasoning behind the RL and graph choices through several technical questions. The discussion made it clear to me that I need a stronger first-principles understanding of reinforcement learning before I can defend the formulation or evaluate an extension rigorously. The recommendation was to study Sutton and Barto's *Reinforcement Learning: An Introduction* thoroughly rather than prepare isolated answers. At the same time, the reading should remain connected to code, equations, and reproducible experiments so that theoretical learning and visible project progress develop together.
 
-Introduce the inherited research to Arghya, discuss the graph-based traffic-signal-control intuition, and assess the reinforcement-learning foundation required before reproduction and extension.
+I did not capture the exact wording of Arghya's questions during the call. I have therefore recorded the themes in the [research question bank](../learning/question-bank.md) without presenting them as quotations. Future mentor questions will be written down as asked, together with my initial response, the corrected explanation, and supporting evidence.
 
-## Discussion captured
+## Repository position clarified after the meeting
 
-- Shreya explained the central graph intuition: represent junctions as nodes and roads as edges, then use graph convolution to allow a signal decision at one junction to incorporate congestion information from neighbouring junctions.
-- The graph approach was contrasted with a central DQN, whose joint action space grows exponentially with the number of controlled intersections, and independent DQNs, which do not naturally coordinate using neighbouring congestion.
-- Arghya asked several technical questions to probe the underlying RL and graph reasoning.
-- Joy identified that his current RL knowledge is foundational and that deeper command of the theory is required to answer questions precisely.
-- The recommended foundation is a thorough reading of Sutton and Barto, *Reinforcement Learning: An Introduction*, across all chapters.
-- Theory development must run in parallel with visible reproduction and research progress.
+Shreya's public `Traffic-Light-Control-using-DQN` repository contains a single-intersection DQN prototype built with a fully connected network. It does not contain the graph-convolution layers, GCQN or GCAC models, graph actor-critic implementation, $2\times2$ graph experiment, or Modified Sioux Falls experiment described in the paper.
 
-## Important record limitation
+I also inspected the `traffic-signal-control/RL_signals` repository linked from the paper. It is a collection of traffic-signal-control resources, posters, and benchmark material rather than the implementation used for the GCQN/GCAC experiments. The authoritative experimental code and configuration therefore still need to be requested from Shreya.
 
-The exact wording of Arghya's individual questions was not captured. They must not be reconstructed as quotations. The known themes have been converted into preparation questions in `docs/learning/question-bank.md`; exact questions should be added when Joy recalls or encounters them again.
+## What I took away from the meeting
 
-## Repository clarification after the meeting
+My immediate goal is to build foundations without losing momentum on implementation. I will complete Chapter 1 with an explain-back note, continue through the textbook systematically, and connect each major concept to the traffic problem. In parallel, the public DQN prototype will serve as a Level-0 engineering baseline: I will run it faithfully, document its behaviour, repair reproducibility problems transparently, and compare results without implying that it reproduces the graph paper.
 
-- Shreya's public `Traffic-Light-Control-using-DQN` repository contains a single-intersection, fully connected DQN prototype.
-- It does not contain GCN layers, GCQN, GCAC, graph actor/critic models, the 2x2 graph environment, or Modified Sioux Falls experiments.
-- The repository linked in the paper, `traffic-signal-control/RL_signals`, was inspected and found to be a general resource catalogue containing a README, benchmark image, and posters—not the paper implementation.
-- The authoritative GCQN/GCAC experimental code therefore remains unavailable and must be requested from Shreya.
+The paper's GCQN/GCAC experiment remains a separate Level-1 milestone. Before claiming that reproduction, I need the original or archived code, network files, configurations, seeds, and expected results. Weekly evidence will include theory learned, code or experiment output, unresolved questions, and the next planned test.
 
-## Decisions
-
-1. Study RL systematically rather than attempting to memorise isolated answers.
-2. Pair each theory topic with an equation, implementation, and connection to the traffic problem.
-3. Reproduce the public DQN prototype first as a Level-0 engineering and learning baseline.
-4. Keep the final GCQN/GCAC paper reproduction as a separate Level-1 milestone.
-5. Maintain a question bank and weekly evidence update.
-
-## Actions
-
-- Joy: complete Chapter 1 and write an explain-back note before moving rapidly through later chapters.
-- Joy: reconstruct any exact questions he remembers in the question bank.
-- Joy/Codex: formalise the MDP from the paper and map it to the public DQN implementation.
-- Joy/Codex: begin `baseline/dqn-reproduction` after the repository-foundation commit.
-- Joy: ask Shreya for the archived/final GCQN/GCAC code, networks, configurations, seeds, and expected results.
-- Joy: provide Prof. Bhatnagar a concise update only after a concrete foundation/reproduction milestone or when a focused academic decision is needed.
+I will contact Prof. Bhatnagar when I have a concrete reproduction or formulation milestone to report, or when a focused academic decision requires his guidance. This should make each update concise and technically useful.

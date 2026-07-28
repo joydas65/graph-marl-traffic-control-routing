@@ -2,193 +2,349 @@
 
 ## Purpose and source boundary
 
-This document formalises the MDP described in Shreya Salmalge and Shalabh Bhatnagar, “Reinforcement Learning Algorithms with Graph Convolution Networks for Traffic Signal Control.” It separates the mathematical problem from model architecture and records ambiguities that require code or mentor confirmation.
+This note formalises the Markov decision process (MDP) described in Shreya Salmalge and Shalabh Bhatnagar, “Reinforcement Learning Algorithms with Graph Convolution Networks for Traffic Signal Control.” It separates the control problem from the neural-network architecture and records the points that still require confirmation from the authors or the original implementation.
 
 ## 1. Road network and controlled junctions
 
-Let the road network be a graph
+Let the road network be the graph
 
-`G = (V, E)`,
+$$
+G=(V,E),
+$$
 
-where junctions are nodes and roads are edges. Let `p = |V|` be the total number of junctions and let `m <= p` be the number of signal-controlled junctions. A junction has at most `k` incoming lanes.
+where each junction is a node in $V$ and each road connection is an edge in $E$. Let
 
-The graph is part of the environment structure. For graph models, it is also supplied to the function approximator through an adjacency matrix with self-loops.
+$$
+p=|V|, \qquad m\leq p,
+$$
+
+where $p$ is the total number of junctions and $m$ is the number of signal-controlled junctions. Each junction has at most $k$ incoming lanes.
+
+The graph is part of the environment structure. In GCQN and GCAC it is also supplied to the function approximator through an adjacency matrix with self-loops.
 
 ## 2. Decision time and traffic-light cycle
 
-Actions are selected at decision instants
+The controller selects actions at discrete decision instants
 
-`t_n = nT`, for `n = 0, 1, 2, ...`,
+$$
+t_n=nT, \qquad n=0,1,2,\ldots,
+$$
 
-where `T = T_g + T_y` is one signal-control cycle. In the experiments:
+where a control cycle has duration
 
-- green duration `T_g = 10` seconds;
-- yellow duration `T_y = 4` seconds; and
-- nominal decision interval `T = 14` seconds.
+$$
+T=T_g+T_y.
+$$
 
-When the selected phase changes, the old phase receives its four-second yellow transition before the new green. If the same phase is selected again, that green continues through the interval that would otherwise be yellow.
+The experimental values are
+
+$$
+T_g=10\ \text{s}, \qquad T_y=4\ \text{s}, \qquad T=14\ \text{s}.
+$$
+
+When the selected phase changes, the previous phase receives a four-second yellow transition before the new green phase begins. If the same phase is selected again, that green phase continues through the interval that would otherwise be used for yellow.
 
 ## 3. State space
 
-For incoming lane `j` at junction `i` and decision time `t`, define:
+For incoming lane $j$ at junction $i$ and decision time $t$, define
 
-- `q_j^i(t)`: queue length on the lane; and
-- `w_j^i(t)`: maximum elapsed time for which a vehicle has waited on that lane since its signal became red.
+$$
+q_j^i(t)=\text{queue length on lane }j,
+$$
 
-The elapsed-time feature is zero when the lane is green or no vehicle is waiting. The unaggregated traffic state is the collection of all queue and elapsed-time values over incoming lanes and controlled junctions.
+and
+
+$$
+w_j^i(t)=\text{maximum elapsed waiting time on lane }j
+$$
+
+since its signal became red. The elapsed-wait feature is zero while the lane is green or when no vehicle is waiting. Before aggregation, the traffic state is the collection of these queue and waiting-time values over all incoming lanes and controlled junctions.
 
 ### State aggregation
 
-The paper maps queue and elapsed time to coarse features using thresholds `L_1`, `L_2`, and `T_1`:
+The paper converts each queue length into a three-level feature:
 
-`sigma_q(q) = 0` when `q < L_1`, `0.5` when `L_1 <= q <= L_2`, and `1` when `q > L_2`.
+$$
+\sigma_q(q)=
+\begin{cases}
+0, & q<L_1,\\
+0.5, & L_1\leq q\leq L_2,\\
+1, & q>L_2.
+\end{cases}
+$$
 
-`sigma_w(w) = 0` when `w < T_1`, and `1` otherwise.
+Elapsed waiting time is converted into a binary feature:
 
-The reported experimental thresholds are:
+$$
+\sigma_w(w)=
+\begin{cases}
+0, & w<T_1,\\
+1, & w\geq T_1.
+\end{cases}
+$$
 
-- `L_1 = 7 m`;
-- `L_2 = 15 m`; and
-- `T_1 = 13 s`.
+The experimental thresholds are
 
-For a graph model, the input is a node-feature matrix
+$$
+L_1=7\ \text{m}, \qquad L_2=15\ \text{m}, \qquad T_1=13\ \text{s}.
+$$
 
-`X_t in R^(p x 2k)`,
+For a graph-based controller, the node-feature matrix is
 
-where a node row contains aggregated queue and elapsed-time features for up to `k` incoming lanes. The graph network also consumes the road-network adjacency structure.
+$$
+X_t\in\mathbb{R}^{p\times 2k}.
+$$
+
+Each row represents one junction and contains the aggregated queue and elapsed-wait features for up to $k$ incoming lanes. The graph network consumes both $X_t$ and the road-network adjacency structure.
 
 ### Markov limitation
 
-The authors formulate this as an MDP, but the coarse observation omits arrival processes, detailed vehicle positions, speeds, signal history beyond elapsed waiting, and downstream occupancy. It is therefore best understood as an aggregated state intended to approximate the information required for Markov control. Whether it is sufficiently Markov is an empirical modelling assumption.
+The paper treats this observation as the MDP state. In practice, the coarse representation omits arrival processes, exact vehicle positions and speeds, downstream occupancy, and most of the signal history. Its Markov property is therefore a modelling assumption: the aggregated state is intended to contain enough information for useful control, but it may not be a sufficient statistic of the simulator's underlying state.
 
 ## 4. Action space
 
-At each controlled junction `i`, an action `a_i(t)` selects one feasible green-phase pattern. The experiments use four phase choices per controlled junction.
+At controlled junction $i$, the action
 
-The network action is
+$$
+a_i(t)\in\mathcal{A}_i
+$$
 
-`a_t = (a_1(t), ..., a_m(t))`.
+selects one of four feasible green-phase patterns. The complete network action is
 
-How this vector is represented depends on the controller:
+$$
+\mathbf{a}_t=\bigl(a_1(t),a_2(t),\ldots,a_m(t)\bigr)
+\in\mathcal{A}_1\times\cdots\times\mathcal{A}_m.
+$$
 
-- **Central DQN:** treats the complete vector as one joint action. With four choices at each of `m` junctions, the number of joint actions is `4^m`.
-- **Individual DQN:** each junction selects its own action from four choices using a separate local network.
-- **GCQN:** produces per-node Q-values and selects the highest-valued phase at each controlled junction.
-- **GCAC:** the graph actor produces a categorical distribution over phases at every controlled junction and samples during training.
+The way this joint decision is represented depends on the controller:
 
-Only traffic-safe phase combinations are exposed as the four actions. The theoretical section assumes all defined actions are feasible in every state.
+- **Central DQN:** treats $\mathbf{a}_t$ as one joint action, giving
+
+  $$
+  |\mathcal{A}|=4^m.
+  $$
+
+- **Individual DQN:** uses a separate local network at each junction, with $|\mathcal{A}_i|=4$.
+- **GCQN:** produces four Q-values per controlled node and chooses the phase with the largest value.
+- **GCAC:** produces a categorical distribution over the four phases at each controlled node and samples from it during training.
+
+Only traffic-safe phase combinations are exposed as actions. The theoretical formulation assumes that every defined action is feasible whenever it may be selected.
 
 ## 5. Transition dynamics
 
-The transition kernel can be written as
+The transition kernel over one control cycle is
 
-`P(s_(t+T) | s_t, a_t)`.
+$$
+P\!\left(s_{t+T}\mid s_t,\mathbf{a}_t\right).
+$$
 
-It is induced by vehicle arrivals, routes, car-following and lane-changing behaviour, signal transitions, and network topology inside SUMO. The algorithms are model-free: they do not learn or require an explicit analytical form of `P`.
+It is induced by vehicle arrivals and routes, car-following and lane-changing behaviour, road topology, and traffic-light transitions inside SUMO. The learning algorithms are model-free, so they do not require an analytical expression for $P$.
 
-Demand is stochastic through randomly generated source and destination roads. Episodes use 1,000 vehicles on the 2x2 grid and 1,500 on Modified Sioux Falls.
+Demand is stochastic because source and destination roads are generated randomly. The reported episodes contain 1,000 vehicles on the $2\times2$ grid and 1,500 vehicles on Modified Sioux Falls.
 
-## 6. Reward and cost
+## 6. Reward and congestion cost
 
-The controller minimises congestion cost or, equivalently, maximises its negative reward. At controlled junction `i`:
+The local reward at controlled junction $i$ is the negative of a weighted congestion cost:
 
-`r_i(t) = -[alpha * sum_j q_j^i(t) + beta * sum_j w_j^i(t)]`.
+$$
+r_i(t)
+=-
+\left[
+\alpha\sum_{j=1}^{k_i}q_j^i(t)
++
+\beta\sum_{j=1}^{k_i}w_j^i(t)
+\right],
+$$
 
-The experiments set
+where $k_i\leq k$ is the number of incoming lanes at that junction. The experiments use
 
-`alpha = beta = 0.5`.
+$$
+\alpha=\beta=0.5.
+$$
 
-The elapsed-waiting component acts as a starvation/fairness mechanism: even a lane with a small queue becomes costly if it remains red for too long.
+The waiting-time term provides a limited fairness mechanism: a lane becomes increasingly costly if it stays red, even when its queue is not the largest.
 
-- The central DQN uses a network-level scalar reward obtained from congestion across junctions.
-- GCQN and GCAC use a reward vector with one component per node; node losses are summed during optimisation.
-- Non-signal nodes contribute zero control loss.
+For a central controller, a natural network-level reward is
 
-This is not the same reward as the public single-junction repository, which uses the change in total waiting plus the change in queue between consecutive decisions.
+$$
+r(t)=\sum_{i=1}^{m}r_i(t).
+$$
+
+GCQN and GCAC instead retain the node-level reward vector
+
+$$
+\mathbf{r}_t=\bigl(r_1(t),\ldots,r_m(t)\bigr),
+$$
+
+and sum node losses during optimisation. Nodes without controllable traffic signals contribute no control loss.
+
+This reward differs from the public single-junction repository, which uses the change in total waiting time plus the change in queue length between consecutive decisions.
 
 ## 7. Objective
 
-For discount factor `gamma in (0,1)`, the theoretical objective is to maximise expected discounted return:
+For a policy $\pi$ and discount factor $\gamma\in(0,1)$, the objective is to maximise expected discounted return:
 
-`J(pi) = E_pi[sum_(n=0)^infinity gamma^n r_(t_n)]`.
+$$
+J(\pi)
+=
+\mathbb{E}_{\pi}
+\left[
+\sum_{n=0}^{\infty}\gamma^n r(t_n)
+\right].
+$$
 
-The experiments use `gamma = 0.75` and finite episodes. An episode ends when all vehicles reach their destinations or after 5,400 simulation seconds.
+Equivalently, a node-wise graph controller can maximise
 
-For graph methods, maximising the sum of node returns corresponds to minimising overall network congestion while using local reward signals for learning.
+$$
+J(\pi)
+=
+\sum_{i=1}^{m}
+\mathbb{E}_{\pi}
+\left[
+\sum_{n=0}^{\infty}\gamma^n r_i(t_n)
+\right].
+$$
+
+The experiments use $\gamma=0.75$ and finite episodes. An episode ends when every vehicle reaches its destination or when the simulation reaches 5,400 seconds.
 
 ## 8. Policies and value functions
 
 ### DQN and GCQN
 
-Training uses epsilon-greedy exploration. The greedy policy selects the action with maximum estimated Q-value. A periodically updated target network supplies bootstrap targets.
+Training uses $\varepsilon$-greedy exploration. For GCQN node $i$, a standard one-step target is
 
-For GCQN node `i`, a one-step target has the form
+$$
+y_i(t)
+=
+r_i(t)
++
+\gamma\max_{a'\in\mathcal{A}_i}
+Q_{\omega^-}^{i}\!\left(s_{t+T},a'\right),
+$$
 
-`y_i(t) = r_i(t) + gamma * max_j Q_target(i, j | s_(t+T))`.
+where $\omega^-$ denotes the target-network parameters. The corresponding node-wise temporal-difference loss is
 
-The squared node losses are summed across controlled nodes and back-propagated through graph-convolution layers. A `K`-layer GCN allows a node decision to depend on features up to `K` hops away.
+$$
+\mathcal{L}_{\mathrm{GCQN}}(\omega)
+=
+\sum_{i=1}^{m}
+\left[
+y_i(t)-Q_{\omega}^{i}\!\left(s_t,a_i(t)\right)
+\right]^2.
+$$
+
+Back-propagation carries this loss through the graph-convolution layers. With $K$ message-passing layers, a node representation can incorporate information from nodes up to $K$ graph hops away.
 
 ### GCAC
 
-The graph actor represents a per-node categorical policy `pi_i(a | s)`. The graph critic estimates a per-node state value `V_i(s)`. The paper defines a one-step advantage from the local reward and value change, then:
+The graph actor represents a categorical policy $\pi_\theta^i(a\mid s)$ for each controlled node, while the graph critic estimates a node value $V_\phi^i(s)$. The paper's printed one-step advantage appears to be
 
-- minimises squared advantage for the critic; and
-- minimises negative log action probability multiplied by advantage for the actor.
+$$
+A_i(t)
+=
+r_i(t)
++
+V_\phi^i(s_{t+T})
+-
+V_\phi^i(s_t).
+$$
 
-The printed GCAC formula should be checked against the original code because the displayed one-step return does not visibly include `gamma`, despite the discounted MDP definition using it.
+A discounted form consistent with the stated MDP would instead be
+
+$$
+A_i^{(\gamma)}(t)
+=
+r_i(t)
++
+\gamma V_\phi^i(s_{t+T})
+-
+V_\phi^i(s_t).
+$$
+
+The actor and critic losses can then be written as
+
+$$
+\mathcal{L}_{\mathrm{actor}}(\theta)
+=
+-\sum_{i=1}^{m}
+\log \pi_\theta^i\!\left(a_i(t)\mid s_t\right)A_i(t),
+$$
+
+and
+
+$$
+\mathcal{L}_{\mathrm{critic}}(\phi)
+=
+\sum_{i=1}^{m}A_i(t)^2.
+$$
+
+Whether the implementation used the printed or discounted advantage must be checked against the authors' code, because the displayed equation does not visibly include $\gamma$ even though the MDP definition is discounted.
 
 ## 9. Experimental instantiations
 
-### 2x2 grid
+### $2\times2$ grid
 
-- 12 graph nodes, four signal-controlled junctions.
+- 12 graph nodes, including four signal-controlled junctions.
 - Eight incoming lanes per controlled junction.
-- Graph input shape `12 x 16`.
-- GCQN output shape `12 x 4`.
-- Central DQN input size 64 and output size `4^4 = 256`.
+- Graph input: $X_t\in\mathbb{R}^{12\times16}$.
+- GCQN output: $Q_t\in\mathbb{R}^{12\times4}$.
+- Central DQN input dimension: $64$.
+- Central DQN output dimension: $4^4=256$.
 
 ### Modified Sioux Falls
 
-- 31 graph nodes, 11 signal-controlled junctions.
-- Graph input shape `31 x 16`.
-- Graph output shape `31 x 4`.
-- Central joint DQN is omitted because `4^11` actions are impractical.
+- 31 graph nodes, including 11 signal-controlled junctions.
+- Graph input: $X_t\in\mathbb{R}^{31\times16}$.
+- Graph output: $Q_t\in\mathbb{R}^{31\times4}$.
+- Central DQN is omitted because its joint action space would contain $4^{11}=4{,}194{,}304$ actions.
 
-## 10. Formal tuple
+## 10. Complete MDP tuple
 
-The paper's control problem can be summarised as:
+The paper's control problem can be summarised as
 
-`M = (S, A, P, R, gamma, T)`,
+$$
+\mathcal{M}
+=
+\left(
+\mathcal{S},
+\mathcal{A},
+P,
+R,
+\gamma,
+T
+\right),
+$$
 
 where:
 
-- `S` contains aggregated lane queue and elapsed-wait features; the fixed road graph `G` is structural context supplied to graph function approximators;
-- `A` contains one feasible phase choice per controlled junction;
-- `P` is the unknown SUMO traffic transition kernel over a 14-second control cycle;
-- `R` is the negative equally weighted queue-and-elapsed-wait cost;
-- `gamma = 0.75`; and
-- `T` defines the 10-second green and 4-second yellow control timing.
+- $\mathcal{S}$ contains the aggregated lane queue and elapsed-wait features. The fixed graph $G$ is structural context supplied to the graph-based function approximators.
+- $\mathcal{A}=\mathcal{A}_1\times\cdots\times\mathcal{A}_m$ contains one feasible signal phase per controlled junction.
+- $P(s_{t+T}\mid s_t,\mathbf{a}_t)$ is the unknown SUMO transition kernel over a 14-second control cycle.
+- $R$ is the negative, equally weighted queue-and-waiting cost.
+- $\gamma=0.75$ is the reported discount factor.
+- $T=T_g+T_y=14$ seconds defines the decision interval.
 
-## 11. What Joy must be able to explain
+The policy is therefore a mapping
 
-1. Why elapsed red waiting provides a limited fairness mechanism.
-2. Why `4^m` makes central DQN unsuitable as `m` grows.
-3. Why individual DQNs lose spatial coordination.
-4. How GCN message passing changes the information available to a node action.
-5. Why a coarse state may violate the strict Markov assumption.
-6. Why graph architecture is not itself a new MDP.
-7. How the paper MDP differs from the public DQN repository.
-8. Which variables must be extended to introduce disruptions and routing.
+$$
+\pi:\mathcal{S}\longrightarrow\Delta(\mathcal{A}),
+$$
 
-## 12. Extension points for the dissertation
+or, for decentralised graph control, a collection of node policies
 
-The dissertation must extend the tuple rather than only add a model layer:
+$$
+\pi_i:\mathcal{S}\longrightarrow\Delta(\mathcal{A}_i),
+\qquad i=1,\ldots,m.
+$$
 
-- augment state with edge availability, capacity, incident severity, downstream congestion, and routing context;
-- constrain actions through topology and safety masks;
-- add slower routing actions or options;
-- define transition timing for asynchronous signal and routing decisions;
-- define a coordination reward and credit-assignment mechanism; and
-- evaluate generalisation to unseen incidents and demand.
+## 11. Questions I should be able to answer
 
-The appropriate formal framework may become a semi-MDP, hierarchical MDP, or multi-agent partially observable model. That choice should follow explicit assumptions and mentor review.
+After studying this formulation, I should be able to explain why elapsed red waiting supplies a limited fairness signal, why the $4^m$ joint action space prevents central DQN from scaling, and why independent DQNs lose spatial coordination. I should also be able to describe what graph message passing adds to each junction's information, why the aggregated state may not be strictly Markov, and why replacing a dense network with a GCN changes the policy architecture but not the underlying MDP.
+
+I also need to keep the paper formulation separate from the public DQN repository: the two use different network structures, traffic layouts, and rewards. That distinction is essential when I report a baseline reproduction.
+
+## 12. Dissertation extension points
+
+The dissertation must extend the decision problem rather than merely insert another neural-network layer. Likely changes include augmenting the state with road availability, capacity, incident severity, downstream congestion, and routing context; masking infeasible signal or routing actions; adding slower routing decisions; and defining a coordination reward that supports meaningful credit assignment.
+
+Once routing and signal control operate on different timescales, the timing assumptions must be explicit. Depending on how decisions persist and what each agent observes, the appropriate framework may be a semi-MDP, a hierarchical MDP, or a partially observable multi-agent model. That choice should follow a precise problem statement and discussion with the mentors.
