@@ -99,7 +99,7 @@ The minimum scientific deliverable is disruption-aware graph-based signal contro
 
 ## Open questions requiring mentor alignment
 
-1. Is `traffic-signal-control/RL_signals` the authoritative code for the 2025 GCQN/GCAC experiments, and which commit/configuration should be reproduced?
+1. Where is the authoritative code for the 2025 GCQN/GCAC experiments? The paper-linked `traffic-signal-control/RL_signals` repository was inspected and contains only a general resource catalogue, not the paper implementation.
 2. What exact research hypothesis should distinguish this dissertation from a system integration exercise?
 3. What is the preferred coordination mechanism between signal and routing policies?
 4. Which network, traffic distributions, and disruption families are sufficient for the first evaluation gate?

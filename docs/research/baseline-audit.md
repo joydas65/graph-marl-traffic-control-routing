@@ -145,7 +145,7 @@ After Level 0, implement a separate tested environment/agent architecture within
 ## Mentor confirmations required
 
 - Whether this repository produced any reported experimental result or was an earlier prototype.
-- Whether `traffic-signal-control/RL_signals` is the authoritative 2025 codebase.
+- The location of the authoritative 2025 codebase; `traffic-signal-control/RL_signals` was inspected and contains no GCQN/GCAC implementation.
 - Original Python, SUMO, framework, and dependency versions.
 - Intended observation dimension: 32 or 80.
 - Missing model/checkpoint/testing files and expected baseline numbers.

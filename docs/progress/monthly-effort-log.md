@@ -55,6 +55,19 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Added a public-safe documentation system containing provenance, project context, mentor guidance, foundational literature, baseline audit, roadmap, research decision record, and this monthly log.
 - Added `AGENTS.md` so future Codex work follows the same scientific, provenance, experiment, and privacy requirements.
 
+### Joint mentor meeting and RL foundations: 27-28 July 2026
+
+- Met jointly with Arghya Roy Chaudhuri and Shreya Salmalge.
+- Shreya explained the intuition for representing the road network as a graph and using neighbouring congestion in signal decisions.
+- Arghya's technical questions identified the need to strengthen first-principles RL and graph understanding.
+- Began Sutton and Barto and reached Chapter 1, Section 1.5 by 28 July.
+- Established chapter evidence requirements: explain-back notes, equations, traffic-control mapping, questions, and related code/experiments.
+- Formalised the complete MDP described in the Salmalge-Bhatnagar paper.
+- Created a question bank; the exact wording of Arghya's questions remains to be reconstructed and will not be invented.
+- Inspected the paper-linked `traffic-signal-control/RL_signals` repository and established that it is a general resource catalogue rather than the GCQN/GCAC implementation.
+- Prepared the first weekly update and the `EXP-DQN-000` inherited-baseline preflight.
+- Started the `baseline/dqn-reproduction` milestone branch for faithful execution, diagnosis, repair, and comparison of Shreya's public DQN prototype.
+
 ### Decisions
 
 - Maintain one longitudinal research repository rather than a disposable baseline fork plus disconnected dissertation repository.
@@ -66,7 +79,7 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 ### Current risks and blockers
 
 - The inherited training/testing implementation is not runnable as a trustworthy end-to-end baseline without repair.
-- The authoritative GCQN/GCAC code commit and experimental configuration require confirmation from Shreya.
+- The authoritative GCQN/GCAC code commit and experimental configuration require confirmation from Shreya; the repository linked in the paper does not contain that implementation.
 - The upstream repository has no declared licence; reuse and redistribution terms require confirmation.
 - Baseline runtime and compute requirements have not yet been measured.
 - The central two-timescale coordination mechanism still requires research alignment with Prof. Bhatnagar.
