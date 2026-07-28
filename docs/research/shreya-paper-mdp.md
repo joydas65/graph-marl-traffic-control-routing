@@ -78,11 +78,9 @@ The paper converts each queue length into a three-level feature:
 Elapsed waiting time is converted into a binary feature:
 
 ```math
-\sigma_w(w)=
-\begin{cases}
-0, & w<T_1,\\
-1, & w\geq T_1.
-\end{cases}
+\sigma_w(w)=0\ \text{when }w<T_1,
+\qquad
+\sigma_w(w)=1\ \text{when }w\geq T_1.
 ```
 
 The experimental thresholds are
