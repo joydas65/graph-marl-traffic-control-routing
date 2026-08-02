@@ -7,6 +7,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 - [`project-context.md`](project-context.md): stable problem definition, scope, mentorship, research lineage, and current questions.
 - [`research/roadmap.md`](research/roadmap.md): gated research programme from inherited baseline to final evaluation.
 - [`research/baseline-audit.md`](research/baseline-audit.md): complete technical assessment of the inherited repository.
+- [`research/shreya-drive-handover-audit.md`](research/shreya-drive-handover-audit.md): aggregate, public-safe provenance assessment of the private GCQN/GCAC handover.
 - [`research/shreya-paper-mdp.md`](research/shreya-paper-mdp.md): GitHub-rendered MDP formulation of the paper and its dissertation extension points.
 - [`research/shreya-paper-mdp.tex`](research/shreya-paper-mdp.tex): standalone LaTeX source that can be uploaded directly to Overleaf.
 
@@ -14,6 +15,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 
 - [`progress/monthly-effort-log.md`](progress/monthly-effort-log.md): chronological effort and evidence log.
 - [`progress/weekly/2026-07-27-to-2026-08-02.md`](progress/weekly/2026-07-27-to-2026-08-02.md): current one-page weekly evidence update.
+- [`experiments/EXP-GRAPH-000.md`](experiments/EXP-GRAPH-000.md): read-only provenance and structural comparison of the GCQN/GCAC handover.
 - [`decisions/0001-single-repository-research-history.md`](decisions/0001-single-repository-research-history.md): rationale for keeping the baseline and dissertation evolution in one repository.
 - [`mentoring/2026-07-initial-guidance.md`](mentoring/2026-07-initial-guidance.md): technical guidance received during project initiation.
 - [`mentoring/2026-07-27-joint-mentor-meeting.md`](mentoring/2026-07-27-joint-mentor-meeting.md): joint discussion with Arghya and Shreya.

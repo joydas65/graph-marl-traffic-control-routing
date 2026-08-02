@@ -86,6 +86,20 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Baseline runtime and compute requirements have not yet been measured.
 - The central two-timescale coordination mechanism still requires research alignment with Prof. Bhatnagar.
 
+## August 2026
+
+### GCQN/GCAC handover provenance audit: 2 August 2026
+
+- Received the local GCQN and GCAC handover roots and confirmed that they are distinct private directories outside the research repository.
+- Created branch `audit/exp-graph-000-provenance` from commit `6a136079835fc3be11cfd549c7ac1faaaa371848`.
+- Implemented a read-only, standard-library inventory utility with deterministic private JSON/CSV output, SHA-256 hashing, duplicate detection, same-path comparison, unreadable-file reporting, and root-versus-nested Git-marker summaries.
+- Added six synthetic unit tests covering determinism, relative paths, symlink handling, output isolation, unreadable files, and embedded Git classification.
+- Completed two full inventory passes: GCQN contains 29,184 files totalling 458,999,601 bytes; GCAC contains 13,140 files totalling 341,321,191 bytes; no unreadable entries were found.
+- Confirmed 12,906 equal-content files and 210 different-content files at equal relative paths, with 18,609 GCQN-only paths and 30 GCAC-only paths.
+- Verified all seven outputs were byte-for-byte deterministic across the two runs and that no absolute local paths appeared in the 14 generated private files.
+- Static provenance checks established that GCQN has incomplete root Git provenance because its recorded `HEAD` does not resolve, while GCAC has no root Git marker. Both contain nested Git metadata; no runtime conclusion was drawn.
+- Produced the aggregate public audit and `EXP-GRAPH-000` record without modifying handover code, installing dependencies, running training, or copying private artifacts into Git.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
