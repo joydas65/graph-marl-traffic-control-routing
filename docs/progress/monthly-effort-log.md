@@ -100,6 +100,17 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Static provenance checks established that GCQN has incomplete root Git provenance because its recorded `HEAD` does not resolve, while GCAC has no root Git marker. Both contain nested Git metadata; no runtime conclusion was drawn.
 - Produced the aggregate public audit and `EXP-GRAPH-000` record without modifying handover code, installing dependencies, running training, or copying private artifacts into Git.
 
+### GCQN/GCAC foundational semantic audit: 2 August 2026
+
+- Created branch `audit/exp-graph-001-semantic-map` from the reviewed `main` milestone.
+- Audited paper Sections 2.1-3.3 and Algorithms 1-2 against both private handovers without importing or executing either codebase.
+- Created a private line-level evidence matrix outside Git covering 27 MDP, GCQN, and GCAC semantic items.
+- Classified 8 items as mapped, 7 as partial, 7 as apparent conflicts, 4 as missing, and 1 as unverified; every item still requires runtime verification.
+- Recorded strong static correspondences for graph construction, phase transitions, GCQN target updates, GCAC policy/value structures, actor and critic losses, and gradient-based updates.
+- Recorded apparent conflicts in state aggregation, reward construction, GCQN action/loss behavior, replay lifecycle, GCAC action selection, GCAC discount-factor notation, and on-policy semantics.
+- Confirmed that terminal handling is not visible on either candidate learning path.
+- Published only sanitized aggregate findings in the research map and `EXP-GRAPH-001` record; no private evidence or reproduction claim entered Git.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
