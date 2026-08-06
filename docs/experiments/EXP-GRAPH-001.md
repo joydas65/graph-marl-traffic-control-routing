@@ -2,13 +2,15 @@
 
 ## Status
 
-Part 1 complete as a non-executing static audit. Runtime verification has not started.
+Parts 1 and 2 are complete as non-executing static audits. Runtime verification has not started.
 
 ## Question
 
 Do the private GCQN and GCAC handovers statically implement the MDP and learning procedures specified in Sections 2.1-3.3 and Algorithms 1-2 of the Salmalge-Bhatnagar paper?
 
 ## Scope completed
+
+### Part 1: paper-to-code semantics
 
 - state and state aggregation;
 - graph nodes and edges;
@@ -17,6 +19,13 @@ Do the private GCQN and GCAC handovers statically implement the MDP and learning
 - GCQN action selection, target, loss, architecture, and target updates;
 - GCAC policy, actor, critic, advantage, losses, optimizer behavior, and replay semantics.
 
+### Part 2: dispatch and symbolic shapes
+
+- runner, configuration, registry, task, trainer, environment, agent, replay, model, update, and evaluation dispatch;
+- symbolic reset, phase, action, reward, done, replay, batch, graph, output, target/return, and loss shapes using `N`, `E`, `F`, `A`, `B`, and `K`;
+- competing scalar and full-network node-wise GCQN candidate paths;
+- GCAC graph-batch, return-update, terminal, target-network, and checkpoint-dispatch questions.
+
 Section 4, experiment figures and tables, datasets, stored results, installation, training, and checkpoint execution were explicitly excluded.
 
 ## Method
@@ -24,10 +33,25 @@ Section 4, experiment figures and tables, datasets, stored results, installation
 1. Treated the complete paper as the normative specification.
 2. Inspected both external handovers read-only.
 3. Traced candidate observation, graph, action, reward, replay, trainer, network, loss, and update paths.
-4. Recorded detailed line-level evidence in a private matrix outside Git.
+4. Recorded detailed line-level semantic and dispatch/shape evidence in private matrices outside Git.
 5. Reduced that evidence to aggregate, public-safe findings.
 
 No handover module was imported or executed. No dependency was installed.
+
+## Part 2 static dispatch findings
+
+The GCQN handover contains two competing selectable graph-Q candidates:
+
+- a scalar or single-intersection candidate that combines `[1, K]` inference input with an `N`-node edge index; and
+- a full-network node-wise candidate with `[N, F]` inference input and `[N, A]` Q output.
+
+Neither candidate is established as the historical or authoritative GCQN implementation. The full-network candidate constructs `[2, B E]` batched edges but statically passes `[B N, F]` features to a model retaining the unbatched `[2, E]` edge index.
+
+The GCAC candidate similarly constructs batched edges and then discards them on the training path selected by the standard trainer. Its return vector has `B N` entries, while the visible assignment loop updates only a prefix of length `B`. These are apparent mismatches, and runtime verification is required.
+
+All scoped candidates omit terminal state from replay and apply no terminal target mask. GCQN target Q-networks are statically connected on both selectable graph-Q paths. GCAC target actor/critic networks are initialized, but standard target updates are empty and target use appears confined to an alternate method without a standard caller.
+
+The public symbolic audit is recorded in [`../research/shreya-dispatch-shape-audit.md`](../research/shreya-dispatch-shape-audit.md).
 
 ## Aggregate evidence
 
@@ -66,8 +90,8 @@ These findings establish audit questions. They do not prove defects, effective r
 
 ## Decision
 
-Do not repair or run either handover yet. First review the apparent conflicts and confirm the intended historical execution path, especially GCQN node-wise control and GCAC replay-based behavior.
+Do not repair or run either handover yet. Confirm the intended source/configuration lineage and review the dispatch/shape questions, especially the competing GCQN candidates, discarded batched edges, GCAC return coverage, terminal propagation, target dispatch, and evaluation loading.
 
 ## Next gate
 
-Complete a non-importing dispatch and tensor-shape audit for the candidate paths. Environment installation and runtime verification require a separate approved experiment plan.
+Prepare a separately approved, minimal, non-training runtime-probe plan for dispatch and tensor invariants. Environment installation and handover execution remain outside this experiment stage.

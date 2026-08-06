@@ -9,6 +9,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 - [`research/baseline-audit.md`](research/baseline-audit.md): complete technical assessment of the inherited repository.
 - [`research/shreya-drive-handover-audit.md`](research/shreya-drive-handover-audit.md): aggregate, public-safe provenance assessment of the private GCQN/GCAC handover.
 - [`research/shreya-paper-to-code-map.md`](research/shreya-paper-to-code-map.md): sanitized static mapping of paper Sections 2.1-3.3 and Algorithms 1-2 to the private GCQN/GCAC handovers.
+- [`research/shreya-dispatch-shape-audit.md`](research/shreya-dispatch-shape-audit.md): sanitized non-importing dispatch trace and symbolic tensor-shape audit for competing GCQN candidates and the GCAC candidate.
 - [`research/shreya-paper-mdp.md`](research/shreya-paper-mdp.md): GitHub-rendered MDP formulation of the paper and its dissertation extension points.
 - [`research/shreya-paper-mdp.tex`](research/shreya-paper-mdp.tex): standalone LaTeX source that can be uploaded directly to Overleaf.
 

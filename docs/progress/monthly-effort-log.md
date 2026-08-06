@@ -111,6 +111,18 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Confirmed that terminal handling is not visible on either candidate learning path.
 - Published only sanitized aggregate findings in the research map and `EXP-GRAPH-001` record; no private evidence or reproduction claim entered Git.
 
+### GCQN/GCAC dispatch and symbolic shape audit: 7 August 2026
+
+- Continued `EXP-GRAPH-001` on branch `audit/exp-graph-001-dispatch-shapes` from the reviewed `main` milestone.
+- Traced runner, configuration, registry, task, trainer, environment, agent, replay, graph model, loss/update, target-network, evaluation, and checkpoint-loading dispatch without importing or executing either handover.
+- Created a private line-level dispatch/shape matrix outside Git and a sanitized public audit using symbolic dimensions `N`, `E`, `F`, `A`, `B`, and `K`.
+- Identified a scalar/single-intersection graph-Q path and a full-network node-wise graph-Q path as competing selectable GCQN candidates; neither was classified as historical or authoritative.
+- Recorded apparent graph-batch mismatches in the full-network GCQN and GCAC candidates because constructed batched edges are not used by their visible training calls.
+- Recorded an apparent GCAC partial return update: the return vector is node-expanded while only a batch-sized prefix is explicitly assigned.
+- Confirmed statically that terminal values are not preserved in replay, GCQN target Q-networks are connected to the standard trainer paths, and GCAC target-network use is confined to a competing alternate method with no standard caller.
+- Recorded evaluation and checkpoint-loading ambiguity without making runtime, reproduction, performance, or successful-loading claims.
+- Kept private filenames, paths, line references, excerpts, configurations, scenario sizes, hashes, and artifact identifiers outside the public repository.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
