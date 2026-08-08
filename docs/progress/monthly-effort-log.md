@@ -123,6 +123,16 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Recorded evaluation and checkpoint-loading ambiguity without making runtime, reproduction, performance, or successful-loading claims.
 - Kept private filenames, paths, line references, excerpts, configurations, scenario sizes, hashes, and artifact identifiers outside the public repository.
 
+### Generic runtime-probe isolation harness: 7 August 2026
+
+- Created branch `plan/exp-graph-002-runtime-probes` from the reviewed `main` milestone.
+- Implemented a Python-standard-library harness that runs one probe per isolated CPU-only subprocess with a configurable timeout and temporary working directory.
+- Added explicit allowed-write roots, Python audit-hook write rejection, nested-process and network blocking, and sanitized output and structured results.
+- Added stable pass, fail, inconclusive, and blocked statuses together with elapsed-time, exit-status, shape, and call-count evidence fields.
+- Added deterministic generic synthetic-world fixtures without copying or mirroring private handover classes.
+- Added ten synthetic tests covering successful execution, timeout handling, blocked and allowed writes, network and nested-process blocking, sanitization across every result channel, stable result schema, dependency independence, and deterministic fixtures.
+- Kept Stage 1 independent of private handover imports, research dependencies, simulators, models, checkpoints, training, and algorithm repair.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
