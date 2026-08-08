@@ -67,20 +67,25 @@ Each approved candidate may later receive exactly one reset, one action selectio
 - No private source or scenario material may be copied into Git.
 - Pre/post source-integrity checks are required when private source is eventually accessed.
 
-The Stage 1 audit hook governs Python operations that emit audit events. It is not a security boundary for native extensions or simulator processes. Level 3 therefore requires container or operating-system read-only enforcement before execution.
+The Stage 1 audit hook governs Python operations that emit audit events. It is not a security boundary for native extensions or simulator processes. Level 3 therefore requires operating-system-level read-only enforcement in an approved execution environment before it can run.
 
 ## Environment gate
 
-Available environment evidence is conflicting and no final Python, PyTorch, graph-library, Gym, or simulator version has been selected. The local Python used to test this standard-library harness is not evidence of handover compatibility.
+[Decision 0002](../decisions/0002-compute-and-experiment-environments.md) separates the development host, reconstructed compatibility validation, canonical dissertation experiments, and optional exploratory compute. The local Python used to test the standard-library harness remains unrelated to handover compatibility.
+
+The selected Level-1 installation-test candidate is native Linux x86-64 with CPython 3.10.13, PyTorch 1.11.0+cpu, the approved Torch-1.11-compatible PyG dependency closure, and CPU-only execution. This candidate will be tested on dedicated native Linux x86-64 remote or cloud infrastructure. It has not been installed or validated, and no provider or machine type has been frozen.
+
+The compatibility-selected stack is not claimed to be the paper's historical environment. Successful execution would characterize the visible source under a defensible reconstructed environment; it would not prove historical reproduction.
 
 Before any candidate-specific import:
 
-1. select and record one CPU-only environment candidate;
-2. resolve exact compatible dependency versions without changing candidate source;
-3. verify that private source can be mounted read-only;
-4. validate the harness against synthetic probes in that environment; and
-5. approve Level 1 separately from Levels 2 and 3.
+1. provision the selected candidate in a disposable native Linux x86-64 environment under separate approval;
+2. verify the exact dependency lock without changing candidate source;
+3. verify that private source can be exposed read-only;
+4. validate the Stage 1 harness against synthetic probes in that environment;
+5. perform dependency-import smoke tests before exposing private source; and
+6. approve Level 1 separately from Levels 2 and 3.
 
 ## Current conclusion
 
-The generic harness is available for review and its synthetic tests exercise success, timeout, write blocking, allowed temporary writes, network and nested-process blocking, sanitization across every result channel, deterministic schema, and dependency independence. No GCQN, GCAC, simulator, checkpoint, or model runtime evidence has been produced.
+The generic harness is available for review and its synthetic tests exercise success, timeout, write blocking, allowed temporary writes, network and nested-process blocking, sanitization across every result channel, deterministic schema, and dependency independence. The compute-environment roles and compatibility candidate are documented, but no environment has been provisioned and no GCQN, GCAC, simulator, checkpoint, or model runtime evidence has been produced.

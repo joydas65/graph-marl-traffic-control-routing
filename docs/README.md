@@ -22,6 +22,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 - [`experiments/EXP-GRAPH-001.md`](experiments/EXP-GRAPH-001.md): non-executing semantic audit of the paper's foundational MDP, GCQN, and GCAC procedures.
 - [`experiments/EXP-GRAPH-002.md`](experiments/EXP-GRAPH-002.md): generic isolation harness and staged plan for minimal GCQN/GCAC runtime probes.
 - [`decisions/0001-single-repository-research-history.md`](decisions/0001-single-repository-research-history.md): rationale for keeping the baseline and dissertation evolution in one repository.
+- [`decisions/0002-compute-and-experiment-environments.md`](decisions/0002-compute-and-experiment-environments.md): separation of the development host, reconstructed compatibility environment, canonical dissertation infrastructure, and optional exploratory compute.
 - [`mentoring/2026-07-initial-guidance.md`](mentoring/2026-07-initial-guidance.md): technical guidance received during project initiation.
 - [`mentoring/2026-07-27-joint-mentor-meeting.md`](mentoring/2026-07-27-joint-mentor-meeting.md): joint discussion with Arghya and Shreya.
 - [`learning/question-bank.md`](learning/question-bank.md): mentor questions and technical preparation prompts.

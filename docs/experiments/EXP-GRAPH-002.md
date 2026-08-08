@@ -2,7 +2,7 @@
 
 ## Status
 
-Stage 1 isolation harness implemented and validated with synthetic dummy probes on 7 August 2026. Candidate-specific runtime characterization has not started.
+Stage 1 isolation harness implemented and validated with synthetic dummy probes on 7 August 2026. The compute-environment roles and Level-1 installation-test candidate were documented on 8 August 2026. No candidate environment has been provisioned or validated, and candidate-specific runtime characterization has not started.
 
 ## Question
 
@@ -59,8 +59,16 @@ Synthetic tests cover:
 
 Stage 1 establishes orchestration and Python-level isolation only. It provides no evidence that either handover imports, executes, matches the paper, loads a checkpoint, or produces a valid action or result.
 
-The Python audit hook cannot govern writes performed directly by native extensions. Simulator smoke probes therefore remain blocked until an operating-system or container read-only boundary is reviewed.
+The Python audit hook cannot govern writes performed directly by native extensions. Simulator smoke probes therefore remain blocked until an operating-system-level read-only boundary is reviewed in an approved execution environment.
+
+## Compute-environment decision
+
+[Decision 0002](../decisions/0002-compute-and-experiment-environments.md) distinguishes the Apple Silicon development host from the reconstructed compatibility-validation environment, canonical dissertation infrastructure, and optional exploratory compute.
+
+The compatibility candidate for future installation testing remains native Linux x86-64, CPython 3.10.13, PyTorch 1.11.0+cpu, the approved Torch-1.11-compatible PyG dependency closure, and CPU-only execution. Testing will use dedicated native Linux x86-64 remote or cloud infrastructure. No provider, machine type, canonical experiment environment, or GPU has been selected.
+
+This compatibility-selected stack is not claimed as the original paper environment. Future success would characterize the visible source under a defensible reconstructed environment and would not, by itself, establish historical reproduction.
 
 ## Next gate
 
-Review the harness and documentation. After approval, resolve one exact CPU-only environment and implement Level 1 synthetic model-only probes as a separate stage. Do not begin fake-world or simulator probes at the same time.
+Under separate approval, provision a disposable native Linux x86-64 instance for the selected CPU-only compatibility candidate. First rerun the Stage 1 synthetic harness, then perform dependency-import smoke tests without private source, and only afterwards consider candidate-specific Level-1 probes. Do not begin fake-world or simulator probes at the same time.
