@@ -133,6 +133,17 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Added ten synthetic tests covering successful execution, timeout handling, blocked and allowed writes, network and nested-process blocking, sanitization across every result channel, stable result schema, dependency independence, and deterministic fixtures.
 - Kept Stage 1 independent of private handover imports, research dependencies, simulators, models, checkpoints, training, and algorithm repair.
 
+### Compute-environment decision documentation: 8 August 2026
+
+- Recorded a public-safe development-host snapshot and its role in editing, orchestration, documentation, analysis, plotting, and standard-library harness work.
+- Established separate environment roles for development, reconstructed compatibility validation, canonical dissertation experiments, and optional exploratory compute.
+- Documented the existing native Linux x86-64, CPython 3.10.13, PyTorch 1.11.0+cpu compatibility candidate and changed its future execution strategy to dedicated native remote or cloud infrastructure.
+- Defined the infrastructure, software, configuration, seed, code, and data identities required for canonical dissertation experiments.
+- Separated architecture-independent compatibility evidence from native training and performance evidence.
+- Classified managed notebook services as exploratory or supplementary compute and bounded remote workspaces as possible development or compatibility options rather than canonical experiment platforms.
+- Deferred provider, machine, GPU, and additional-hardware selection until baseline profiling and cloud-cost evidence are available.
+- Completed documentation only; no environment was provisioned, software installed, private handover imported, simulator started, checkpoint loaded, or runtime probe executed.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
