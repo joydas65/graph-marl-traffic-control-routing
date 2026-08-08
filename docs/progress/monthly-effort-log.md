@@ -144,6 +144,19 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Deferred provider, machine, GPU, and additional-hardware selection until baseline profiling and cloud-cost evidence are available.
 - Completed documentation only; no environment was provisioned, software installed, private handover imported, simulator started, checkpoint loaded, or runtime probe executed.
 
+### Native Linux compatibility environment and dependency validation: 8–9 August 2026
+
+- Created a separate AWS account for dissertation research on the Free plan and hardened access: enabled root MFA while retaining zero root access keys; created the non-root `research-admin` IAM identity with MFA and no access keys; reduced the `research-admins` group to `AdministratorAccess` by removing redundant service-specific administrator policies; and successfully simulated the EC2, IAM, and SSM permissions required for the validation workflow.
+- Created disposable EXP-GRAPH-002 infrastructure comprising an EC2 SSM role/profile with `AmazonSSMManagedInstanceCore`, a dedicated zero-inbound security group, no SSH key or port 22, required IMDSv2, and a four-hour automatic-shutdown safeguard.
+- Provisioned one On-Demand `m7i-flex.large` instance in `ap-south-1` using the public Canonical Ubuntu 22.04 x86-64 AMI current at execution time and a 40 GB encrypted gp3 root volume. This instance is compatibility-validation hardware only, not canonical dissertation performance hardware.
+- Captured the observed runtime identity: Ubuntu 22.04.5 LTS, kernel 6.8.0-1061-aws, glibc 2.35, x86_64, 2 vCPUs, approximately 7.6 GiB usable RAM, Intel Xeon Platinum 8488C, KVM, base Python 3.10.12, and a working SSM Agent.
+- Built CPython 3.10.13 from official source under `/opt/exp-graph-002`, created the isolated `venv-l1`, validated native standard-library imports, and recorded source SHA-256 `5c88848668640d3e152b35b4536ef1c23b2ca4bd2c957ef1ecbb053f571dd3f6`.
+- Installed and exact-version-audited the selected public L1 dependency closure: PyTorch 1.11.0+cpu, PyG 2.0.4, torch-scatter 2.0.9, torch-sparse 0.6.13, NumPy 1.21.5, Gym 0.23.1, and PFRL 0.3.0. `pip check` reported no broken package requirements.
+- Characterized an API-compatibility issue: top-level `import pfrl` fails with Gym 0.23.1 because PFRL 0.3.0 imports the removed `gym.wrappers.Monitor`. This is a reconstructed-environment compatibility result, not a confirmed defect in the historical handover or paper environment.
+- Completed an isolated graph-stack validation excluding PFRL: Python 3.10.13, Torch 1.11.0+cpu, PyG 2.0.4, torch-scatter 2.0.9, and torch-sparse 0.6.13 ran CPU-only with CUDA unavailable; a generic `GCNConv` accepted input shape `(3,3)` and edge-index shape `(2,4)`, produced finite output of shape `(3,2)`, and passed its smoke test.
+- Stopped all instances after each bounded stage. No private GCQN/GCAC handover was uploaded or executed, and no simulator, checkpoint, training, or paper-performance reproduction was run.
+- Research significance: the reconstructed native Linux Torch/PyG graph stack is independently executable, while the PFRL/Gym pair exposes a separate compatibility ambiguity that should be resolved only if the relevant inherited execution path requires PFRL. These results characterize the selected compatibility environment and do not reproduce Shreya's historical environment.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
