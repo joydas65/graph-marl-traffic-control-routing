@@ -8,6 +8,8 @@ construction or forward computation fails the probe.
 
 from __future__ import annotations
 
+import ast
+import builtins
 import importlib.abc
 import importlib.util
 import os
@@ -44,6 +46,22 @@ class ForbiddenDependencyImported(ProbeBoundaryError):
     def __init__(self, root: str) -> None:
         super().__init__("forbidden dependency import blocked")
         self.root = root
+
+
+class _SourceImportTracker:
+    """Record public-safe context for imports requested by the source module."""
+
+    def __init__(self) -> None:
+        self.last_import_root = "UNRESOLVED"
+
+    def observe(self, name: str, level: int) -> None:
+        if level:
+            self.last_import_root = "isolated_package"
+            return
+        root = name.partition(".")[0]
+        self.last_import_root = (
+            root if len(root) <= 128 and root.isidentifier() else "UNRESOLVED"
+        )
 
 
 class _ForbiddenImportFinder(importlib.abc.MetaPathFinder):
@@ -155,15 +173,97 @@ def _install_import_boundaries(
     return package_name, tuple(sorted(stubs))
 
 
-def _load_source(source: Path, package_name: str) -> types.ModuleType:
+def _load_source(
+    source: Path,
+    package_name: str,
+    tracker: _SourceImportTracker,
+) -> tuple[types.ModuleType, BaseException | None]:
     module_name = f"{package_name}.candidate_n_source"
     specification = importlib.util.spec_from_file_location(module_name, source)
     if specification is None or specification.loader is None:
         raise ProbeBoundaryError("source loader unavailable")
     module = importlib.util.module_from_spec(specification)
     sys.modules[module_name] = module
-    specification.loader.exec_module(module)
-    return module
+    original_import = builtins.__import__
+
+    def tracked_import(
+        name: str,
+        globals: dict[str, Any] | None = None,
+        locals: dict[str, Any] | None = None,
+        fromlist: tuple[str, ...] = (),
+        level: int = 0,
+    ) -> Any:
+        if globals is not None and globals.get("__name__") == module_name:
+            tracker.observe(name, level)
+        return original_import(name, globals, locals, fromlist, level)
+
+    builtins.__import__ = tracked_import
+    try:
+        specification.loader.exec_module(module)
+    except BaseException as exc:
+        return module, exc
+    finally:
+        builtins.__import__ = original_import
+    return module, None
+
+
+def _source_module_line(exc: BaseException, source: Path) -> int | None:
+    """Find the source module's top-level traceback location without exposing it."""
+    source_name = str(source)
+    current = exc.__traceback__
+    matched: int | None = None
+    while current is not None:
+        frame = current.tb_frame
+        if frame.f_code.co_filename == source_name and frame.f_code.co_name == "<module>":
+            matched = current.tb_lineno
+        current = current.tb_next
+    return matched
+
+
+def _source_import_stage(exc: BaseException, source: Path) -> str:
+    if isinstance(exc, ImportError):
+        return "IMPORT_RESOLUTION"
+
+    failure_line = _source_module_line(exc, source)
+    if failure_line is None:
+        return "UNRESOLVED"
+    try:
+        tree = ast.parse(source.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError, UnicodeError):
+        return "UNRESOLVED"
+
+    for statement in tree.body:
+        start_line = statement.lineno
+        if isinstance(statement, ast.ClassDef) and statement.decorator_list:
+            start_line = min(
+                start_line,
+                *(decorator.lineno for decorator in statement.decorator_list),
+            )
+        end_line = getattr(statement, "end_lineno", statement.lineno)
+        if start_line <= failure_line <= end_line:
+            if isinstance(statement, (ast.Import, ast.ImportFrom)):
+                return "IMPORT_RESOLUTION"
+            if isinstance(statement, ast.ClassDef):
+                return "DECORATOR_OR_CLASS_DEFINITION"
+            return "MODULE_EXECUTION_OTHER"
+    return "UNRESOLVED"
+
+
+def _source_import_diagnostics(
+    exc: BaseException,
+    source: Path,
+    module: types.ModuleType,
+    tracker: _SourceImportTracker,
+) -> dict[str, str]:
+    exception_type = type(exc).__name__
+    if len(exception_type) > 128 or not exception_type.isidentifier():
+        exception_type = "UNRESOLVED"
+    return {
+        "source_import_exception_type": exception_type,
+        "source_import_stage": _source_import_stage(exc, source),
+        "last_import_root": tracker.last_import_root,
+        "gcn_visible_at_failure": "YES" if "GCN" in module.__dict__ else "NO",
+    }
 
 
 def _forbidden_loaded() -> list[str]:
@@ -258,44 +358,66 @@ def probe(context: Any) -> dict[str, Any]:
 
     monitor = _BoundaryMonitor()
     finder = _ForbiddenImportFinder()
+    import_tracker = _SourceImportTracker()
     sys.meta_path.insert(0, finder)
     try:
         package_name, stub_names = _install_import_boundaries(monitor)
-        module = _load_source(source, package_name)
-    except ForbiddenDependencyImported as exc:
-        return _public_failure(
-            "blocked",
-            "forbidden dependency import blocked",
-            "source_import",
-            exc.root,
+        module, source_exception = _load_source(
+            source,
+            package_name,
+            import_tracker,
         )
-    except InertBoundaryTouched as exc:
+    except ProbeBoundaryError as exc:
         return _public_failure(
-            "blocked",
-            "unexpected framework initialization reached an inert boundary",
+            "inconclusive",
+            "source loader could not establish an isolated module",
             "source_import",
-            exc.label,
+            type(exc).__name__,
         )
-    except ModuleNotFoundError as exc:
+
+    if source_exception is not None:
+        diagnostics = _source_import_diagnostics(
+            source_exception,
+            source,
+            module,
+            import_tracker,
+        )
+    else:
+        diagnostics = {}
+
+    if isinstance(source_exception, ForbiddenDependencyImported):
+        diagnostics["error_type"] = source_exception.root
+        return {
+            "status": "blocked",
+            "message": "forbidden dependency import blocked",
+            "evidence": diagnostics,
+        }
+    if isinstance(source_exception, InertBoundaryTouched):
+        diagnostics["error_type"] = source_exception.label
+        return {
+            "status": "blocked",
+            "message": "unexpected framework initialization reached an inert boundary",
+            "evidence": diagnostics,
+        }
+    if isinstance(source_exception, ModuleNotFoundError):
         public_roots = {
             "torch_geometric",
             "torch_scatter",
             "torch_sparse",
         }
-        root = (exc.name or "").partition(".")[0]
-        return _public_failure(
-            "blocked",
-            "required public graph dependency is unavailable",
-            "source_import",
-            root if root in public_roots else None,
-        )
-    except BaseException as exc:
-        return _public_failure(
-            "inconclusive",
-            "source module could not be isolated",
-            "source_import",
-            type(exc).__name__,
-        )
+        root = (source_exception.name or "").partition(".")[0]
+        if root in public_roots:
+            return {
+                "status": "blocked",
+                "message": "required public graph dependency is unavailable",
+                "evidence": diagnostics,
+            }
+    if source_exception is not None:
+        return {
+            "status": "inconclusive",
+            "message": "source module could not be isolated",
+            "evidence": diagnostics,
+        }
 
     model_class = getattr(module, "GCN", None)
     if not isinstance(model_class, type):
