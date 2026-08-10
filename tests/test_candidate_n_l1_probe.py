@@ -155,7 +155,95 @@ class CandidateNL1ProbeTest(unittest.TestCase):
         self.assertTrue(values["source_unchanged"])
         self.assertTrue(values["deterministic_reconstruction"])
         self.assertEqual(values["forbidden_dependencies_loaded"], [])
+        self.assertNotIn("source_import_exception_type", values)
+        self.assertNotIn("source_import_stage", values)
+        self.assertNotIn("last_import_root", values)
+        self.assertNotIn("gcn_visible_at_failure", values)
         self.assertNotIn(str(self.base), str(result))
+
+    def test_missing_import_before_gcn_is_diagnosed(self) -> None:
+        source = self.make_source(
+            """
+            import synthetic_missing_dependency
+
+            class GCN:
+                pass
+            """
+        )
+
+        result = self.run_probe(source)
+
+        self.assertEqual(result["status"], "inconclusive")
+        values = result["evidence"]["values"]
+        self.assertEqual(
+            values["source_import_exception_type"],
+            "ModuleNotFoundError",
+        )
+        self.assertEqual(values["source_import_stage"], "IMPORT_RESOLUTION")
+        self.assertEqual(values["last_import_root"], "synthetic_missing_dependency")
+        self.assertEqual(values["gcn_visible_at_failure"], "NO")
+
+    def test_decorator_failure_before_gcn_is_diagnosed(self) -> None:
+        source = self.make_source(
+            """
+            def reject_class(candidate):
+                raise RuntimeError("synthetic decorator failure")
+
+            @reject_class
+            class UnusedAgent:
+                pass
+
+            class GCN:
+                pass
+            """
+        )
+
+        result = self.run_probe(source)
+
+        self.assertEqual(result["status"], "inconclusive")
+        values = result["evidence"]["values"]
+        self.assertEqual(values["source_import_exception_type"], "RuntimeError")
+        self.assertEqual(
+            values["source_import_stage"],
+            "DECORATOR_OR_CLASS_DEFINITION",
+        )
+        self.assertEqual(values["gcn_visible_at_failure"], "NO")
+
+    def test_exception_after_gcn_definition_records_visibility(self) -> None:
+        source = self.make_source(
+            """
+            class GCN:
+                pass
+
+            raise RuntimeError("synthetic post-GCN failure")
+            """
+        )
+
+        result = self.run_probe(source)
+
+        self.assertEqual(result["status"], "inconclusive")
+        values = result["evidence"]["values"]
+        self.assertEqual(values["source_import_exception_type"], "RuntimeError")
+        self.assertEqual(values["source_import_stage"], "MODULE_EXECUTION_OTHER")
+        self.assertEqual(values["gcn_visible_at_failure"], "YES")
+
+    def test_source_exception_message_and_path_are_not_exposed(self) -> None:
+        source = self.make_source(
+            """
+            raise RuntimeError("/sensitive/local/source.py PRIVATE_SENTINEL")
+            """
+        )
+
+        result = self.run_probe(source)
+        serialized = json.dumps(result, sort_keys=True)
+
+        self.assertEqual(result["status"], "inconclusive")
+        self.assertNotIn("/sensitive/local/source.py", serialized)
+        self.assertNotIn("PRIVATE_SENTINEL", serialized)
+        self.assertEqual(
+            result["evidence"]["values"]["source_import_exception_type"],
+            "RuntimeError",
+        )
 
     def test_cli_runs_synthetic_candidate_with_cpu_limit(self) -> None:
         source = self.make_source(
