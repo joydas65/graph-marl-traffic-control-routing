@@ -36,6 +36,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--id", required=True, dest="probe_id", help="public-safe probe ID")
     parser.add_argument("--timeout", type=float, default=30.0, help="timeout in seconds")
     parser.add_argument(
+        "--cpu-time-limit",
+        type=int,
+        help="optional POSIX CPU-time limit in seconds",
+    )
+    parser.add_argument(
+        "--memory-limit-bytes",
+        type=int,
+        help="optional POSIX address-space limit in bytes",
+    )
+    parser.add_argument(
         "--allow-write-root",
         action="append",
         default=[],
@@ -65,6 +75,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.probe,
             args.probe_id,
             timeout_seconds=args.timeout,
+            cpu_time_seconds=args.cpu_time_limit,
+            memory_limit_bytes=args.memory_limit_bytes,
             allowed_write_roots=args.allow_write_root,
             parameters=parameters,
         )
