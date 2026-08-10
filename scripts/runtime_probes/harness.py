@@ -16,6 +16,7 @@ import json
 import math
 import os
 import re
+import resource
 import runpy
 import subprocess
 import sys
@@ -30,6 +31,8 @@ from typing import Any
 RESULT_SCHEMA_VERSION = 1
 PROBE_STATUSES = ("pass", "fail", "inconclusive", "blocked")
 DEFAULT_TIMEOUT_SECONDS = 30.0
+DEFAULT_CPU_TIME_SECONDS: int | None = None
+DEFAULT_MEMORY_LIMIT_BYTES: int | None = None
 MAX_CAPTURE_CHARS = 32_768
 PROBE_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
 POSIX_ABSOLUTE_PATH_PATTERN = re.compile(
@@ -81,6 +84,8 @@ def _assert_write_allowed(
     if not isinstance(value, (str, bytes, os.PathLike)):
         return
     candidate = _resolved_path(value)
+    if candidate == Path(os.devnull).resolve():
+        return
     if any(_is_relative_to(candidate, root) for root in allowed_roots):
         return
     raise WriteOutsideAllowedRoot("write outside allowed roots blocked")
@@ -137,6 +142,31 @@ def _install_audit_guard(allowed_roots: Sequence[str]) -> None:
             raise IsolationViolation("network access blocked")
 
     sys.addaudithook(audit)
+
+
+def _apply_resource_limits(
+    cpu_time_seconds: int | None,
+    memory_limit_bytes: int | None,
+) -> None:
+    """Apply optional POSIX limits before loading a probe or native module."""
+
+    def set_soft_limit(kind: int, requested: int) -> None:
+        current_soft, current_hard = resource.getrlimit(kind)
+        candidates = [requested]
+        if current_soft != resource.RLIM_INFINITY:
+            candidates.append(current_soft)
+        if current_hard != resource.RLIM_INFINITY:
+            candidates.append(current_hard)
+        effective = min(candidates)
+        resource.setrlimit(kind, (effective, current_hard))
+
+    try:
+        if cpu_time_seconds is not None:
+            set_soft_limit(resource.RLIMIT_CPU, cpu_time_seconds)
+        if memory_limit_bytes is not None:
+            set_soft_limit(resource.RLIMIT_AS, memory_limit_bytes)
+    except (OSError, ValueError) as exc:
+        raise IsolationViolation("resource limit could not be applied") from exc
 
 
 class ProbeContext:
@@ -255,9 +285,13 @@ def _child_main(payload_path: str, result_path: str) -> int:
         allowed_write_roots=allowed_roots,
         parameters=payload.get("parameters", {}),
     )
-    _install_audit_guard(payload["allowed_write_roots"])
-
     try:
+        limits = payload.get("resource_limits", {})
+        _apply_resource_limits(
+            limits.get("cpu_time_seconds"),
+            limits.get("memory_limit_bytes"),
+        )
+        _install_audit_guard(payload["allowed_write_roots"])
         namespace = runpy.run_path(payload["probe_path"], run_name="__runtime_probe__")
         probe = namespace.get("probe")
         if not callable(probe):
@@ -336,6 +370,9 @@ def _child_environment(work_dir: Path) -> dict[str, str]:
         "CUDA_VISIBLE_DEVICES": "-1",
         "HOME": str(work_dir),
         "NVIDIA_VISIBLE_DEVICES": "none",
+        "NUMEXPR_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
         "PYTHONDONTWRITEBYTECODE": "1",
         "PYTHONHASHSEED": "0",
         "PYTHONIOENCODING": "utf-8",
@@ -343,7 +380,10 @@ def _child_environment(work_dir: Path) -> dict[str, str]:
         "TEMP": str(work_dir),
         "TMP": str(work_dir),
         "TMPDIR": str(work_dir),
+        "VECLIB_MAXIMUM_THREADS": "1",
     }
+    if "SOURCE_MODULE" in os.environ:
+        environment["SOURCE_MODULE"] = os.environ["SOURCE_MODULE"]
     for key in ("LANG", "LC_ALL", "PATH", "SYSTEMROOT", "WINDIR"):
         if key in os.environ:
             environment[key] = os.environ[key]
@@ -379,6 +419,8 @@ def run_isolated_probe(
     probe_id: str,
     *,
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+    cpu_time_seconds: int | None = DEFAULT_CPU_TIME_SECONDS,
+    memory_limit_bytes: int | None = DEFAULT_MEMORY_LIMIT_BYTES,
     allowed_write_roots: Sequence[Path] = (),
     parameters: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -387,6 +429,24 @@ def run_isolated_probe(
         raise ProbeConfigurationError("probe ID contains unsupported characters")
     if not math.isfinite(timeout_seconds) or timeout_seconds <= 0:
         raise ProbeConfigurationError("timeout must be a positive finite number")
+    if (
+        cpu_time_seconds is not None
+        and (
+            isinstance(cpu_time_seconds, bool)
+            or not isinstance(cpu_time_seconds, int)
+            or cpu_time_seconds <= 0
+        )
+    ):
+        raise ProbeConfigurationError("CPU limit must be a positive integer")
+    if (
+        memory_limit_bytes is not None
+        and (
+            isinstance(memory_limit_bytes, bool)
+            or not isinstance(memory_limit_bytes, int)
+            or memory_limit_bytes <= 0
+        )
+    ):
+        raise ProbeConfigurationError("memory limit must be a positive integer")
 
     probe = probe_path.expanduser().resolve(strict=True)
     if not probe.is_file():
@@ -415,6 +475,10 @@ def run_isolated_probe(
             "work_dir": str(work_dir),
             "allowed_write_roots": [str(root) for root in roots],
             "parameters": _json_safe(parameters or {}),
+            "resource_limits": {
+                "cpu_time_seconds": cpu_time_seconds,
+                "memory_limit_bytes": memory_limit_bytes,
+            },
         }
         payload_path.write_text(
             json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
@@ -461,6 +525,7 @@ def run_isolated_probe(
             str(Path.cwd().resolve()),
             str(Path.home().resolve()),
             *(str(root) for root in roots),
+            os.environ.get("SOURCE_MODULE", ""),
         ]
         safe_stdout = _sanitise_text(stdout, redactions)
         safe_stderr = _sanitise_text(stderr, redactions)
