@@ -157,6 +157,17 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Stopped all instances after each bounded stage. No private GCQN/GCAC handover was uploaded or executed, and no simulator, checkpoint, training, or paper-performance reproduction was run.
 - Research significance: the reconstructed native Linux Torch/PyG graph stack is independently executable, while the PFRL/Gym pair exposes a separate compatibility ambiguity that should be resolved only if the relevant inherited execution path requires PFRL. These results characterize the selected compatibility environment and do not reproduce Shreya's historical environment.
 
+### Candidate N L1 probe validation and import diagnostics: 10 August 2026
+
+- Implemented an isolated, model-only probe for the Candidate N `GCN` using a deterministic synthetic graph with `N=3`, `E=4`, `F=3`, and `A=2`. The probe is CPU-only and excludes simulators, PFRL, agents, replay, training, backward passes, optimizers, and checkpoints.
+- Applied bounded execution controls of 60 seconds wall time, 30 seconds CPU time, a 4 GiB address-space limit, and one CPU thread. Synthetic/local validation passed, and the initial freeze passed 25 tests before merging through PR #7 at merge commit `97df49a1f985c20ffb8be58b08edde29a38203b5`.
+- Validated the merged probe on the native Linux x86-64 compatibility environment with CPython 3.10.13, PyTorch 1.11.0+cpu, PyG 2.0.4, torch-scatter 2.0.9, and torch-sparse 0.6.13. Linux enforced the 4 GiB `RLIMIT_AS`, and the synthetic Candidate N probe passed under the production isolation controls without private source; the instance was stopped afterward.
+- Performed the first controlled private Candidate N L1 characterization using only the approved minimum source subset with encrypted, non-public temporary staging and RAM-backed, read-only exposure. Source integrity was verified before and after execution, temporary permissions and staged data were removed, and the instance was stopped.
+- Recorded the private characterization as `INCONCLUSIVE`: containing-module execution failed before normal `GCN` lookup, so model construction and forward execution were not reached. PFRL and traffic simulators were not loaded, and no training, backward pass, optimizer, or checkpoint operation occurred. This is an import-isolation ambiguity, not evidence of a model or algorithm defect.
+- Diagnosed that the loader required successful execution of the complete containing module before class lookup. The immediate limitation was insufficient sanitized observability; available evidence did not justify another stub or any change to Candidate N computation.
+- Added sanitized import diagnostics for exception class, import-stage classification, contextual last import root, and `GCN` visibility at failure. No new stubs or model-boundary changes were introduced, and a partially defined `GCN` is never executed. All 29 tests passed before merging through PR #8 at merge commit `8f66636bde90e9758113fc7b53f4702593372a26`.
+- Research significance: the infrastructure, dependency stack, Linux resource limits, isolation controls, and private-source lifecycle are experimentally validated. Candidate N model-level compatibility remains unresolved because forward execution has not yet been reached; the exact import boundary must be diagnosed before changing the isolation boundary.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
