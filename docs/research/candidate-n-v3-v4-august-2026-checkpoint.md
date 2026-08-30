@@ -4,7 +4,7 @@
 
 This checkpoint closes the public-documentation gap from 22–30 August 2026. Earlier August work is already recorded through the 21 August V3 checkpoint in the [monthly effort log](../progress/monthly-effort-log.md); it is not repeated here except where needed to explain later decisions.
 
-The research cutoff is the authoritative Candidate N V4 RMSprop dependency and complete-architecture reconciliation. All V4 results below are static contracts, architecture decisions, synthetic evidence, or authorized private-static findings. V4 has not been implemented or executed. The later subject-role/model-setup reconciliation is outside this checkpoint and remains pending here.
+The checkpoint was originally merged with the authoritative Candidate N V4 RMSprop dependency reconciliation as its cutoff. A subsequent source-free reconciliation on 30 August resolved the subject-role/model-setup topology; this corrected checkpoint extends the public cutoff through that result. All V4 results below are static contracts, architecture decisions, synthetic evidence, or authorized private-static findings. V4 has not been implemented or executed.
 
 ## Executive summary
 
@@ -12,7 +12,7 @@ Late-August work established that the frozen V3 machinery was source-free and re
 
 Static reconciliation then defined a V4 successor architecture. It preserves Candidate-owned replay and update behavior on one shared primary subject, narrows the admissible real-runtime evidence to directly observable objects, fixes the primary endpoint oracle at an order-invariant mean-MSE loss of `43.88`, and separates experiment, mapping, writing, and final-controller outcomes. Authorized read-only inspections established that Candidate N owns genuine RMSprop and mean-reduced MSELoss and that its pre-mutation access surface supports a temporary optimizer-slot guard and transparent criterion wrapper.
 
-The dependency-provider seam is resolved, but complete V4 readiness is not. Subject-role/model-setup cardinality, the independent controller host, the native filesystem primitive, the controller receipt channel and security review, implementation, integrated validation, and later private-execution authorization remain outstanding.
+The dependency-provider and subject-role/model-setup seams are resolved, but complete V4 readiness is not. The independent controller host, native filesystem primitive, controller receipt channel and security review, implementation, integrated validation, and later private-execution authorization remain outstanding.
 
 ## Work completed during the checkpoint period
 
@@ -62,7 +62,140 @@ The resolved coordinator contract retains one primary Candidate subject, lifecyc
 
 Placeholder replay insertion and externally manufactured records are prohibited. Terminal-false, terminal-true, deterministic-action, isolated hard-sync, and passive graph observations remain fresh and isolated from the primary update subject. The frozen public `run_integrated_contract(...)` interface can remain unchanged. Neither the external driver nor dependency-provider layer requires direct Candidate method access, and no layer may duplicate Candidate replay, batching, action, update, synchronization, or graph-processing algorithms.
 
-One topology discrepancy remains unresolved at this cutoff. An earlier coordinator assumption applied model setup broadly across six sessions, while the later role-minimal proposal constructs models only for roles that use them. The exact subject-role/model-setup cardinality requires a dedicated reconciliation before implementation.
+The earlier coordinator assumption applied model setup broadly across six sessions. It is preserved as historical design evidence but superseded by the completed role-minimal reconciliation below, which distinguishes common controlled-subject state setup from role-level model setup and per-object parameter configuration.
+
+## Subject-role and model-setup reconciliation
+
+The completed 30 August reconciliation established:
+
+- `V4_SUBJECT_ROLE_AND_SETUP_TOPOLOGY_RECONCILED=YES`;
+- `DEPENDENCY_PROVIDER_COMPATIBILITY=RESOLVED`;
+- `COMPLETE_V4_ARCHITECTURE_RECONCILED=NO`; and
+- `READY_TO_BEGIN_V4_IMPLEMENTATION=NO`.
+
+No Candidate runtime execution occurred during this static reconciliation.
+
+The earlier wording conflated six controlled-subject state-setup events with six model-setup events. The authoritative interpretation is six controlled subjects, six independently owned lifecycle sessions, and six common controlled-subject state setups, but only four model-bearing subjects and four role-level deterministic model setups. Those four roles own four online models and two target models: six individual model objects, six model-builder calls, and six model-parameter configuration applications. The two terminal roles use replay-only state setup.
+
+> Six model objects do not mean six model-bearing subjects.
+
+### Role matrix
+
+| Role | Required resources and observations | Resources or operations not acquired |
+|---|---|---|
+| Shared primary replay/update | Replay container; online and target models; graph state; genuine mean-MSE criterion; genuine RMSprop; criterion wrapper; optimizer guard; parameter and optimizer integrity observations | None of the listed primary dependencies |
+| Terminal-false observation | Fresh replay container; storage binding; one terminal-false record observation; storage-required scalar/configuration state | Online model; target model; criterion; optimizer; batch; update; action; synchronization; graph operation |
+| Terminal-true observation | Independent fresh replay container; storage binding; one terminal-true record observation; storage-required scalar/configuration state | Online model; target model; criterion; optimizer; batch; update; action; synchronization; graph operation |
+| Deterministic action | One online model; action configuration; passive Q/action observation | Target model; replay container; criterion; optimizer |
+| Isolated hard synchronization | One online model; one target model; distinguishable pre-sync states; exact synchronization callable | Replay container; criterion; optimizer |
+| Passive graph observation | One isolated replay container; one online graph model; graph state; replay-derived graph batch; passive graph-convolution hook | Target model; criterion; optimizer |
+
+### Successful-run cardinalities
+
+| Resource or event | Count |
+|---|---:|
+| Controlled subjects | 6 |
+| Subject sessions | 6 |
+| Controlled-subject state setups | 6 |
+| Replay containers | 4 |
+| Online-model-bearing subjects | 4 |
+| Target-model-bearing subjects | 2 |
+| Online models | 4 |
+| Target models | 2 |
+| Individual model objects | 6 |
+| Model-builder calls | 6 |
+| Role-level deterministic model setups | 4 |
+| Model-parameter configuration applications | 6 |
+| Replay-only state setups | 2 |
+| Post-setup mutation baselines | 6 |
+| Genuine mean-MSE criteria | 1 |
+| Genuine RMSprop optimizers | 1 |
+| Criterion wrappers | 1 |
+| Optimizer guards | 1 |
+| Provider factory calls | 1 |
+| Provider acquisitions | 1 |
+| Provider leases | 1 |
+| Provider releases | 1 |
+| Session closures | 6 |
+
+The four replay containers belong to the primary replay/update, terminal-false, terminal-true, and graph-observation roles.
+
+### Provider lease and setup topology
+
+C2 owns one run-scoped dependency-provider lease, with one provider factory call, one acquisition, and one release. Four model-bearing roles receive non-owning, role-restricted facets:
+
+- primary: online, target, criterion, and RMSprop operations;
+- action: online operations only;
+- synchronization: online and target operations; and
+- graph: online graph-model operations.
+
+The terminal roles receive no provider handle, but their sessions remain part of the same validated run environment and execution provenance. No role may replace or independently release the provider.
+
+The setup concepts remain separate:
+
+| Setup concept | Applicability |
+|---|---|
+| `CONTROLLED_SUBJECT_STATE_SETUP` | Once for each of all six roles |
+| `DETERMINISTIC_MODEL_SETUP` | Once for each of four model-bearing roles |
+| `MODEL_PARAMETER_CONFIGURATION_APPLICATION` | Once for each of six model objects |
+| `REPLAY_ONLY_STATE_SETUP` | Once for each terminal role |
+| `POST_SETUP_MUTATION_BASELINE` | Once per session |
+
+These are distinct applicability categories within the same six subject sessions; they are not additive subject or session counts.
+
+Mutation expectations are role-specific:
+
+- primary: no model, parameter, gradient, or optimizer mutation through the controlled stop;
+- terminal-false and terminal-true: only the expected isolated replay append;
+- action: no online-model mutation;
+- synchronization: expected target synchronization with the online model unchanged; and
+- graph: no model, parameter, or retained-edge mutation during passive observation.
+
+The primary setup order is:
+
+1. construct the final online model;
+2. construct the distinct final target model;
+3. finish any allowed loading or replacement;
+4. perform initial online-to-target synchronization;
+5. apply deterministic online setup;
+6. apply deterministic target setup, restoring the distinct target oracle;
+7. prohibit later model replacement or synchronization;
+8. enumerate the final online parameters;
+9. construct genuine mean-MSE;
+10. construct exact genuine RMSprop;
+11. capture the post-setup mutation baseline; and
+12. install the wrapper and guard immediately before update.
+
+The complete order is fixed before the first primary replay store. Steps 1–11 complete before that store, and the same primary subject, online and target models, replay container, and lifecycle session persist through both reviewed stores. The wrapper and guard in Step 12 are then installed immediately before the guarded update.
+
+### Cleanup and lifecycle-receipt applicability
+
+| Role | Applicable cleanup |
+|---|---|
+| Primary | Replay and model resources; criterion-wrapper restoration; optimizer-guard restoration; session |
+| Terminal-false and terminal-true | Storage binding; replay container; session only |
+| Action | Online model; action observer; session only |
+| Synchronization | Online model; target model; synchronization binding; session only |
+| Graph | Online model; replay/batch resources; graph hook; session only |
+
+Every session closes exactly once. The provider lease releases exactly once after role cleanup. A resource that a role never acquired is recorded as `NOT_APPLICABLE_NOT_ACQUIRED`; it is not falsely reported as passed, restored, closed, or released.
+
+`CandidateNV4C2LifecycleReceiptV1` retains its V1 schema. Only its applicability rules are reconciled: wrapper and guard restoration apply to the primary role only; action-observer cleanup applies to action only; graph-hook restoration applies to graph only; all six session closures remain applicable; provider-anchor stability and lease release are run-global; model cleanup is inapplicable to terminal roles; and criterion-wrapper and optimizer-guard restoration are inapplicable to every nonprimary role. No schema or version change is required because no implementation was frozen.
+
+### Topology supersession and provenance
+
+The historical broad coordinator report remains unchanged, as does the planned coordinator V1 identity. The explicit conceptual supersession is `CANDIDATE_N_V4_COORDINATOR_ROLE_TOPOLOGY_SUPERSESSION_V1`. Coordinator V1 is authoritative only when bound to this role-minimal topology supersession; no coordinator V2 or frozen implementation is claimed.
+
+The public-safe provenance chain is:
+
+1. the earlier broad six-session model-setup assumption;
+2. the original source-free SGD proposal;
+3. the P1 RMSprop finding;
+4. the disclosed P1 scope-selection deviation;
+5. the P2 pre-guard guard/wrapper finding;
+6. the authoritative RMSprop reconciliation;
+7. the authoritative role-minimal subject/setup reconciliation; and
+8. no Candidate runtime execution during these static tasks.
 
 ## V4 evidence, lifecycle, and controller architecture
 
@@ -133,7 +266,7 @@ This surface is statically compatible with temporary replacement of the subject 
 | SGD-positive provider tests | Historical only; future authoritative tests must bind to RMSprop. |
 | `3.355` as the primary update endpoint | Synthetic-fixture evidence only; the primary shared-replay loss oracle is `43.88`. |
 | Hidden temporal-difference intermediates as real-runtime evidence | Restricted to synthetic instrumentation. |
-| Model setup across all six sessions | Still an unresolved coordinator-versus-role-minimal discrepancy at this cutoff. |
+| Model setup across all six sessions | Preserved as the historical broad assumption but superseded by six controlled-subject state setups, four role-level deterministic model setups, six model-object parameter configurations, and two replay-only terminal setups. |
 
 No implemented or frozen V4 provider package was rewritten because none existed. The historical SGD proposal remains available as design provenance, while future manifests and tests must carry the explicit RMSprop supersession.
 
@@ -161,12 +294,12 @@ Resolved static seams include:
 - reduced reader, activation bridge, and C2 cleanup/lifecycle receipt;
 - controller receipt and final-status topology;
 - strict evidence mapping and durable write/readback contracts;
-- exact genuine RMSprop/MSE provider seam; and
-- pre-guard optimizer-guard and criterion-wrapper compatibility.
+- exact genuine RMSprop/MSE provider seam and dependency-provider compatibility;
+- pre-guard optimizer-guard and criterion-wrapper compatibility; and
+- exact role-minimal subject/setup topology, provider-lease participation, mutation baselines, and cleanup applicability.
 
 Not resolved or not ready:
 
-- exact subject-role/model-setup topology reconciliation;
 - a qualifying independent external Linux controller host;
 - native filesystem syscall primitive and ABI validation;
 - controller-host security and receipt-channel review;
@@ -181,11 +314,9 @@ Therefore:
 
 ## Next research task
 
-The immediate next task is `RECONCILE_V4_SUBJECT_ROLE_AND_MODEL_SETUP_TOPOLOGY`.
+The immediate next task is `SELECT_AND_REVIEW_V4_EXTERNAL_CONTROLLER_HOST_AND_RECEIPT_CHANNEL`.
 
-After that reconciliation, the next infrastructure task is `SELECT_AND_REVIEW_V4_EXTERNAL_CONTROLLER_HOST_AND_RECEIPT_CHANNEL`.
-
-Neither task is executed by this documentation checkpoint.
+The completed subject-role/model-setup reconciliation was static only and did not implement V4. This checkpoint does not execute the next infrastructure task.
 
 ## Claims explicitly not made
 

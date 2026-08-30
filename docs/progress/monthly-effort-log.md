@@ -210,9 +210,11 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Recorded authorized read-only static findings that Candidate N owns exact genuine RMSprop and mean-reduced MSELoss, superseding the earlier SGD provider proposal.
 - Recorded pre-guard compatibility with temporary optimizer-slot replacement and a transparent criterion wrapper; no backward or optimizer-step compatibility is claimed.
 - Disclosed the P1 component-identification scope-selection deviation and its immediate stop/non-use; P2 had no scope deviation.
-- Left subject-role/model-setup cardinality, the external controller host, native filesystem primitive, security/receipt review, V4 implementation, integrated validation, and later authorization reconfirmation unresolved.
+- A subsequent 30 August static reconciliation completed the subject-role/model-setup topology across six controlled subjects and independently owned sessions: six controlled-subject state setups, four model-bearing roles and role-level deterministic model setups, four online plus two target models, six model-builder calls and parameter-configuration applications, two replay-only terminal setups, and four replay containers owned by the primary, terminal-false, terminal-true, and graph roles.
+- Reconciled the single C2-owned run-scoped provider lease, four non-owning role-restricted facets, role-specific mutation baselines and cleanup, and V1 lifecycle-receipt applicability; terminal roles receive no provider handle, and never-acquired resources remain `NOT_APPLICABLE_NOT_ACQUIRED`.
+- Left the external controller host, native filesystem primitive, security/receipt review, V4 implementation, integrated validation, and later authorization reconfirmation unresolved.
 - Research boundary: V4 remains unimplemented and not ready to implement; this documentation task performs no AWS or private-source activity and makes no training, simulator, performance, superiority, historical-environment, or paper-reproduction claim.
-- Next gates: first `RECONCILE_V4_SUBJECT_ROLE_AND_MODEL_SETUP_TOPOLOGY`, then `SELECT_AND_REVIEW_V4_EXTERNAL_CONTROLLER_HOST_AND_RECEIPT_CHANNEL`.
+- Next gate: `SELECT_AND_REVIEW_V4_EXTERNAL_CONTROLLER_HOST_AND_RECEIPT_CHANNEL`.
 
 ### August 2026 entry goals
 
