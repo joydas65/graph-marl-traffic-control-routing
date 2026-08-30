@@ -21,6 +21,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 - [`experiments/EXP-GRAPH-000.md`](experiments/EXP-GRAPH-000.md): read-only provenance and structural comparison of the GCQN/GCAC handover.
 - [`experiments/EXP-GRAPH-001.md`](experiments/EXP-GRAPH-001.md): non-executing semantic audit of the paper's foundational MDP, GCQN, and GCAC procedures.
 - [`experiments/EXP-GRAPH-002.md`](experiments/EXP-GRAPH-002.md): generic isolation harness and staged plan for minimal GCQN/GCAC runtime probes.
+- [`research/candidate-n-v3-v4-august-2026-checkpoint.md`](research/candidate-n-v3-v4-august-2026-checkpoint.md): consolidated public-safe Candidate N V3→V4 checkpoint for 22–30 August, through the RMSprop dependency reconciliation.
 - [`decisions/0001-single-repository-research-history.md`](decisions/0001-single-repository-research-history.md): rationale for keeping the baseline and dissertation evolution in one repository.
 - [`decisions/0002-compute-and-experiment-environments.md`](decisions/0002-compute-and-experiment-environments.md): separation of the development host, reconstructed compatibility environment, canonical dissertation infrastructure, and optional exploratory compute.
 - [`mentoring/2026-07-initial-guidance.md`](mentoring/2026-07-initial-guidance.md): technical guidance received during project initiation.

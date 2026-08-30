@@ -196,6 +196,24 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Research boundary: V3 establishes synthetic validation of the corrected loader, binding, activation, and bounded execution machinery only. It does not establish successful real Candidate N loading, real update-contract compatibility, paper reproduction, training or simulator correctness, convergence, or performance.
 - Permission boundary: the first private-execution authorization was consumed. Renewed narrow authorization has now been obtained for exactly one additional bounded execution using the same one-component source scope and frozen V3 package. The second execution has not occurred, and its cloud environment has not been started; authorization remains limited to encrypted, non-public, read-only handling, the synthetic bounded agent/update contract, no simulator, training, backward pass, or optimizer mutation, and immediate verified source deletion afterward.
 
+### Candidate N V3→V4 late-August research checkpoint: 22–30 August 2026
+
+- Closed the later-August documentation gap; work through 21 August was already recorded in the preceding checkpoints.
+- Added the consolidated [Candidate N V3→V4 research checkpoint](../research/candidate-n-v3-v4-august-2026-checkpoint.md) with explicit synthetic, private-static, runtime-evidence, supersession, and claim boundaries.
+- Recorded the V3 source-free validation outcome of 301 V3 tests passed, 55 public regression tests passed, and zero collection errors, together with the corrected native source-lifecycle gate.
+- Preserved the later renewed execution outcome as `BLOCKED`: it stopped before private-source upload, capability creation, private loading, or Candidate execution because no frozen reviewed end-to-end driver existed. The remaining authorization was not consumed.
+- Established statically why V3 could not honestly preserve primary replay/update continuity without direct Candidate invocation or manufactured replay state, motivating a V4 successor rather than an algorithm repair.
+- Resolved a shared-primary replay/update coordinator contract while retaining isolated terminal, action, synchronization, and graph observations and leaving the frozen public runner unchanged.
+- Reduced the admissible future real-runtime evidence to directly observable values; bootstrap maxima and hidden temporal-difference matrices remain synthetic-only.
+- Reconciled the two permitted replay orders and fixed the primary full-matrix mean-MSE endpoint oracle at `43.88`; `3.355` remains specific to the earlier synthetic fixture.
+- Resolved static reader, activation/C2 cleanup, controller receipt/status, strict mapping, and durable write/readback contracts without implementing them.
+- Recorded authorized read-only static findings that Candidate N owns exact genuine RMSprop and mean-reduced MSELoss, superseding the earlier SGD provider proposal.
+- Recorded pre-guard compatibility with temporary optimizer-slot replacement and a transparent criterion wrapper; no backward or optimizer-step compatibility is claimed.
+- Disclosed the P1 component-identification scope-selection deviation and its immediate stop/non-use; P2 had no scope deviation.
+- Left subject-role/model-setup cardinality, the external controller host, native filesystem primitive, security/receipt review, V4 implementation, integrated validation, and later authorization reconfirmation unresolved.
+- Research boundary: V4 remains unimplemented and not ready to implement; this documentation task performs no AWS or private-source activity and makes no training, simulator, performance, superiority, historical-environment, or paper-reproduction claim.
+- Next gates: first `RECONCILE_V4_SUBJECT_ROLE_AND_MODEL_SETUP_TOPOLOGY`, then `SELECT_AND_REVIEW_V4_EXTERNAL_CONTROLLER_HOST_AND_RECEIPT_CHANNEL`.
+
 ### August 2026 entry goals
 
 - Publish the preservation tag and repository-foundation changes after review.
