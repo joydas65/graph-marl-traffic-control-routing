@@ -227,6 +227,17 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Establish fixed-time or round-robin comparison and record first multi-seed runtime/results.
 - Prepare a one-page research roadmap for Prof. Bhatnagar's alignment on hypothesis, contribution, and evaluation gates.
 
+## September 2026
+
+### Candidate N V4 controller-provisioning Module A public projection: 2 September 2026
+
+- Published the public, source-safe `CANDIDATE_N_V4_CONTROLLER_PROVISIONING_MODULE_A_V1` finite-state contract and its exhaustive standard-library unit tests.
+- Fixed the exact three-phase condition truth table, twelve-resource registry, eight persistent-resource invariant, three legal forward transitions, legal resource deltas, sealed-state metadata expectation, deterministic ordering, immutable derived records, and exact clarification-version binding.
+- Added a research note that separates the implemented specification from future template construction and live infrastructure validation.
+- Kept the implementation independent of provider SDKs, external dependencies, simulators, model execution, evidence writing, and cloud API calls.
+- Verified all 53 dedicated Module A tests and all 108 repository tests with both the established standard-library discovery command and the host-side Pytest runner; compilation and whitespace checks also passed.
+- Research boundary: this is reviewed provisioning apparatus, not a deployable template, a provisioned controller, graph-MARL novelty, runtime evidence, traffic-performance evidence, or paper reproduction. Module B remains a separate future publication gate.
+
 ---
 
 ## Monthly entry template
