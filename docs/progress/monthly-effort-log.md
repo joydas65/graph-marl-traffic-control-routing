@@ -238,6 +238,14 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Verified all 53 dedicated Module A tests and all 108 repository tests with both the established standard-library discovery command and the host-side Pytest runner; compilation and whitespace checks also passed.
 - Research boundary: this is reviewed provisioning apparatus, not a deployable template, a provisioned controller, graph-MARL novelty, runtime evidence, traffic-performance evidence, or paper reproduction. Module B remains a separate future publication gate.
 
+### Candidate N V4 controller-provisioning Module B public projection: 3 September 2026
+
+- Published the public, source-safe `CANDIDATE_N_V4_CONTROLLER_PROVISIONING_MODULE_B_V1` structural model and offline validator with an exact import-time binding to public Module A and the phase clarification.
+- Fixed three non-deployable main profiles and two non-deployable staging profiles, the exact twelve-resource type/Condition model, active counts of eight, twelve, and ten, retained-evidence attributes, the three-edge dependency graph, bootstrap expectations, and closed privileged-content deferrals.
+- Added compact canonical UTF-8 JSON rendering, duplicate and non-canonical input rejection, a closed-result validator, a bounded accidental-leakage scanner, twenty-six named in-memory negative fixtures, and a 5,000-cycle independent determinism check.
+- Verified all 53 Module A regression tests, all 72 Module B tests, and all 180 repository tests with standard-library discovery; the Pytest run also passed all 180 tests and 249 subtests. Compilation, direct execution of the Module B test file, whitespace checks, public dependency review, and the context-aware privacy review passed.
+- Research boundary: Module B remains an AWS-independent structural specification, not deployable CloudFormation, an IAM/KMS or bootstrap implementation, controller provisioning, live infrastructure evidence, Candidate runtime evidence, traffic-performance evidence, paper reproduction, or Module C.
+
 ---
 
 ## Monthly entry template
