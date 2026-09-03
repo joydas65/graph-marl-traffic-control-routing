@@ -246,6 +246,16 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Verified all 53 Module A regression tests, all 72 Module B tests, and all 180 repository tests with standard-library discovery; the Pytest run also passed all 180 tests and 249 subtests. Compilation, direct execution of the Module B test file, whitespace checks, public dependency review, and the context-aware privacy review passed.
 - Research boundary: Module B remains an AWS-independent structural specification, not deployable CloudFormation, an IAM/KMS or bootstrap implementation, controller provisioning, live infrastructure evidence, Candidate runtime evidence, traffic-performance evidence, paper reproduction, or Module C.
 
+### Candidate N V4 controller-provisioning Module C public projection: 4 September 2026
+
+- Published the public, source-safe `CANDIDATE_N_V4_CONTROLLER_PROVISIONING_MODULE_C_CHANGESET_REVIEWER_V1` offline semantic reviewer with exact bindings to public Modules A and B and the phase clarification.
+- Implemented normalized, immutable review contracts for S0, M0, S1, M1, and M2; A/B-derived expected mutations; order-independent comparison; complete-page-set and protected-resource gates; and deterministic `ACCEPTED` or `BLOCKED` results with closed reasons.
+- Preserved the strict update contracts: S1 changes only the staging bucket policy, M1 adds exactly the four compute/bootstrap resources, and M2 removes the two bootstrap resources and performs only the required non-replacing controller metadata modification.
+- Published 64 named negative-fixture semantics, 105 systematic mutation cases, semantic-duplication checks, and repeated mixed-operation determinism. Artificial sensitive-shaped scanner inputs are assembled at runtime from harmless fragments, so no credential-shaped test literal or real cloud identifier is committed.
+- Verified all 53 unchanged Module A tests, all 72 unchanged Module B tests, and all 239 Module C tests. The full Pytest repository suite passed 419 tests and 249 subtests, and standard-library discovery passed its 180-test surface. Compilation, whitespace, dependency, privacy, and synthetic-secret scans also passed.
+- Research boundary: Module C reviews normalized offline descriptions only. `ACCEPTED` is not an AWS or provisioning approval and does not establish service-pagination correctness, AWS acceptance, IAM/KMS correctness, provisioning readiness, Candidate behavior, traffic performance, paper reproduction, or methodological superiority.
+- Next gate: reassess whether remaining controller-provisioning apparatus or simulator-integrated empirical work offers the greater reduction in dissertation research uncertainty.
+
 ---
 
 ## Monthly entry template
