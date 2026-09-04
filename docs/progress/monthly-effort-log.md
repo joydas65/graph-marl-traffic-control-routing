@@ -272,6 +272,15 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Recorded `B0_EMPIRICAL_SUBSTRATE_VALIDATED=YES` while retaining the distinct scenario verdict `TOO_WEAK`: N0/D0 restricted mean and P95 trip times were identical, queue burden differed by only −1 vehicle-second, and no exposed vehicle incurred additional edge or arrival delay.
 - Published only generated inputs, exact source provenance, tests, and compact results. Raw simulator outputs and machine-specific receipts remain ignored; no RL, treatment, OD calibration, or central-hypothesis test occurred.
 
+### B0 uniform-demand calibration and publication: 4–5 September 2026
+
+- Froze a baseline-only first-qualifying calibration contract over 2X, 3X, 4X, and 5X globally balanced traffic at the calibration-seen `A1B1`/`B1A1` corridor, using calibration seeds `20260904`, `20260905`, and `20260906`.
+- Preserved attempt 1 as a pre-SUMO local connection failure with no observations; attempt 2 retained the scientific inputs and completed all 24 fixed-time N0/D0 simulations.
+- All 12 seed pairs passed integrity and completion checks, but all definitively failed both network-response gates. The 2X/`20260906` pair also fell below the exposure gate. No level qualified on all three seeds.
+- Recorded `CALIBRATION_STATUS=NO_QUALIFYING_DEMAND_LEVEL`, `SELECTED_CALIBRATED_DEMAND_LEVEL=NONE`, and `DISSERTATION_EFFECT_THRESHOLD_REMAINS_UNSET=YES`. No deterministic repeat or calibrated-scenario freeze was performed.
+- Published the frozen contract, exact executed-source provenance, 35 logic tests, demand identities, and concise aggregates while excluding the 550-artifact raw evidence tree and machine-specific receipts.
+- Across the frozen 2X–5X ladder, globally balanced density did not meet the predeclared network-response gates. The +1-second and +5% pilot gates were not dissertation δ, which remains unset. The single next baseline-only axis is OD/corridor concentration at fixed 3X total demand; no such run, RL, routing, graph method, treatment, or central-hypothesis test occurred here.
+
 ---
 
 ## Monthly entry template
