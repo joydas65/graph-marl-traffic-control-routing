@@ -28,6 +28,12 @@ one-lane-loss scenario is `TOO_WEAK`: direct exposure and lane compliance are
 observable, but the event produces no measurable trip-time or network-queue
 degradation. No RL or dissertation treatment has been implemented or tested.
 
+The subsequent baseline-only uniform-demand calibration tested 2X–5X traffic
+over three frozen calibration seeds. No level met the response gates on all
+three seeds, so no demand level or dissertation effect threshold was selected.
+The next planned calibration axis is OD/corridor concentration at fixed 3X
+total demand; it has not been executed.
+
 ## Research progression
 
 1. Preserve and audit the inherited DQN baseline.
@@ -44,6 +50,7 @@ degradation. No RL or dissertation treatment has been implemented or tested.
 - [Research roadmap](docs/research/roadmap.md)
 - [Inherited baseline audit](docs/research/baseline-audit.md)
 - [Deterministic B0 substrate and 1X exposure diagnosis](docs/experiments/EXP-B0-000.md)
+- [Baseline-only 2X–5X uniform-demand calibration](docs/experiments/EXP-B0-CAL-001.md)
 - [Paper MDP formulation for GitHub](docs/research/shreya-paper-mdp.md)
 - [Paper MDP formulation for Overleaf](docs/research/shreya-paper-mdp.tex)
 - [Monthly effort log](docs/progress/monthly-effort-log.md)
