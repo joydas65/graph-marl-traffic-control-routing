@@ -5,6 +5,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 ## Core context
 
 - [`project-context.md`](project-context.md): stable problem definition, scope, mentorship, research lineage, and current questions.
+- [`research/dissertation-empirical-research-charter-v1.md`](research/dissertation-empirical-research-charter-v1.md): frozen pre-empirical question, hypotheses, baseline/ablation hierarchy, evidence rules, and routing gate.
 - [`research/roadmap.md`](research/roadmap.md): gated research programme from inherited baseline to final evaluation.
 - [`research/baseline-audit.md`](research/baseline-audit.md): complete technical assessment of the inherited repository.
 - [`research/shreya-drive-handover-audit.md`](research/shreya-drive-handover-audit.md): aggregate, public-safe provenance assessment of the private GCQN/GCAC handover.
@@ -17,6 +18,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 ## Evidence and decisions
 
 - [`progress/monthly-effort-log.md`](progress/monthly-effort-log.md): chronological effort and evidence log.
+- [`research/capacity-conditioned-graph-tsc-novelty-audit-2026-09.md`](research/capacity-conditioned-graph-tsc-novelty-audit-2026-09.md): bounded public-source novelty audit for capacity-conditioned graph signal control under held-out localized disruptions.
 - [`progress/weekly/2026-07-27-to-2026-08-02.md`](progress/weekly/2026-07-27-to-2026-08-02.md): current one-page weekly evidence update.
 - [`experiments/EXP-GRAPH-000.md`](experiments/EXP-GRAPH-000.md): read-only provenance and structural comparison of the GCQN/GCAC handover.
 - [`experiments/EXP-GRAPH-001.md`](experiments/EXP-GRAPH-001.md): non-executing semantic audit of the paper's foundational MDP, GCQN, and GCAC procedures.

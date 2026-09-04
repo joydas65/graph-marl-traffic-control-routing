@@ -256,6 +256,13 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Research boundary: Module C reviews normalized offline descriptions only. `ACCEPTED` is not an AWS or provisioning approval and does not establish service-pagination correctness, AWS acceptance, IAM/KMS correctness, provisioning readiness, Candidate behavior, traffic performance, paper reproduction, or methodological superiority.
 - Next gate: reassess whether remaining controller-provisioning apparatus or simulator-integrated empirical work offers the greater reduction in dissertation research uncertainty.
 
+### Pre-empirical research charter and novelty audit: 4 September 2026
+
+- Deliberately parked Candidate N and froze the narrower empirical research question around capacity-conditioned graph communication under localized road-capacity reductions.
+- Published a versioned pre-treatment charter covering the central and secondary hypotheses, B0–B3/T0 baseline hierarchy, A0–A3 ablations, physical-location split, outcomes, guardrails, statistical principles, mechanism diagnostics, failure criteria, and conditional routing gate.
+- Completed a bounded public-source literature collision audit. No near-duplicate was located through 4 September 2026; this is not an absolute novelty claim.
+- No capacity-conditioned treatment was implemented or evaluated, and no experimental result was created at this checkpoint. The next empirical step is one deterministic fixed-time SUMO baseline on the smallest selected network with a versioned scenario, seed, and metric record.
+
 ---
 
 ## Monthly entry template
