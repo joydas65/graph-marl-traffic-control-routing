@@ -1,0 +1,27 @@
+{
+  "disrupted": {
+    "disruption_events_equal": true,
+    "normalized_exposure_events_equal": true,
+    "normalized_exposure_summaries_equal": true,
+    "normalized_metrics_equal": true,
+    "pass": true,
+    "pre_event_occupancy_equal": true,
+    "step_trace_byte_equal": true,
+    "tripinfo_semantically_equal": true,
+    "vehicle_ledger_equal": true,
+    "vehroute_semantically_equal": true
+  },
+  "normal": {
+    "disruption_events_equal": true,
+    "normalized_exposure_events_equal": true,
+    "normalized_exposure_summaries_equal": true,
+    "normalized_metrics_equal": true,
+    "pass": true,
+    "pre_event_occupancy_equal": true,
+    "step_trace_byte_equal": true,
+    "tripinfo_semantically_equal": true,
+    "vehicle_ledger_equal": true,
+    "vehroute_semantically_equal": true
+  },
+  "pass": true
+}

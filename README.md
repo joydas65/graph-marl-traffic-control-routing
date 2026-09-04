@@ -16,9 +16,23 @@ The preservation tag points to the unmodified upstream state. All dissertation c
 
 ## Current status
 
-The inherited code is a Level-0 learning baseline: one DQN controls one four-arm SUMO intersection. It is not the multi-intersection GCQN/GCAC implementation from the 2025 Salmalge-Bhatnagar paper and is not yet a trustworthy experimental baseline. Known blockers include an unregistered PyTorch hidden-layer list, a broken testing import/API, incompatible training and testing observations, incomplete seeding, and missing dependency and result specifications.
+The inherited code remains a Level-0 learning baseline with the defects and
+claim limits recorded in
+[`docs/research/baseline-audit.md`](docs/research/baseline-audit.md). It is not
+the multi-intersection GCQN/GCAC implementation from the 2025
+Salmalge-Bhatnagar paper.
 
-No scientific result should be claimed until the repaired implementation passes the reproduction acceptance criteria documented in [`docs/research/baseline-audit.md`](docs/research/baseline-audit.md).
+Separately, the deterministic fixed-time `B0_GRID_3X3_V1` SUMO substrate and
+its read-only exposure observer are now empirically validated. The current 1X
+one-lane-loss scenario is `TOO_WEAK`: direct exposure and lane compliance are
+observable, but the event produces no measurable trip-time or network-queue
+degradation. No RL or dissertation treatment has been implemented or tested.
+
+The subsequent baseline-only uniform-demand calibration tested 2X–5X traffic
+over three frozen calibration seeds. No level met the response gates on all
+three seeds, so no demand level or dissertation effect threshold was selected.
+The next planned calibration axis is OD/corridor concentration at fixed 3X
+total demand; it has not been executed.
 
 ## Research progression
 
@@ -35,6 +49,8 @@ No scientific result should be claimed until the repaired implementation passes 
 - [Project context](docs/project-context.md)
 - [Research roadmap](docs/research/roadmap.md)
 - [Inherited baseline audit](docs/research/baseline-audit.md)
+- [Deterministic B0 substrate and 1X exposure diagnosis](docs/experiments/EXP-B0-000.md)
+- [Baseline-only 2X–5X uniform-demand calibration](docs/experiments/EXP-B0-CAL-001.md)
 - [Paper MDP formulation for GitHub](docs/research/shreya-paper-mdp.md)
 - [Paper MDP formulation for Overleaf](docs/research/shreya-paper-mdp.tex)
 - [Monthly effort log](docs/progress/monthly-effort-log.md)

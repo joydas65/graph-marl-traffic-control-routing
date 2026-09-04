@@ -1,0 +1,125 @@
+{
+  "comparisons": {
+    "D0-DIAG": {
+      "aggregate_scientific_projection_equal": true,
+      "diagnostic_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6810.0,
+        "queue_burden_vehicle_seconds": 6810.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "disruption_events_equal": true,
+      "original_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6810.0,
+        "queue_burden_vehicle_seconds": 6810.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "pass": true,
+      "raw_metrics_equal": true,
+      "step_trace_byte_equal": true,
+      "tripinfo_semantically_equal": true,
+      "vehicle_ledger_equal": true,
+      "vehroute_semantically_equal": true
+    },
+    "D0-DIAG-R": {
+      "aggregate_scientific_projection_equal": true,
+      "diagnostic_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6810.0,
+        "queue_burden_vehicle_seconds": 6810.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "disruption_events_equal": true,
+      "original_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6810.0,
+        "queue_burden_vehicle_seconds": 6810.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "pass": true,
+      "raw_metrics_equal": true,
+      "step_trace_byte_equal": true,
+      "tripinfo_semantically_equal": true,
+      "vehicle_ledger_equal": true,
+      "vehroute_semantically_equal": true
+    },
+    "N0-DIAG": {
+      "aggregate_scientific_projection_equal": true,
+      "diagnostic_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6811.0,
+        "queue_burden_vehicle_seconds": 6811.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "disruption_events_equal": true,
+      "original_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6811.0,
+        "queue_burden_vehicle_seconds": 6811.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "pass": true,
+      "raw_metrics_equal": true,
+      "step_trace_byte_equal": true,
+      "tripinfo_semantically_equal": true,
+      "vehicle_ledger_equal": true,
+      "vehroute_semantically_equal": true
+    },
+    "N0-DIAG-R": {
+      "aggregate_scientific_projection_equal": true,
+      "diagnostic_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6811.0,
+        "queue_burden_vehicle_seconds": 6811.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "disruption_events_equal": true,
+      "original_raw_recomputation": {
+        "arrivals": 180,
+        "native_waiting_time_seconds": 6811.0,
+        "queue_burden_vehicle_seconds": 6811.0,
+        "restricted_mean_trip_time_seconds": 96.14444444444445,
+        "restricted_p95_trip_time_seconds_nearest_rank": 125.0,
+        "scheduled_trips": 180,
+        "teleport_events": 0,
+        "unfinished": 0
+      },
+      "pass": true,
+      "raw_metrics_equal": true,
+      "step_trace_byte_equal": true,
+      "tripinfo_semantically_equal": true,
+      "vehicle_ledger_equal": true,
+      "vehroute_semantically_equal": true
+    }
+  },
+  "status": "PASS"
+}

@@ -18,6 +18,8 @@ This directory is the durable, public-safe research memory for the dissertation.
 ## Evidence and decisions
 
 - [`progress/monthly-effort-log.md`](progress/monthly-effort-log.md): chronological effort and evidence log.
+- [`experiments/EXP-B0-000.md`](experiments/EXP-B0-000.md): deterministic fixed-time 3×3 SUMO substrate validation, direct exposure diagnosis, and the 1X `TOO_WEAK` scenario verdict.
+- [`experiments/EXP-B0-CAL-001.md`](experiments/EXP-B0-CAL-001.md): frozen baseline-only 2X–5X uniform-demand calibration, its complete aggregate result, and the `NO_QUALIFYING_DEMAND_LEVEL` decision.
 - [`research/capacity-conditioned-graph-tsc-novelty-audit-2026-09.md`](research/capacity-conditioned-graph-tsc-novelty-audit-2026-09.md): bounded public-source novelty audit for capacity-conditioned graph signal control under held-out localized disruptions.
 - [`progress/weekly/2026-07-27-to-2026-08-02.md`](progress/weekly/2026-07-27-to-2026-08-02.md): current one-page weekly evidence update.
 - [`experiments/EXP-GRAPH-000.md`](experiments/EXP-GRAPH-000.md): read-only provenance and structural comparison of the GCQN/GCAC handover.

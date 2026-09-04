@@ -1,0 +1,223 @@
+{
+  "calibration_identity": "B0_BASELINE_ONLY_DEMAND_CALIBRATION_V1",
+  "evidence_identity": "b0-calibration/2026-09-demand-ladder-v1",
+  "calibration_question": "What is the lowest predeclared departure-density multiplier at which the frozen A1B1 one-lane-loss event produces a reproducible, non-catastrophic, directly exposed and scientifically measurable fixed-time baseline response on all three calibration seeds?",
+  "calibration_hypothesis": "At least one of 2X, 3X, 4X or 5X will satisfy every frozen integrity, usability, exposure, network-response and local-response gate on all three calibration seeds.",
+  "research_boundary": {
+    "baseline_only": true,
+    "calibration_seeds_excluded_from_final_confirmatory_treatment_estimate": true,
+    "calibration_seed_reuse_requires_later_preregistered_justification": true,
+    "capacity_conditioned_treatment_exists": false,
+    "future_treatment_results_may_influence_selection": false,
+    "rl_executed": false
+  },
+  "calibration_location": {
+    "corridor_edges": [
+      "A1B1",
+      "B1A1"
+    ],
+    "future_headline_heldout_location_eligible": false,
+    "role": "CALIBRATION_SEEN_LOCATION"
+  },
+  "calibration_seeds": [
+    20260904,
+    20260905,
+    20260906
+  ],
+  "demand_ladder": [
+    {
+      "label": "2X",
+      "multiplier": 2,
+      "scheduled_trips": 360
+    },
+    {
+      "label": "3X",
+      "multiplier": 3,
+      "scheduled_trips": 540
+    },
+    {
+      "label": "4X",
+      "multiplier": 4,
+      "scheduled_trips": 720
+    },
+    {
+      "label": "5X",
+      "multiplier": 5,
+      "scheduled_trips": 900
+    }
+  ],
+  "demand_generation": {
+    "algorithm_identity": "B0_MULTIPLIED_SEEDED_ROUTE_SLOT_SCHEDULER_V1",
+    "blocks": 15,
+    "block_seconds": 60,
+    "demand_window": {
+      "end_exclusive": 900,
+      "start_inclusive": 0
+    },
+    "departure_time_serialization": "INTEGER_SECONDS",
+    "description": "Extend the frozen 1X generator exactly: initialize Python random.Random(seed), then for each 60-second block shuffle list(ROUTES)*multiplier once and assign slot k to integer second block*60 + floor(k*60/(12*multiplier)). This reproduces the frozen 1X route schedule when multiplier=1 and creates multiplier departures per original five-second stratum.",
+    "equal_trip_counts_per_route": true,
+    "generator_rng_calls_other_than_one_shuffle_per_block": 0,
+    "internal_1x_compatibility_sha256": "12998402ad18f625440e85352a9c348882c7c504d18ded4ad9f42690322b276d",
+    "od_weights_adapted_from_results": false,
+    "route_count": 12,
+    "route_definitions_unchanged": true,
+    "simulator_random_mode": false,
+    "simulator_seed": 20260904,
+    "seed_role": "DEPARTURE_ROUTE_TO_SLOT_ASSIGNMENT_ONLY"
+  },
+  "scientific_configuration": {
+    "disruption_end_exclusive": 600,
+    "disruption_start_inclusive": 300,
+    "dynamic_rerouting": false,
+    "fixed_time_tls_program_seconds": 68,
+    "h_pilot_seconds": 1500,
+    "monitored_edge": "A1B1",
+    "network_identity": "B0_GRID_3X3_V1",
+    "passenger_class": "passenger",
+    "restricted_lane": "A1B1_0",
+    "simulation_step_seconds": 1,
+    "surviving_lane": "A1B1_1"
+  },
+  "inherited_metric_definitions": {
+    "completion_fraction": "ARRIVED_NON_TELEPORTED_TRIPS_DIVIDED_BY_ALL_SCHEDULED_TRIPS_AT_H_PILOT",
+    "native_waiting": "SUMO_TRIPINFO_WAITING_TIME_WITH_ZERO_CONTRIBUTION_FOR_UNDEPARTED_TRIPS_AND_COMPLETE_DEPARTED_COVERAGE_REQUIRED",
+    "primary": "MEAN_RESTRICTED_TRIP_TIME_FROM_SCHEDULED_DEPARTURE_ACROSS_ALL_SCHEDULED_TRIPS; ARRIVAL_OR_H_PILOT_IS_THE_ENDPOINT",
+    "queue": "SUM_OVER_EACH_ONE_SECOND_STEP_OF_NETWORK_WIDE_ACTIVE_PASSENGER_VEHICLES_WITH_SPEED_BELOW_0.1_METRES_PER_SECOND",
+    "restricted_p95": "NEAREST_RANK_CEILING_OF_0.95_TIMES_ALL_SCHEDULED_RESTRICTED_TRIP_TIMES",
+    "throughput": "NON_TELEPORTED_ARRIVED_TRIPS_BY_H_PILOT",
+    "unfinished": "ACTIVE_PLUS_NOT_DEPARTED_PLUS_TELEPORTED_PLUS_FAILED_INVALID_AT_H_PILOT"
+  },
+  "frozen_source_bindings": {
+    "disruption_source_sha256": "77df3a6504045f12815b6fe75ca7b00d370d568d1b5203d863f83385d536fb91",
+    "network_sha256": "49b2c7a89a72083b0f894c6b7083558f0120059122237d960a907bafbcf62dd2",
+    "observer_identity": "B0_EXPOSURE_DIAGNOSTIC_V1",
+    "observer_sha256": "dd582ab3011d3077c1ad1f63b95f26708813bf0628dcdee4bebda4c054a68d57",
+    "original_b0_route_sha256": "12998402ad18f625440e85352a9c348882c7c504d18ded4ad9f42690322b276d",
+    "original_b0_runner_sha256": "d4286193089a8062ae16e51e3dbaf8f26df6be11d43399d6fd998941b275ccab",
+    "observer_byte_exact_reuse_required": true
+  },
+  "conditions_per_candidate_seed": [
+    "N0-CAL",
+    "D0-CAL"
+  ],
+  "qualification_contract": {
+    "all_three_seeds_must_pass": true,
+    "comparators_are_inclusive": true,
+    "d0_completion_fraction_minimum": 0.95,
+    "d0_exposure_count_minimum": 10,
+    "d0_mean_trip_time_increase_seconds_minimum": 1.0,
+    "d0_queue_burden_relative_increase_minimum": 0.05,
+    "d0_teleport_event_count_maximum": 0,
+    "integrity": {
+      "activation_and_restoration_directly_observed": true,
+      "all_metrics_finite": true,
+      "all_scheduled_trips_accounted": true,
+      "fixed_time_tls_unchanged": true,
+      "invalid_or_failed_routes_maximum": 0,
+      "no_rerouting": true,
+      "passenger_post_activation_restricted_lane_entries_maximum": 0,
+      "routes_unchanged": true,
+      "sumo_collisions_maximum": 0,
+      "unexplained_simulator_errors_maximum": 0,
+      "unexpected_permission_transition_count_maximum": 0
+    },
+    "event_entry_semantics": "A unique passenger edge visit whose one-second entry transition interval overlaps [300,600): interval_end>300 and interval_start<600. Preexisting occupants are not entries.",
+    "local_physical_response": {
+      "criterion": "At least one directly exposed vehicle has increased A1B1 time, positive additional A1B1 halting, or delayed final arrival in D0 versus N0.",
+      "missing_or_ambiguous_pairing_rule": "If no positive witness exists and any potentially decisive visit or arrival comparison is missing or ambiguous, the local gate is NOT_IDENTIFIABLE. A positive edge-time, edge-halting, or valid-arrival witness passes even when another comparison is unavailable.",
+      "pairing": "Pair each D0 event-entry vehicle to its unique A1B1 visit in D0 and unique A1B1 traversal in matched N0; fixed routes contain A1B1 at most once. Any multiple-visit ambiguity is NOT_IDENTIFIABLE."
+    },
+    "mean_trip_time_exact_gate": "SUM(D0_RESTRICTED_TRIP_TIME)-SUM(N0_RESTRICTED_TRIP_TIME) >= SCHEDULED_TRIP_COUNT",
+    "n0_completion_fraction_minimum": 0.99,
+    "n0_teleport_event_count_maximum": 0,
+    "queue_burden_exact_gate": "N0_QUEUE>0 AND 100*D0_QUEUE >= 105*N0_QUEUE",
+    "queue_zero_denominator_rule": "NOT_IDENTIFIABLE",
+    "seed_pair_state_rule": "INTEGRITY_FAILURE if integrity is contradicted; otherwise DOES_NOT_QUALIFY if any scientific gate definitively fails; otherwise NOT_IDENTIFIABLE if any required gate is unknown; otherwise QUALIFIES."
+  },
+  "recovery_diagnostic": {
+    "classification_is_not_final_dissertation_recovery_definition": true,
+    "decline_rule": "At least one later post-restoration sample is below the earliest maximum positive excess queue.",
+    "positive_excess_used_for_peak_and_near_zero": "MAX(0,D0_QUEUE(t)-N0_QUEUE(t))",
+    "signed_excess_queue_trace": "D0_QUEUE(t)-N0_QUEUE(t)",
+    "no_positive_peak_rule": "NO_RECOVERY_SIGNAL",
+    "near_zero_absolute_vehicle_threshold": 1,
+    "near_zero_rule": "After the earliest positive peak and a strict decline, positive excess queue is <=1 at some sample strictly before H_PILOT.",
+    "peak_at_h_pilot_rule": "NO_RECOVERY_SIGNAL",
+    "post_restoration_first_sample_seconds": 601,
+    "statuses": [
+      "RECOVERY_SIGNAL_OBSERVED",
+      "NO_RECOVERY_SIGNAL",
+      "NOT_IDENTIFIABLE"
+    ]
+  },
+  "selection_rule": {
+    "higher_levels_after_first_qualifier_are_prohibited": true,
+    "level_state_rule": "A level QUALIFIES only when all three seed pairs QUALIFY. Any definitive seed nonqualification makes the level DOES_NOT_QUALIFY even if a different seed is NOT_IDENTIFIABLE. With no definitive failure, any NOT_IDENTIFIABLE seed stops selection as INCONCLUSIVE.",
+    "rule": "FIRST_QUALIFYING",
+    "sequence": [
+      "2X",
+      "3X",
+      "4X",
+      "5X"
+    ]
+  },
+  "selected_deterministic_repeat": {
+    "conditions": [
+      "N0-CAL-R",
+      "D0-CAL-R"
+    ],
+    "exact_equality_required": true,
+    "normalized_fields": [
+      "per_vehicle_trip_accounting",
+      "per_vehicle_restricted_trip_times",
+      "restricted_mean_and_p95_trip_time",
+      "complete_queue_trace",
+      "normalized_exposure_events_and_summary",
+      "preactivation_occupancy",
+      "event_lifecycle",
+      "lane_visit_compliance",
+      "route_file_sha256"
+    ],
+    "operational_fields_excluded": [
+      "run_id",
+      "condition_label",
+      "attempt",
+      "wall_clock_timestamps",
+      "wall_clock_runtime",
+      "output_identity"
+    ],
+    "seed": 20260904
+  },
+  "status_contract": {
+    "FAIL": "Executed input, implementation, integrity, public-repository, or freeze/readback contradiction.",
+    "BLOCKED": "The local environment prevents a required run or durable write without a scientific contradiction.",
+    "INCONCLUSIVE": "A required selection decision remains semantically ambiguous after otherwise trustworthy evidence.",
+    "NO_QUALIFYING_DEMAND_LEVEL": "All four levels definitively do not qualify without integrity defects or unresolved ambiguity.",
+    "PASS": "The first qualifier passes all three seeds, exact repeat, and freeze readback.",
+    "precedence": [
+      "FAIL",
+      "BLOCKED",
+      "INCONCLUSIVE",
+      "PASS_OR_NO_QUALIFYING_DEMAND_LEVEL"
+    ]
+  },
+  "effect_threshold_boundary": {
+    "dissertation_delta_frozen": false,
+    "pilot_mean_trip_time_gate_is_delta": false,
+    "pilot_queue_gate_is_delta": false,
+    "pilot_thresholds_are_scenario_sensitivity_gates_only": true
+  },
+  "interpretation_boundary": {
+    "establishes_only": "Whether a frozen physical disruption produces enough measurable fixed-time baseline traffic response for later method comparisons.",
+    "does_not_establish": [
+      "RL superiority",
+      "graph benefit",
+      "capacity-conditioned communication benefit",
+      "the central dissertation hypothesis",
+      "generalization",
+      "statistical significance",
+      "publication-level evidence"
+    ]
+  }
+}

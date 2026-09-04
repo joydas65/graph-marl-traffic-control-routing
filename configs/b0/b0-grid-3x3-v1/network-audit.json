@@ -1,0 +1,25 @@
+{
+  "selected_network_id": "B0_GRID_3X3_V1",
+  "source": "GENERATED",
+  "controlled_intersection_count": 9,
+  "controlled_intersection_ids": [
+    "A0",
+    "A1",
+    "A2",
+    "B0",
+    "B1",
+    "B2",
+    "C0",
+    "C1",
+    "C2"
+  ],
+  "undirected_internal_neighbour_relationships": 12,
+  "eligible_physical_disruption_zone_count": 12,
+  "lanes_per_direction": 2,
+  "nominal_speed_metres_per_second": 13.89,
+  "requested_internal_link_length_metres": 200,
+  "requested_boundary_attachment_length_metres": 150,
+  "network_frozen_after_single_generation": true,
+  "single_intersection_fixture_research_suitable": false,
+  "selection_reason": "Smallest regular grid with a genuine interior controlled node, boundary/corner structure, multiple physical disruption zones and graph-hop diversity."
+}

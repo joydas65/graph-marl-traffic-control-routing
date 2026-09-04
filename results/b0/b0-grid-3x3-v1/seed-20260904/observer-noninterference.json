@@ -1,0 +1,18 @@
+{
+  "diagnostic_runner_forbidden_control_calls": [],
+  "missing_required_read_calls": [],
+  "observer_advances_simulation_only_by_delegating_simulationStep": true,
+  "observer_changes_lane_permissions": false,
+  "observer_changes_routes": false,
+  "observer_changes_tls": false,
+  "observer_changes_vehicle_state": false,
+  "observer_forbidden_control_calls": [],
+  "observer_identity": "B0_EXPOSURE_DIAGNOSTIC_V1",
+  "original_runner_control_calls": [
+    "setAllowed",
+    "setDisallowed"
+  ],
+  "original_runner_control_scope": "Frozen restricted-lane permission activation/restoration only",
+  "required_read_calls_present": true,
+  "status": "PASS"
+}

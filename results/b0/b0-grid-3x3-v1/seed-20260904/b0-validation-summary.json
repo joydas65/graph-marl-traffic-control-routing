@@ -1,0 +1,19 @@
+{
+  "all_run_integrity_pass": true,
+  "b0_status": "PASS",
+  "determinism_repeat_pass": true,
+  "interpretation": "B0 substrate validation and scenario characterization only; not a test of the central hypothesis.",
+  "pre_empirical_boundary_preserved": true,
+  "public_git_modified": false,
+  "repository_state_before_and_after_equal": true,
+  "restricted_trip_time_implemented": true,
+  "run_attempt": 2,
+  "run_order": [
+    "N0",
+    "D0",
+    "N0-R",
+    "D0-R"
+  ],
+  "treatment_executed": false,
+  "trip_accounting_reconciled": true
+}
