@@ -263,6 +263,15 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Completed a bounded public-source literature collision audit. No near-duplicate was located through 4 September 2026; this is not an absolute novelty claim.
 - No capacity-conditioned treatment was implemented or evaluated, and no experimental result was created at this checkpoint. The next empirical step is one deterministic fixed-time SUMO baseline on the smallest selected network with a versioned scenario, seed, and metric record.
 
+### B0 fixed-time substrate and 1X exposure diagnosis: 4 September 2026
+
+- Generated and froze `B0_GRID_3X3_V1`, a 3×3 network with nine controlled intersections, twelve fixed row/column routes, 180 trips over `[0,900)`, static 68-second TLS programs, and a 1,500-second pilot horizon.
+- Executed fixed-time N0/D0 and exact repeats at seed `20260904`; all 180 trips completed in every run with zero teleports, collisions, invalid routes, or unfinished trips. Metric, trace, ledger, and event-lifecycle repeat comparisons passed.
+- Independently reconciled scheduled-trip accounting, restricted mean and P95 trip time, queue burden, native waiting, throughput, and disruption application against raw evidence without changing the scenario.
+- Validated a read-only per-vehicle exposure observer and its noninterference contract. Five vehicles entered `A1B1` during the event, all used surviving lane `A1B1_1`, and no passenger entered restricted lane `A1B1_0` after activation.
+- Recorded `B0_EMPIRICAL_SUBSTRATE_VALIDATED=YES` while retaining the distinct scenario verdict `TOO_WEAK`: N0/D0 restricted mean and P95 trip times were identical, queue burden differed by only −1 vehicle-second, and no exposed vehicle incurred additional edge or arrival delay.
+- Published only generated inputs, exact source provenance, tests, and compact results. Raw simulator outputs and machine-specific receipts remain ignored; no RL, treatment, OD calibration, or central-hypothesis test occurred.
+
 ---
 
 ## Monthly entry template

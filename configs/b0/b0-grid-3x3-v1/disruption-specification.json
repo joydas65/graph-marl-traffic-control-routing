@@ -1,0 +1,27 @@
+{
+  "condition": "D0",
+  "disruption_family": "TEMPORARY_SINGLE_LINK_PARTIAL_CAPACITY_REDUCTION",
+  "implementation": "TEMPORARY_ONE_LANE_LOSS_CAPACITY_PROXY",
+  "selection_basis": [
+    "topology",
+    "two-lane structure",
+    "frozen route coverage",
+    "centre adjacency",
+    "lexicographic tie-break among centre-adjacent eligible directed edges and lanes"
+  ],
+  "directed_edge_id": "A1B1",
+  "lane_id": "A1B1_0",
+  "original_lane_count": 2,
+  "remaining_route_feasible_lane_id": "A1B1_1",
+  "remaining_lane_successor_for_exposed_route": "B1C1_1",
+  "vehicle_class_temporarily_disallowed": "passenger",
+  "start_step_inclusive": 300,
+  "end_step_exclusive": 600,
+  "scheduled_routes_structurally_exposed": 15,
+  "scheduled_routes_total": 180,
+  "scheduled_route_exposure_fraction": 0.08333333333333333,
+  "scheduled_exposed_departures_during_event": 5,
+  "full_link_closure": false,
+  "rerouting_permitted": false,
+  "exact_capacity_percentage_claimed": false
+}

@@ -1,0 +1,22 @@
+{
+  "disrupted": {
+    "disruption_events_equal": true,
+    "first": "D0",
+    "normalized_metrics_equal": true,
+    "pass": true,
+    "repeat": "D0-R",
+    "step_trace_byte_equal": true,
+    "vehicle_ledger_equal": true
+  },
+  "interpretation": "Exact repeats are reproducibility checks, not independent statistical seeds.",
+  "normal": {
+    "disruption_events_equal": true,
+    "first": "N0",
+    "normalized_metrics_equal": true,
+    "pass": true,
+    "repeat": "N0-R",
+    "step_trace_byte_equal": true,
+    "vehicle_ledger_equal": true
+  },
+  "pass": true
+}

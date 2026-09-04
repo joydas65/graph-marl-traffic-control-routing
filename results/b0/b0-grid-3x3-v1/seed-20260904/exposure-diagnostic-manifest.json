@@ -1,0 +1,21 @@
+{
+  "diagnostic_identity": "B0_EXPOSURE_DIAGNOSTIC_V1",
+  "evidence_identity": "b0-diagnostic/2026-09-04_seed-20260904/exposure-v1",
+  "original_b0_identity": "b0/2026-09-04_seed-20260904",
+  "purpose": "DIRECTLY_OBSERVE_PER_VEHICLE_EDGE_AND_LANE_EXPOSURE_ONLY",
+  "scientific_configuration_changes_permitted": false,
+  "observer_style": "ONE_SECOND_READ_ONLY_EVENT_TRANSITIONS",
+  "monitored_edges": {
+    "A1B1": [
+      "A1B1_0",
+      "A1B1_1"
+    ]
+  },
+  "condition_order": [
+    "N0-DIAG",
+    "D0-DIAG",
+    "N0-DIAG-R",
+    "D0-DIAG-R"
+  ],
+  "scenario_suitability_frozen": "TOO_WEAK"
+}
