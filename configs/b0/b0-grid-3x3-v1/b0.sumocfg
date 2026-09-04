@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <input>
+    <net-file value="b0-grid-3x3.net.xml"/>
+    <route-files value="b0-fixed-routes.rou.xml"/>
+  </input>
+  <time>
+    <begin value="0"/>
+    <end value="1500"/>
+    <step-length value="1"/>
+  </time>
+  <processing>
+    <time-to-teleport value="-1"/>
+    <waiting-time-memory value="1501"/>
+    <max-depart-delay value="-1"/>
+  </processing>
+  <routing>
+    <device.rerouting.probability value="0"/>
+    <person-device.rerouting.probability value="0"/>
+  </routing>
+  <report>
+    <no-step-log value="true"/>
+    <duration-log.statistics value="true"/>
+    <xml-validation value="never"/>
+  </report>
+  <random_number>
+    <random value="false"/>
+    <seed value="20260904"/>
+  </random_number>
+</configuration>

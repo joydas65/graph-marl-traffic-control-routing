@@ -1,0 +1,2008 @@
+{
+  "demand_window_seconds": {
+    "end_exclusive": 900,
+    "start_inclusive": 0
+  },
+  "dynamic_rerouting": false,
+  "generation_algorithm": "15 sixty-second blocks; one vehicle per explicit route per block; seeded route-to-five-second-offset permutation",
+  "route_count": 12,
+  "routes_fixed_before_simulation": true,
+  "scenario_seed": 20260904,
+  "scheduled_trip_count": 180,
+  "scheduled_trips": [
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 0,
+      "vehicle_id": "veh_0000"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 5,
+      "vehicle_id": "veh_0001"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 10,
+      "vehicle_id": "veh_0002"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 15,
+      "vehicle_id": "veh_0003"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 20,
+      "vehicle_id": "veh_0004"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 25,
+      "vehicle_id": "veh_0005"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 30,
+      "vehicle_id": "veh_0006"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 35,
+      "vehicle_id": "veh_0007"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 40,
+      "vehicle_id": "veh_0008"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 45,
+      "vehicle_id": "veh_0009"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 50,
+      "vehicle_id": "veh_0010"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 55,
+      "vehicle_id": "veh_0011"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 60,
+      "vehicle_id": "veh_0012"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 65,
+      "vehicle_id": "veh_0013"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 70,
+      "vehicle_id": "veh_0014"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 75,
+      "vehicle_id": "veh_0015"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 80,
+      "vehicle_id": "veh_0016"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 85,
+      "vehicle_id": "veh_0017"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 90,
+      "vehicle_id": "veh_0018"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 95,
+      "vehicle_id": "veh_0019"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 100,
+      "vehicle_id": "veh_0020"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 105,
+      "vehicle_id": "veh_0021"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 110,
+      "vehicle_id": "veh_0022"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 115,
+      "vehicle_id": "veh_0023"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 120,
+      "vehicle_id": "veh_0024"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 125,
+      "vehicle_id": "veh_0025"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 130,
+      "vehicle_id": "veh_0026"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 135,
+      "vehicle_id": "veh_0027"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 140,
+      "vehicle_id": "veh_0028"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 145,
+      "vehicle_id": "veh_0029"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 150,
+      "vehicle_id": "veh_0030"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 155,
+      "vehicle_id": "veh_0031"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 160,
+      "vehicle_id": "veh_0032"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 165,
+      "vehicle_id": "veh_0033"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 170,
+      "vehicle_id": "veh_0034"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 175,
+      "vehicle_id": "veh_0035"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 180,
+      "vehicle_id": "veh_0036"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 185,
+      "vehicle_id": "veh_0037"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 190,
+      "vehicle_id": "veh_0038"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 195,
+      "vehicle_id": "veh_0039"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 200,
+      "vehicle_id": "veh_0040"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 205,
+      "vehicle_id": "veh_0041"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 210,
+      "vehicle_id": "veh_0042"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 215,
+      "vehicle_id": "veh_0043"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 220,
+      "vehicle_id": "veh_0044"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 225,
+      "vehicle_id": "veh_0045"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 230,
+      "vehicle_id": "veh_0046"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 235,
+      "vehicle_id": "veh_0047"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 240,
+      "vehicle_id": "veh_0048"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 245,
+      "vehicle_id": "veh_0049"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 250,
+      "vehicle_id": "veh_0050"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 255,
+      "vehicle_id": "veh_0051"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 260,
+      "vehicle_id": "veh_0052"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 265,
+      "vehicle_id": "veh_0053"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 270,
+      "vehicle_id": "veh_0054"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 275,
+      "vehicle_id": "veh_0055"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 280,
+      "vehicle_id": "veh_0056"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 285,
+      "vehicle_id": "veh_0057"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 290,
+      "vehicle_id": "veh_0058"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 295,
+      "vehicle_id": "veh_0059"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 300,
+      "vehicle_id": "veh_0060"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 305,
+      "vehicle_id": "veh_0061"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 310,
+      "vehicle_id": "veh_0062"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 315,
+      "vehicle_id": "veh_0063"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 320,
+      "vehicle_id": "veh_0064"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 325,
+      "vehicle_id": "veh_0065"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 330,
+      "vehicle_id": "veh_0066"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 335,
+      "vehicle_id": "veh_0067"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 340,
+      "vehicle_id": "veh_0068"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 345,
+      "vehicle_id": "veh_0069"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 350,
+      "vehicle_id": "veh_0070"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 355,
+      "vehicle_id": "veh_0071"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 360,
+      "vehicle_id": "veh_0072"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 365,
+      "vehicle_id": "veh_0073"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 370,
+      "vehicle_id": "veh_0074"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 375,
+      "vehicle_id": "veh_0075"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 380,
+      "vehicle_id": "veh_0076"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 385,
+      "vehicle_id": "veh_0077"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 390,
+      "vehicle_id": "veh_0078"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 395,
+      "vehicle_id": "veh_0079"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 400,
+      "vehicle_id": "veh_0080"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 405,
+      "vehicle_id": "veh_0081"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 410,
+      "vehicle_id": "veh_0082"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 415,
+      "vehicle_id": "veh_0083"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 420,
+      "vehicle_id": "veh_0084"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 425,
+      "vehicle_id": "veh_0085"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 430,
+      "vehicle_id": "veh_0086"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 435,
+      "vehicle_id": "veh_0087"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 440,
+      "vehicle_id": "veh_0088"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 445,
+      "vehicle_id": "veh_0089"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 450,
+      "vehicle_id": "veh_0090"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 455,
+      "vehicle_id": "veh_0091"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 460,
+      "vehicle_id": "veh_0092"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 465,
+      "vehicle_id": "veh_0093"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 470,
+      "vehicle_id": "veh_0094"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 475,
+      "vehicle_id": "veh_0095"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 480,
+      "vehicle_id": "veh_0096"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 485,
+      "vehicle_id": "veh_0097"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 490,
+      "vehicle_id": "veh_0098"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 495,
+      "vehicle_id": "veh_0099"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 500,
+      "vehicle_id": "veh_0100"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 505,
+      "vehicle_id": "veh_0101"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 510,
+      "vehicle_id": "veh_0102"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 515,
+      "vehicle_id": "veh_0103"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 520,
+      "vehicle_id": "veh_0104"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 525,
+      "vehicle_id": "veh_0105"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 530,
+      "vehicle_id": "veh_0106"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 535,
+      "vehicle_id": "veh_0107"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 540,
+      "vehicle_id": "veh_0108"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 545,
+      "vehicle_id": "veh_0109"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 550,
+      "vehicle_id": "veh_0110"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 555,
+      "vehicle_id": "veh_0111"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 560,
+      "vehicle_id": "veh_0112"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 565,
+      "vehicle_id": "veh_0113"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 570,
+      "vehicle_id": "veh_0114"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 575,
+      "vehicle_id": "veh_0115"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 580,
+      "vehicle_id": "veh_0116"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 585,
+      "vehicle_id": "veh_0117"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 590,
+      "vehicle_id": "veh_0118"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 595,
+      "vehicle_id": "veh_0119"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 600,
+      "vehicle_id": "veh_0120"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 605,
+      "vehicle_id": "veh_0121"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 610,
+      "vehicle_id": "veh_0122"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 615,
+      "vehicle_id": "veh_0123"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 620,
+      "vehicle_id": "veh_0124"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 625,
+      "vehicle_id": "veh_0125"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 630,
+      "vehicle_id": "veh_0126"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 635,
+      "vehicle_id": "veh_0127"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 640,
+      "vehicle_id": "veh_0128"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 645,
+      "vehicle_id": "veh_0129"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 650,
+      "vehicle_id": "veh_0130"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 655,
+      "vehicle_id": "veh_0131"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 660,
+      "vehicle_id": "veh_0132"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 665,
+      "vehicle_id": "veh_0133"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 670,
+      "vehicle_id": "veh_0134"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 675,
+      "vehicle_id": "veh_0135"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 680,
+      "vehicle_id": "veh_0136"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 685,
+      "vehicle_id": "veh_0137"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 690,
+      "vehicle_id": "veh_0138"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 695,
+      "vehicle_id": "veh_0139"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 700,
+      "vehicle_id": "veh_0140"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 705,
+      "vehicle_id": "veh_0141"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 710,
+      "vehicle_id": "veh_0142"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 715,
+      "vehicle_id": "veh_0143"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 720,
+      "vehicle_id": "veh_0144"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 725,
+      "vehicle_id": "veh_0145"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 730,
+      "vehicle_id": "veh_0146"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 735,
+      "vehicle_id": "veh_0147"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 740,
+      "vehicle_id": "veh_0148"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 745,
+      "vehicle_id": "veh_0149"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 750,
+      "vehicle_id": "veh_0150"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 755,
+      "vehicle_id": "veh_0151"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 760,
+      "vehicle_id": "veh_0152"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 765,
+      "vehicle_id": "veh_0153"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 770,
+      "vehicle_id": "veh_0154"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 775,
+      "vehicle_id": "veh_0155"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 780,
+      "vehicle_id": "veh_0156"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 785,
+      "vehicle_id": "veh_0157"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 790,
+      "vehicle_id": "veh_0158"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 795,
+      "vehicle_id": "veh_0159"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 800,
+      "vehicle_id": "veh_0160"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 805,
+      "vehicle_id": "veh_0161"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 810,
+      "vehicle_id": "veh_0162"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 815,
+      "vehicle_id": "veh_0163"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 820,
+      "vehicle_id": "veh_0164"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 825,
+      "vehicle_id": "veh_0165"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 830,
+      "vehicle_id": "veh_0166"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 835,
+      "vehicle_id": "veh_0167"
+    },
+    {
+      "edges": [
+        "right2C2",
+        "C2B2",
+        "B2A2",
+        "A2left2"
+      ],
+      "route_id": "row2_west",
+      "scheduled_departure_seconds": 840,
+      "vehicle_id": "veh_0168"
+    },
+    {
+      "edges": [
+        "top1B2",
+        "B2B1",
+        "B1B0",
+        "B0bottom1"
+      ],
+      "route_id": "colB_south",
+      "scheduled_departure_seconds": 845,
+      "vehicle_id": "veh_0169"
+    },
+    {
+      "edges": [
+        "right1C1",
+        "C1B1",
+        "B1A1",
+        "A1left1"
+      ],
+      "route_id": "row1_west",
+      "scheduled_departure_seconds": 850,
+      "vehicle_id": "veh_0170"
+    },
+    {
+      "edges": [
+        "bottom1B0",
+        "B0B1",
+        "B1B2",
+        "B2top1"
+      ],
+      "route_id": "colB_north",
+      "scheduled_departure_seconds": 855,
+      "vehicle_id": "veh_0171"
+    },
+    {
+      "edges": [
+        "top0A2",
+        "A2A1",
+        "A1A0",
+        "A0bottom0"
+      ],
+      "route_id": "colA_south",
+      "scheduled_departure_seconds": 860,
+      "vehicle_id": "veh_0172"
+    },
+    {
+      "edges": [
+        "left2A2",
+        "A2B2",
+        "B2C2",
+        "C2right2"
+      ],
+      "route_id": "row2_east",
+      "scheduled_departure_seconds": 865,
+      "vehicle_id": "veh_0173"
+    },
+    {
+      "edges": [
+        "right0C0",
+        "C0B0",
+        "B0A0",
+        "A0left0"
+      ],
+      "route_id": "row0_west",
+      "scheduled_departure_seconds": 870,
+      "vehicle_id": "veh_0174"
+    },
+    {
+      "edges": [
+        "left0A0",
+        "A0B0",
+        "B0C0",
+        "C0right0"
+      ],
+      "route_id": "row0_east",
+      "scheduled_departure_seconds": 875,
+      "vehicle_id": "veh_0175"
+    },
+    {
+      "edges": [
+        "left1A1",
+        "A1B1",
+        "B1C1",
+        "C1right1"
+      ],
+      "route_id": "row1_east",
+      "scheduled_departure_seconds": 880,
+      "vehicle_id": "veh_0176"
+    },
+    {
+      "edges": [
+        "top2C2",
+        "C2C1",
+        "C1C0",
+        "C0bottom2"
+      ],
+      "route_id": "colC_south",
+      "scheduled_departure_seconds": 885,
+      "vehicle_id": "veh_0177"
+    },
+    {
+      "edges": [
+        "bottom2C0",
+        "C0C1",
+        "C1C2",
+        "C2top2"
+      ],
+      "route_id": "colC_north",
+      "scheduled_departure_seconds": 890,
+      "vehicle_id": "veh_0178"
+    },
+    {
+      "edges": [
+        "bottom0A0",
+        "A0A1",
+        "A1A2",
+        "A2top0"
+      ],
+      "route_id": "colA_north",
+      "scheduled_departure_seconds": 895,
+      "vehicle_id": "veh_0179"
+    }
+  ],
+  "trips_per_route": {
+    "colA_north": 15,
+    "colA_south": 15,
+    "colB_north": 15,
+    "colB_south": 15,
+    "colC_north": 15,
+    "colC_south": 15,
+    "row0_east": 15,
+    "row0_west": 15,
+    "row1_east": 15,
+    "row1_west": 15,
+    "row2_east": 15,
+    "row2_west": 15
+  }
+}

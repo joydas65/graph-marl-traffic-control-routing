@@ -1,0 +1,13 @@
+{
+  "sha256": {
+    "b0-fixed-routes.rou.xml": "12998402ad18f625440e85352a9c348882c7c504d18ded4ad9f42690322b276d",
+    "b0-grid-3x3.net.xml": "49b2c7a89a72083b0f894c6b7083558f0120059122237d960a907bafbcf62dd2",
+    "b0.sumocfg": "228b6c5e50b54a5c6f772d961aa95f045a4ed81f35e68b1a3744bdef428e7805",
+    "demand-manifest.json": "9217ee41129d384f7abf7551f1aaa3d829b951c152b022320db0ee2ce123b5cc",
+    "disruption-specification.json": "77df3a6504045f12815b6fe75ca7b00d370d568d1b5203d863f83385d536fb91",
+    "network-audit.json": "c6f21066539a890ffffcbd067a036ee3abc645e6b246eb25d6ce4e01a0048ba3",
+    "network-generation-command.txt": "480b474e8a2428c0394ce09a7359cf45441523247d64f8df203dfb7829610bb6",
+    "scenario-manifest.json": "492401db6bb6877a6591fc28733c5f441da23ff86a88cf8be4c4ed99aec7ca8f"
+  },
+  "self_hash_included": false
+}

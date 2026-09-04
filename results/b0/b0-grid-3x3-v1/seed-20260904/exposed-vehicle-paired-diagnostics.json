@@ -1,0 +1,318 @@
+{
+  "causal_claim_made": false,
+  "comparison_cohort": "D0 vehicles observed entering A1B1 during [300,600)",
+  "comparisons": [
+    {
+      "d0": {
+        "edge_entry_interval_seconds": [
+          309.0,
+          310.0
+        ],
+        "edge_entry_observed_at_seconds": 310.0,
+        "edge_exit_interval_seconds": [
+          326.0,
+          327.0
+        ],
+        "edge_exit_observed_at_seconds": 327.0,
+        "final_arrival_seconds": 390.0,
+        "lane_sequence": [
+          "A1B1_1"
+        ],
+        "native_waiting_time_seconds": 43.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 17.0,
+        "restricted_trip_time_seconds": 115.0
+      },
+      "d0_lane_change_count": 0,
+      "d0_minus_n0": {
+        "edge_entry_observed_at_seconds": 0.0,
+        "edge_exit_observed_at_seconds": 0.0,
+        "final_arrival_seconds": 0.0,
+        "native_waiting_time_seconds": -1.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 0.0,
+        "restricted_trip_time_seconds": 0.0
+      },
+      "lane_choice_difference_observed": true,
+      "n0": {
+        "edge_entry_interval_seconds": [
+          309.0,
+          310.0
+        ],
+        "edge_entry_observed_at_seconds": 310.0,
+        "edge_exit_interval_seconds": [
+          326.0,
+          327.0
+        ],
+        "edge_exit_observed_at_seconds": 327.0,
+        "final_arrival_seconds": 390.0,
+        "lane_sequence": [
+          "A1B1_0"
+        ],
+        "native_waiting_time_seconds": 44.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 17.0,
+        "restricted_trip_time_seconds": 115.0
+      },
+      "n0_lane_change_count": 0,
+      "pairing_basis": "UNIQUE_N0_TRAVERSAL",
+      "scheduled_departure_seconds": 275.0,
+      "status": "IDENTIFIED",
+      "vehicle_id": "veh_0055"
+    },
+    {
+      "d0": {
+        "edge_entry_interval_seconds": [
+          377.0,
+          378.0
+        ],
+        "edge_entry_observed_at_seconds": 378.0,
+        "edge_exit_interval_seconds": [
+          390.0,
+          391.0
+        ],
+        "edge_exit_observed_at_seconds": 391.0,
+        "final_arrival_seconds": 455.0,
+        "lane_sequence": [
+          "A1B1_1"
+        ],
+        "native_waiting_time_seconds": 52.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 13.0,
+        "restricted_trip_time_seconds": 110.0
+      },
+      "d0_lane_change_count": 0,
+      "d0_minus_n0": {
+        "edge_entry_observed_at_seconds": 0.0,
+        "edge_exit_observed_at_seconds": 0.0,
+        "final_arrival_seconds": 0.0,
+        "native_waiting_time_seconds": 0.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 0.0,
+        "restricted_trip_time_seconds": 0.0
+      },
+      "lane_choice_difference_observed": true,
+      "n0": {
+        "edge_entry_interval_seconds": [
+          377.0,
+          378.0
+        ],
+        "edge_entry_observed_at_seconds": 378.0,
+        "edge_exit_interval_seconds": [
+          390.0,
+          391.0
+        ],
+        "edge_exit_observed_at_seconds": 391.0,
+        "final_arrival_seconds": 455.0,
+        "lane_sequence": [
+          "A1B1_0"
+        ],
+        "native_waiting_time_seconds": 52.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 13.0,
+        "restricted_trip_time_seconds": 110.0
+      },
+      "n0_lane_change_count": 0,
+      "pairing_basis": "UNIQUE_N0_TRAVERSAL",
+      "scheduled_departure_seconds": 345.0,
+      "status": "IDENTIFIED",
+      "vehicle_id": "veh_0069"
+    },
+    {
+      "d0": {
+        "edge_entry_interval_seconds": [
+          445.0,
+          446.0
+        ],
+        "edge_entry_observed_at_seconds": 446.0,
+        "edge_exit_interval_seconds": [
+          458.0,
+          459.0
+        ],
+        "edge_exit_observed_at_seconds": 459.0,
+        "final_arrival_seconds": 523.0,
+        "lane_sequence": [
+          "A1B1_1"
+        ],
+        "native_waiting_time_seconds": 55.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 13.0,
+        "restricted_trip_time_seconds": 113.0
+      },
+      "d0_lane_change_count": 0,
+      "d0_minus_n0": {
+        "edge_entry_observed_at_seconds": 0.0,
+        "edge_exit_observed_at_seconds": 0.0,
+        "final_arrival_seconds": 0.0,
+        "native_waiting_time_seconds": 0.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 0.0,
+        "restricted_trip_time_seconds": 0.0
+      },
+      "lane_choice_difference_observed": true,
+      "n0": {
+        "edge_entry_interval_seconds": [
+          445.0,
+          446.0
+        ],
+        "edge_entry_observed_at_seconds": 446.0,
+        "edge_exit_interval_seconds": [
+          458.0,
+          459.0
+        ],
+        "edge_exit_observed_at_seconds": 459.0,
+        "final_arrival_seconds": 523.0,
+        "lane_sequence": [
+          "A1B1_0"
+        ],
+        "native_waiting_time_seconds": 55.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 13.0,
+        "restricted_trip_time_seconds": 113.0
+      },
+      "n0_lane_change_count": 0,
+      "pairing_basis": "UNIQUE_N0_TRAVERSAL",
+      "scheduled_departure_seconds": 410.0,
+      "status": "IDENTIFIED",
+      "vehicle_id": "veh_0082"
+    },
+    {
+      "d0": {
+        "edge_entry_interval_seconds": [
+          467.0,
+          468.0
+        ],
+        "edge_entry_observed_at_seconds": 468.0,
+        "edge_exit_interval_seconds": [
+          510.0,
+          511.0
+        ],
+        "edge_exit_observed_at_seconds": 511.0,
+        "final_arrival_seconds": 538.0,
+        "lane_sequence": [
+          "A1B1_1"
+        ],
+        "native_waiting_time_seconds": 28.0,
+        "observed_edge_halting_seconds": 28.0,
+        "observed_edge_time_seconds": 43.0,
+        "restricted_trip_time_seconds": 83.0
+      },
+      "d0_lane_change_count": 0,
+      "d0_minus_n0": {
+        "edge_entry_observed_at_seconds": 0.0,
+        "edge_exit_observed_at_seconds": 0.0,
+        "final_arrival_seconds": 0.0,
+        "native_waiting_time_seconds": 0.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 0.0,
+        "restricted_trip_time_seconds": 0.0
+      },
+      "lane_choice_difference_observed": true,
+      "n0": {
+        "edge_entry_interval_seconds": [
+          467.0,
+          468.0
+        ],
+        "edge_entry_observed_at_seconds": 468.0,
+        "edge_exit_interval_seconds": [
+          510.0,
+          511.0
+        ],
+        "edge_exit_observed_at_seconds": 511.0,
+        "final_arrival_seconds": 538.0,
+        "lane_sequence": [
+          "A1B1_0"
+        ],
+        "native_waiting_time_seconds": 28.0,
+        "observed_edge_halting_seconds": 28.0,
+        "observed_edge_time_seconds": 43.0,
+        "restricted_trip_time_seconds": 83.0
+      },
+      "n0_lane_change_count": 0,
+      "pairing_basis": "UNIQUE_N0_TRAVERSAL",
+      "scheduled_departure_seconds": 455.0,
+      "status": "IDENTIFIED",
+      "vehicle_id": "veh_0091"
+    },
+    {
+      "d0": {
+        "edge_entry_interval_seconds": [
+          581.0,
+          582.0
+        ],
+        "edge_entry_observed_at_seconds": 582.0,
+        "edge_exit_interval_seconds": [
+          594.0,
+          595.0
+        ],
+        "edge_exit_observed_at_seconds": 595.0,
+        "final_arrival_seconds": 659.0,
+        "lane_sequence": [
+          "A1B1_1"
+        ],
+        "native_waiting_time_seconds": 66.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 13.0,
+        "restricted_trip_time_seconds": 124.0
+      },
+      "d0_lane_change_count": 0,
+      "d0_minus_n0": {
+        "edge_entry_observed_at_seconds": 0.0,
+        "edge_exit_observed_at_seconds": 0.0,
+        "final_arrival_seconds": 0.0,
+        "native_waiting_time_seconds": 0.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 0.0,
+        "restricted_trip_time_seconds": 0.0
+      },
+      "lane_choice_difference_observed": true,
+      "n0": {
+        "edge_entry_interval_seconds": [
+          581.0,
+          582.0
+        ],
+        "edge_entry_observed_at_seconds": 582.0,
+        "edge_exit_interval_seconds": [
+          594.0,
+          595.0
+        ],
+        "edge_exit_observed_at_seconds": 595.0,
+        "final_arrival_seconds": 659.0,
+        "lane_sequence": [
+          "A1B1_0"
+        ],
+        "native_waiting_time_seconds": 66.0,
+        "observed_edge_halting_seconds": 0.0,
+        "observed_edge_time_seconds": 13.0,
+        "restricted_trip_time_seconds": 124.0
+      },
+      "n0_lane_change_count": 0,
+      "pairing_basis": "UNIQUE_N0_TRAVERSAL",
+      "scheduled_departure_seconds": 535.0,
+      "status": "IDENTIFIED",
+      "vehicle_id": "veh_0107"
+    }
+  ],
+  "frozen_structural_route_count_exceptions": {},
+  "frozen_structurally_exposed_vehicle_count": 15,
+  "frozen_structurally_exposed_vehicles_traverse_A1B1_exactly_once": true,
+  "mechanism_characterization": {
+    "additional_wait_on_A1B1": "NOT_OBSERVED",
+    "delayed_edge_entry": "NOT_OBSERVED",
+    "delayed_edge_exit": "NOT_OBSERVED",
+    "lane_change_on_A1B1": "NOT_OBSERVED",
+    "lane_choice_difference": "OBSERVED"
+  },
+  "observed_structural_vehicles_traverse_A1B1_once_per_condition": true,
+  "observed_traversal_count_exceptions": {},
+  "status": "PASS",
+  "timestamp_precision": "ONE_SECOND_OBSERVATION_INTERVALS",
+  "vehicle_count": 5,
+  "vehicle_ids": [
+    "veh_0055",
+    "veh_0069",
+    "veh_0082",
+    "veh_0091",
+    "veh_0107"
+  ]
+}
