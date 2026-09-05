@@ -281,6 +281,15 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Published the frozen contract, exact executed-source provenance, 35 logic tests, demand identities, and concise aggregates while excluding the 550-artifact raw evidence tree and machine-specific receipts.
 - Across the frozen 2X–5X ladder, globally balanced density did not meet the predeclared network-response gates. The +1-second and +5% pilot gates were not dissertation δ, which remains unset. The single next baseline-only axis is OD/corridor concentration at fixed 3X total demand; no such run, RL, routing, graph method, treatment, or central-hypothesis test occurred here.
 
+### B0 OD-concentration protocol and corrected V2 public checkpoint: 5 September 2026
+
+- Prepared the minimum public [pre-run protocol and implementation checkpoint](../experiments/EXP-B0-OD-001.md): byte-exact Scientific Contract V1, deterministic OD generation, the corrected V2 measurement adapter, and self-contained offline tests.
+- Preserved the fixed 540-trip budget, all twelve seed/concentration assignments, departure schedule, nested target sets, qualification rules and stopping budget. No concentration has been selected and dissertation delta remains unset.
+- Recorded the V1 defect: two individually finite native waits could overflow their accumulated total while the result remained `VALID`. V2 returns an explicit integrity failure and null total, retains every trip, and guards other floating metrics. Historical artifacts and the separately recorded V1 failing assertion remain unchanged.
+- Kept production projection changes to one observer-path expression; OD source and scientific contract are byte-identical to their freezes. Public fixtures reconstruct inputs and use recorded synthetic-output identities without importing defective V1 or reading ignored workspaces.
+- Verified 153 B0 offline tests: 88 original adapter cases, 13 correction cases, two public-projection cases and 50 unchanged public regressions; zero failures/errors/skips/collection errors, with 175 subtest callbacks separately counted. Compilation, complete/censored compatibility, strict JSON, twelve input readbacks and public dependency checks passed. No process/socket/simulator or ignored-workspace access was attempted by the guarded tests.
+- Research boundary: this is a draft-review checkpoint, not independent external approval, a live writer, simulator integration, OD-calibration evidence or a dissertation-treatment result. Independent public-source review remains the next gate; no merge, simulation, AWS, private-source execution, RL or routing work occurred.
+
 ---
 
 ## Monthly entry template
