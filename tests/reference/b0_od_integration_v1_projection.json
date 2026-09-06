@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "integration_identity": "B0_OD_INTEGRATION_LAYER_V1",
+  "evidence_kind": "SYNTHETIC",
+  "ready_to_run": false,
+  "validated_implementation_base": "b9cccd5cf8fe129711e6e9b36089312525e1fc01",
+  "contract_historical_source_commit": "eccc2bb2a3318ac364396a828a4d0a0106d9e764",
+  "files": [
+    {
+      "original_component": "b0_od_integration_v1/__init__.py",
+      "original_validated_sha256": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "public_path": "scripts/b0/od_integration_v1/__init__.py",
+      "public_sha256": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "adjustment": "NONE",
+      "initial_publication_sha256": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "initial_publication_adjustment": "NONE"
+    },
+    {
+      "original_component": "b0_od_integration_v1/integration.py",
+      "original_validated_sha256": "fa99994afb7e453df39b8efc441b2cf5174304c657fadecebf2ee40bb81df4ab",
+      "public_path": "scripts/b0/od_integration_v1/integration.py",
+      "public_sha256": "aee3028c1e2fd6d8972955bbd5375cff083a1787f5ab26409182d28338a5de37",
+      "adjustment": "Operational-status correction: explicit unchanged-clock step-abort readback, verified prefix assessment, full-H measurement remains invalid.",
+      "initial_publication_sha256": "fa99994afb7e453df39b8efc441b2cf5174304c657fadecebf2ee40bb81df4ab",
+      "initial_publication_adjustment": "NONE"
+    },
+    {
+      "original_component": "b0_od_integration_v1/qualification.py",
+      "original_validated_sha256": "e683e39cc266822f3a02315341292faaba15219713029693993d78556677a349",
+      "public_path": "scripts/b0/od_integration_v1/qualification.py",
+      "public_sha256": "955c13ee956a929bce167eb6d61ea335967944596c7539959f55353c2fd3aec3",
+      "adjustment": "Operational-status correction: FAIL-before-BLOCKED run, pair, session and repeat stop propagation without scientific gate changes.",
+      "initial_publication_sha256": "e683e39cc266822f3a02315341292faaba15219713029693993d78556677a349",
+      "initial_publication_adjustment": "NONE"
+    },
+    {
+      "original_component": "b0_od_integration_v1/evidence.py",
+      "original_validated_sha256": "1694adb14332b89b45c4f095fed16d5cf0526869e621a361091625aee89abc47",
+      "public_path": "scripts/b0/od_integration_v1/evidence.py",
+      "public_sha256": "11b2995f5f161be2dff062a5d2c119fe396a954f2582e242e37de7576e5cb517",
+      "adjustment": "Isolated public WORKSPACE expression plus operational-status correction: failure envelope retains and revalidates operational experiment status independently of persistence success.",
+      "initial_publication_sha256": "d9cdf1a34825492be5ed108fe443462a724af330277476bee46bd369aa8a03c5",
+      "initial_publication_adjustment": "WORKSPACE output-root expression only; isolated repository-relative output directory."
+    },
+    {
+      "original_component": "tests/fake_backend.py",
+      "original_validated_sha256": "58d849ffaa2380817c6497562acf6ba59b8b552ed96fd6ac5341556223c48e13",
+      "public_path": "tests/b0_od_integration_fixtures.py",
+      "public_sha256": "ba6c45c27842015584e480528ff2c35998fdff74a38ba3b039d6c5f98330c178",
+      "adjustment": "Public package import only.",
+      "initial_publication_sha256": "ba6c45c27842015584e480528ff2c35998fdff74a38ba3b039d6c5f98330c178",
+      "initial_publication_adjustment": "Public package import only."
+    },
+    {
+      "original_component": "tests/test_integration.py",
+      "original_validated_sha256": "157aa5d0267105d5261f0030169792e07553c0de2b2660308f92092d44e25d24",
+      "public_path": "tests/test_b0_od_integration_observation.py",
+      "public_sha256": "9390d76d87cf19a349ea544ae1a946913d84756b37a7fa36f6887a1fcf15c306",
+      "adjustment": "Public package/fixture imports; output-root binding and parent-directory creation only.",
+      "initial_publication_sha256": "9390d76d87cf19a349ea544ae1a946913d84756b37a7fa36f6887a1fcf15c306",
+      "initial_publication_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation only."
+    },
+    {
+      "original_component": "tests/test_qualification.py",
+      "original_validated_sha256": "7f59edfc8015436071984a13a73bd01e486d24e527531a6a3b2a85cea17ab805",
+      "public_path": "tests/test_b0_od_integration_qualification.py",
+      "public_sha256": "9da901ee1b473f83235adee6985f4a946bcd8e05be7396ee3142f32c821c4f71",
+      "adjustment": "Public package/fixture imports; output-root binding and parent-directory creation; print measured C4 payload byte count.",
+      "initial_publication_sha256": "9da901ee1b473f83235adee6985f4a946bcd8e05be7396ee3142f32c821c4f71",
+      "initial_publication_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation; print measured C4 payload byte count."
+    },
+    {
+      "original_component": "tests/test_evidence.py",
+      "original_validated_sha256": "3fedcba213e18e358273ea0a9beb13052cb962254b3e110548e4a71e6c1c6012",
+      "public_path": "tests/test_b0_od_integration_evidence.py",
+      "public_sha256": "bfaaee1f7f3ab46888a9f6e4b2393ff9d60f1959f79b7b296fcfd4265b7df2e9",
+      "adjustment": "Public package/fixture imports; output parent-directory creation only.",
+      "initial_publication_sha256": "bfaaee1f7f3ab46888a9f6e4b2393ff9d60f1959f79b7b296fcfd4265b7df2e9",
+      "initial_publication_adjustment": "Public package/fixture imports; output parent-directory creation only."
+    },
+    {
+      "original_component": "tests/run_offline.py",
+      "original_validated_sha256": "dc26de2ffd595d6d077b639bed2f18d2625ae60cbd4dfb564c10487ca2e14371",
+      "public_path": "tests/run_b0_od_integration_offline.py",
+      "public_sha256": "9c9a5cb68bd6b233d8e7d0c2dc398259a6c2968c69c528054d1c365c1610d0e4",
+      "adjustment": "Public repository/test/output paths and source inventory; separate existing-regression discovery excluding integration tests. Runtime denial and counting logic preserved.",
+      "initial_publication_sha256": "9c9a5cb68bd6b233d8e7d0c2dc398259a6c2968c69c528054d1c365c1610d0e4",
+      "initial_publication_adjustment": "Public repository/test/output paths and source inventory; separate existing-regression discovery excluding integration tests. Runtime denial and counting logic preserved."
+    }
+  ],
+  "additional_publication_tests": "Initial public projection added identity/import-location and oversize rejection. Correction adds preserved-provenance assertions and fake-only operational-status regressions; no scientific assertions weakened.",
+  "accepted_dependency_sha256": {
+    "configs/b0/b0-grid-3x3-v1/b0-fixed-routes.rou.xml": "12998402ad18f625440e85352a9c348882c7c504d18ded4ad9f42690322b276d",
+    "configs/b0/b0-grid-3x3-v1/b0-grid-3x3.net.xml": "49b2c7a89a72083b0f894c6b7083558f0120059122237d960a907bafbcf62dd2",
+    "configs/b0/b0-grid-3x3-v1/b0.sumocfg": "228b6c5e50b54a5c6f772d961aa95f045a4ed81f35e68b1a3744bdef428e7805",
+    "configs/b0/b0-grid-3x3-v1/disruption-specification.json": "77df3a6504045f12815b6fe75ca7b00d370d568d1b5203d863f83385d536fb91",
+    "configs/b0/od-concentration-v1/calibration-contract.json": "a450405a7e14ea7c099edb7bf9cd8598b72b3d392444c08c8ba481e96902284b",
+    "scripts/b0/calibration/contracts/calibration-contract.json": "3e3cbc4f822b7bb75974e21064b62d54a076dd1db7c38119aad81ea7ba6f3382",
+    "scripts/b0/calibration/run_calibration.py": "f44035eac421d428877c356ecfef8c5aa9e0388a820c4b1421997c6346c9c3b4",
+    "scripts/b0/exposure_observer.py": "dd582ab3011d3077c1ad1f63b95f26708813bf0628dcdee4bebda4c054a68d57",
+    "scripts/b0/od_concentration_v2/cutoff_measurement.py": "88dcdeafd174392758d74cc62a3ca3932632692248b620d1955d9df0442938cb",
+    "scripts/b0/od_concentration_v2/od_input.py": "b78482335713b029eba50c62eb1f3a3a1976399ededf3bf749ab49e91a5db8a3",
+    "scripts/b0/run_b0.py": "d4286193089a8062ae16e51e3dbaf8f26df6be11d43399d6fd998941b275ccab"
+  },
+  "status_correction": {
+    "reviewed_public_head": "e635d14ec50a11ba502829708630446caf6d65b2",
+    "scope": "Supported operational abort propagation only; original snapshot and historical public identities retained.",
+    "supported_abort": "OSError raised by simulationStep, verified unchanged-clock boundary and consistent observed prefix; not a blanket TECHNICAL-label rule."
+  },
+  "additional_public_test_sha256": {
+    "tests/test_b0_od_integration_projection.py": "bcdb64b3dcf14870b70ced6e70051b8ae0cfa4dfd7b336906892acab7f303343",
+    "tests/test_b0_od_integration_operational.py": "ab5afc555fef46a4abc08d1dbcda4212e2c0c435921779dbbb5800384c64ee45"
+  }
+}

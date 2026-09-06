@@ -299,6 +299,22 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Prepared a private read-only plan for four local and two remote retained branches. Mapped-content comparison found no unique work, active worktree use or open-PR association for these targets; proposed dispositions still require fresh exact-ref authorization. No retained ref was modified, and complete historical erasure remains unestablished.
 - Preserved all eight historical SHA references, B0/OD sources, tests, contracts and results. Live integration and the output writer remain absent, OD calibration has not run, no concentration is selected, dissertation delta remains unset, and readiness remains false. The next gate is review of the hygiene PR and private retained-ref plan, followed by a return to the minimal OD integration layer.
 
+### Minimal B0 OD integration public pre-run checkpoint: 6 September 2026
+
+- Prepared the [offline integration checkpoint](../experiments/EXP-B0-OD-002.md) with three production modules, focused public tests and exact source/dependency projection identities. At the initial public checkpoint, the integration and qualification sources were byte-identical to their validated originals; the writer changed only its isolated output-root expression.
+- Preserved Scientific Contract V1, Adapter V2, all twelve 540-trip allocations, measurement definitions, qualification precedence, first-qualifying/repeat rules and the future 24-plus-two simulation budget. Historical snapshots remain unchanged.
+- Verified 74 public integration tests and 94 subtests, plus 153 unchanged B0/adapter tests and 175 subtests, with zero failures/errors/skips/collection errors and zero forbidden-access attempts. The original 72-test surface remains intact; two publication checks add source/import identity and explicit oversize rejection.
+- Preserved the technical history of the initial 32 MiB writer-limit failure and its existing 64 MiB correction. The full 26-record synthetic fixture measures 56,899,689 bytes and passes actual write, independent hash/readback and finalization; this is not a traffic result or execution of the scientific budget.
+- Research boundary: thin live binding absent, no simulation or OD calibration, no selected concentration, dissertation delta unset, Candidate N parked and readiness false. Independent public-source review is pending; this checkpoint authorizes no merge or live validation. Historical privacy cleanup remains incomplete.
+
+### PR #23 operational-status correction: 6 September 2026
+
+- Reproduced the reviewed first-advance OSError with actual integration functions and the existing fake backend: TECHNICAL first failure, unusable measurement, successful cleanup, but pair/session FAIL caused by absent full-horizon evidence. This is synthetic review evidence, not a SUMO result.
+- Added bounded unchanged-clock step-abort readback and verified-prefix assessment. Supported operational interruption now propagates BLOCKED through pair/session/repeat and failure persistence; partial measurement remains unusable and independent contradictions retain FAIL precedence. No scientific gates, allocations, measurement definitions, thresholds, budget or writer completion protocol changed.
+- Final validation passed 12 focused tests/38 subtests, 86 full public integration tests/134 subtests and 153 existing tests/175 subtests, with zero failures/errors/skips/collection errors, stable source hashes and no forbidden-access attempts. The focused suite is included in the full suite. The original reports and an earlier passing development run are preserved separately.
+- Updated the [checkpoint](../experiments/EXP-B0-OD-002.md) and projection manifest to distinguish original, initial-publication and corrected identities. All three corrected production modules differ from the original snapshot; path-only/byte-identical statements now describe only the initial historical publication. The 56,900,339-byte full synthetic fixture passes the unchanged 64 MiB writer limit.
+- Boundary: only evidenced unchanged-clock step aborts are supported by this correction; setup/permission/ambiguous aborts are not blanket-reclassified. No live integration, simulation, calibration, cloud, RL, routing or treatment work. PR #23 must remain draft/unmerged; next gate is REVIEW_PR23_OPERATIONAL_STATUS_CORRECTION_BEFORE_MERGE.
+
 ---
 
 ## Monthly entry template
