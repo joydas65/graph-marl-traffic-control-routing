@@ -32,6 +32,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 - [`research/candidate-n-v4-controller-provisioning-module-c.md`](research/candidate-n-v4-controller-provisioning-module-c.md): public, AWS-independent semantic reviewer for normalized synthetic S0/M0/S1/M1/M2 change-set descriptions derived from Modules A and B.
 - [`decisions/0001-single-repository-research-history.md`](decisions/0001-single-repository-research-history.md): rationale for keeping the baseline and dissertation evolution in one repository.
 - [`decisions/0002-compute-and-experiment-environments.md`](decisions/0002-compute-and-experiment-environments.md): separation of the development host, reconstructed compatibility environment, canonical dissertation infrastructure, and optional exploratory compute.
+- [`decisions/0003-repository-publication-privacy.md`](decisions/0003-repository-publication-privacy.md): metadata-sanitation evidence boundaries, bounded local pre-push privacy guard, and retained-ref review requirements; repository hygiene only.
 - [`mentoring/2026-07-initial-guidance.md`](mentoring/2026-07-initial-guidance.md): technical guidance received during project initiation.
 - [`mentoring/2026-07-27-joint-mentor-meeting.md`](mentoring/2026-07-27-joint-mentor-meeting.md): joint discussion with Arghya and Shreya.
 - [`learning/question-bank.md`](learning/question-bank.md): mentor questions and technical preparation prompts.
