@@ -25,7 +25,7 @@ PUBLIC_HASHES = {
 RUN_KEYS = {"schema_version", "integration_identity", "evidence_kind", "ready_to_run",
             "run_id", "condition_label", "binding", "observations", "summary", "events",
             "preactivation", "lifecycle", "controls", "failure", "cleanup_failures",
-            "output_finalized", "measurement"}
+            "output_finalized", "measurement", "operational_abort"}
 
 
 def digest(value):
@@ -177,7 +177,7 @@ def _monitor_states(view, active, observer, monitored_edge):
     return states
 
 
-def _replay_exposure(record):
+def _replay_exposure(record, *, prefix=False):
     """Reconstruct the real observer's output from retained sampled raw states."""
     binding = record["binding"]; cfg = binding["scientific_configuration"]
     observer = _observer(binding, record["run_id"])
@@ -225,6 +225,14 @@ def _replay_exposure(record):
         replay.sample = sample
         observer.before_step(replay, start)
         observer.after_step(replay, start, sample["time"])
+    if prefix:
+        # The failed advance followed before_step, but never after_step. Replay
+        # that permission observation without inventing a cutoff/finalization.
+        replay.sample = record["operational_abort"]["readback"]
+        observer.before_step(replay, record["operational_abort"]["time_before"])
+        if observer.events_payload() != record["events"]:
+            raise ValueError("EXPOSURE_PREFIX_REPLAY_MISMATCH")
+        return
     observer.finalize(cfg["h_pilot_seconds"])
     routes = {r["id"]: r["edges"].split() for r in cfg["route_definitions"]}
     structural = [r["vehicle_id"] for r in scheduled(binding)
@@ -263,7 +271,8 @@ def observe_run(binding, condition_label, run_id, connection, collector):
                   binding=copy.deepcopy(binding), observations=obs, summary=None, events=None,
                   preactivation=None, lifecycle=[], controls={"initial": None, "steps": [], "final": None,
                   "permissions_initial": None, "permissions_final": None}, failure=None,
-                  cleanup_failures=[], output_finalized=False, measurement=None)
+                  cleanup_failures=[], output_finalized=False, measurement=None,
+                  operational_abort=None)
     view = observer = None
     baseline = None; mutation_attempted = False; restored = False; stage = "INITIAL_STATE"
     lanes = [cfg["restricted_lane"], cfg["surviving_lane"]]
@@ -305,7 +314,25 @@ def observe_run(binding, condition_label, run_id, connection, collector):
                     restored = True
             stage = "OBSERVATION"
             observer.before_step(view, start)
-            connection.simulationStep()
+            try:
+                connection.simulationStep()
+            except OSError as error:
+                # A label alone is insufficient. Retain one bounded readback
+                # attempt before cleanup; never retry the advance. Unsupported
+                # or failed readback remains explicit, not fabricated evidence.
+                abort = dict(operation="SIMULATION_STEP", time_before=start,
+                             exception_code=type(error).__name__, readback=None)
+                record["operational_abort"] = abort
+                try:
+                    abort["readback"] = dict(time=view.simulation.getTime(),
+                        delta=view.simulation.getDeltaT(),
+                        active_ids=sorted(view.vehicle.getIDList()),
+                        permissions=_permissions(view, lanes),
+                        controls=copy.deepcopy(collector.controls(view)),
+                        diagnostics=copy.deepcopy(collector.diagnostics(view)))
+                except Exception:
+                    pass
+                raise
             end = view.simulation.getTime()
             active = sorted(view.vehicle.getIDList())
             if len(active) != len(set(active)) or set(active)-ids:
@@ -385,8 +412,8 @@ def _account(record):
     return adapter.account_trips(scheduled(record["binding"]), **inputs)
 
 
-def validate_run(record):
-    """Recompute accounting and validate evidence, not a supplied VALID label."""
+def _validate_run(record, *, prefix=False):
+    """Shared evidence checks; prefix mode never returns a valid measurement."""
     if not isinstance(record, dict) or set(record) != RUN_KEYS or type(record["schema_version"]) is not int or record["schema_version"] != 1 or record["integration_identity"] != IDENTITY or record["evidence_kind"] != "SYNTHETIC" or record["ready_to_run"] is not False:
         raise ValueError("RUN_SCHEMA")
     if not isinstance(record["run_id"], str) or not record["run_id"] or record["condition_label"] not in ("N0", "D0", "N0-CAL-R", "D0-CAL-R"):
@@ -406,6 +433,8 @@ def validate_run(record):
             or any(v is not None and type(v) is not dict for v in
                    (record["events"],record["summary"],record["preactivation"]))):
         raise ValueError("RUN_STATUS_OR_EVIDENCE_SCHEMA")
+    if record["operational_abort"] is not None and type(record["operational_abort"]) is not dict:
+        raise ValueError("ABORT_SCHEMA")
     observations_keys = {"tripinfo_records","departed_events","arrival_events","cutoff_active_ids",
         "cutoff_pending_ids","per_trip_halting_seconds","queue_trace","teleport_start_events",
         "teleport_end_events","observations_complete","final_time_seconds","step_intervals"}
@@ -423,10 +452,35 @@ def validate_run(record):
         errors.append("SUPPLIED_MEASUREMENT_DIFFERS_FROM_RECOMPUTATION")
     cfg = record["binding"]["scientific_configuration"]; h = cfg["h_pilot_seconds"]
     obs = record["observations"]; controls = record["controls"]
+    if prefix:
+        abort = record["operational_abort"]
+        if (type(abort) is not dict or set(abort) != {"operation", "time_before", "exception_code", "readback"}
+                or abort["operation"] != "SIMULATION_STEP"
+                or type(abort["time_before"]) is not int or not 0 <= abort["time_before"] < h
+                or type(abort["exception_code"]) is not str or not abort["exception_code"]
+                or record["failure"] != {"kind": "TECHNICAL", "stage": "OBSERVATION", "code": abort["exception_code"]}):
+            raise ValueError("UNSUPPORTED_OPERATIONAL_ABORT")
+        h = abort["time_before"]
+        boundary = abort["readback"]
+        if (type(boundary) is not dict or set(boundary) != {"time", "delta", "active_ids", "permissions", "controls", "diagnostics"}
+                or type(boundary["time"]) not in (int, float) or boundary["time"] != h
+                or type(boundary["delta"]) not in (int, float) or boundary["delta"] != cfg["simulation_step_seconds"]
+                or obs["observations_complete"] is not False or obs["final_time_seconds"] != h
+                or obs["cutoff_active_ids"] != [] or obs["cutoff_pending_ids"] != []
+                or record["summary"] is not None or record["preactivation"] is not None
+                or controls["final"] is not None or controls["permissions_final"] is not None):
+            raise ValueError("ABORT_BOUNDARY_OR_FALSE_COMPLETION")
+        # These full-H errors are consequences ONLY if all prefix/boundary
+        # checks below pass. All other Adapter contradictions retain precedence.
+        errors[:] = [e for e in errors if e not in {
+            "INCOMPLETE_OBSERVATION_HORIZON", "INVALID_OR_TRUNCATED_QUEUE_TRACE",
+            "UNEXPLAINED_DISAPPEARANCE"}]
     if obs["step_intervals"] != [[t, t+1] for t in range(h)]:
         errors.append("CALLBACK_COVERAGE")
-    if record["failure"]:
+    if record["failure"] and not prefix:
         (deficient if record["failure"]["kind"] == "EVIDENCE" else errors).append("FIRST_FAILURE:"+record["failure"]["stage"])
+    if record["operational_abort"] is not None and not prefix and record["failure"] is None:
+        errors.append("ABORT_WITHOUT_FAILURE")
     if record["cleanup_failures"]:
         deficient.append("CLEANUP_FAILURE")
     if record["output_finalized"] is not True:
@@ -434,14 +488,21 @@ def validate_run(record):
     try:
         expected = expected_controls(record["binding"])
         expected_sha = digest(expected)
-        if controls["initial"] != expected or controls["final"] != expected:
+        if controls["initial"] != expected or (not prefix and controls["final"] != expected):
             raise ValueError("SCIENTIFIC_CONTROLS")
         baseline = controls["permissions_initial"]
         restricted, surviving = cfg["restricted_lane"], cfg["surviving_lane"]
-        if set(baseline) != {restricted, surviving} or controls["permissions_final"] != baseline or not all(_allowed(p,cfg["passenger_class"]) for p in baseline.values()):
+        if set(baseline) != {restricted, surviving} or (not prefix and controls["permissions_final"] != baseline) or not all(_allowed(p,cfg["passenger_class"]) for p in baseline.values()):
             raise ValueError("PERMISSION_BASELINE_OR_FINAL")
-        if len(controls["steps"]) != h:
+        if len(controls["steps"]) != h or (prefix and len(obs["queue_trace"]) != h):
             raise ValueError("CONTROL_COVERAGE")
+        if prefix:
+            for key in ("departed_events", "arrival_events", "teleport_start_events", "teleport_end_events"):
+                if any(len(times) != 1 or not 1 <= _number(times[0]) <= h for times in obs[key].values()):
+                    raise ValueError("EVENT_OUTSIDE_OBSERVED_PREFIX")
+            for row in obs["tripinfo_records"]:
+                if any(_number(float(row.get(key, -1))) > h for key in ("depart", "arrival")):
+                    raise ValueError("TRIPINFO_OUTSIDE_OBSERVED_PREFIX")
         halted_counts = {key: 0 for key in measured["ledger"]}
         for time, sample in enumerate(controls["steps"], 1):
             if sample["time"] != time or sample["controls_sha256"] != expected_sha:
@@ -459,9 +520,40 @@ def validate_run(record):
                 raise ValueError("UNEXPECTED_PERMISSION_TRANSITION")
             if set(sample["diagnostics"]) != {"collisions","invalid_routes","simulator_errors"} or any(type(v) is not int or v != 0 for v in sample["diagnostics"].values()):
                 raise ValueError("COLLISION_ROUTE_OR_SIMULATOR_ERROR")
-        if halted_counts != obs["per_trip_halting_seconds"] or controls["steps"][-1]["active_ids"] != obs["cutoff_active_ids"]:
+        if halted_counts != obs["per_trip_halting_seconds"] or (not prefix and controls["steps"][-1]["active_ids"] != obs["cutoff_active_ids"]):
             raise ValueError("CUTOFF_OR_HALTING_MISMATCH")
-        _replay_exposure(record)
+        _replay_exposure(record, prefix=prefix)
+        if prefix:
+            permissions = copy.deepcopy(baseline)
+            if record["condition_label"].startswith("D0") and cfg["disruption_start_inclusive"] <= h < cfg["disruption_end_exclusive"]:
+                permissions[restricted]["disallowed"] = sorted(set(permissions[restricted]["disallowed"]) | {cfg["passenger_class"]})
+            if (boundary["controls"] != expected or boundary["permissions"] != permissions
+                    or boundary["active_ids"] != (controls["steps"][-1]["active_ids"] if h else [])
+                    or boundary["diagnostics"] != {"collisions": 0, "invalid_routes": 0, "simulator_errors": 0}
+                    or any(type(v) is not int for v in boundary["diagnostics"].values())):
+                raise ValueError("ABORT_READBACK_CONTRADICTION")
+            transitions = [e for e in record["events"]["events"] if e["event"] in ("RESTRICTION_ACTIVATION", "RESTORATION", "PERMISSION_CHANGE")]
+            expected_operations = [("ACTIVATION", cfg["disruption_start_inclusive"]), ("RESTORATION", cfg["disruption_end_exclusive"])] if record["condition_label"].startswith("D0") else []
+            expected_operations = [(e,t) for e,t in expected_operations if t <= h]
+            if ([(e["event"], e["time"]) for e in record["lifecycle"]] != expected_operations
+                    or [(e["event"], e["observed_at_seconds"], e["lane_id"]) for e in transitions] !=
+                    [("RESTRICTION_ACTIVATION" if e == "ACTIVATION" else e, t, restricted) for e,t in expected_operations]):
+                raise ValueError("ABORT_PREFIX_LIFECYCLE")
+            for operation, event in zip(record["lifecycle"], transitions):
+                if (operation["before"][restricted] != event["before_permissions"]
+                        or operation["after"][restricted] != event["after_permissions"]
+                        or operation["before"][surviving] != baseline[surviving]
+                        or operation["after"][surviving] != baseline[surviving]):
+                    raise ValueError("ABORT_OPERATION_OBSERVER_MISMATCH")
+            if record["condition_label"].startswith("D0") and any(
+                    e["event"] == "ENTER_LANE" and e["lane_id"] == restricted
+                    and cfg["disruption_start_inclusive"] < e["observed_at_seconds"] <= cfg["disruption_end_exclusive"]
+                    for e in record["events"]["events"]):
+                raise ValueError("RESTRICTED_LANE_VISIT_COMPLIANCE")
+            # Deliberately no full-H summary, scientific metrics, or gates.
+            measured["integrity_errors"] = sorted(set(errors))
+            measured["measurement_status"] = "INTEGRITY_FAILURE" if errors else "EVIDENCE_DEFICIENCY"
+            return measured
         summary, events, pre = record["summary"], record["events"], record["preactivation"]
         if summary["observer_identity"] != adapter.OBSERVER_IDENTITY or summary["run_id"] != record["run_id"] or summary["exposure_observability_complete"] is not True or summary["cutoff_seconds"] != h or pre["simulation_time_seconds"] != cfg["disruption_start_inclusive"] or events["run_id"] != record["run_id"]:
             raise ValueError("EXPOSURE_COVERAGE_OR_IDENTITY")
@@ -491,6 +583,34 @@ def validate_run(record):
     measured["integrity_errors"] = sorted(set(errors)); measured["evidence_deficiencies"] = sorted(set(deficient))
     measured["measurement_status"] = "INTEGRITY_FAILURE" if errors else "EVIDENCE_DEFICIENCY" if deficient else "VALID"
     return measured
+
+
+def validate_run(record):
+    """Full-horizon measurement validity, including unusable aborted records."""
+    return _validate_run(record)
+
+
+def assess_run(record):
+    """Separate experiment stop from measurement validity; never trust a label.
+
+    Only a recorded step OSError with unchanged-clock readback and a verified
+    observed prefix is supported here. This is consistency evidence, not an
+    authentication claim about externally supplied records or a live adapter.
+    """
+    measured = validate_run(record)
+    status = measured["measurement_status"]
+    stop = "FAIL" if status == "INTEGRITY_FAILURE" else "INCONCLUSIVE" if status == "EVIDENCE_DEFICIENCY" else None
+    if record["operational_abort"] is not None:
+        try:
+            prefix = _validate_run(record, prefix=True)
+            stop = "FAIL" if prefix["integrity_errors"] else "BLOCKED"
+            reasons = prefix["integrity_errors"] or ["VERIFIED_STEP_ABORT_PREFIX"]
+        except (KeyError, TypeError, ValueError, IndexError, OverflowError, AssertionError, OSError):
+            stop, reasons = "FAIL", ["UNSUPPORTED_OR_CONTRADICTORY_ABORT_EVIDENCE"]
+    else:
+        reasons = measured["integrity_errors"] or measured["evidence_deficiencies"]
+    return {"measurement": measured, "stop_status": stop,
+            "qualification_evaluated": False, "reason_codes": reasons}
 
 
 def normalized_scientific(record):

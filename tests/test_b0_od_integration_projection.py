@@ -20,6 +20,16 @@ class PublicIntegrationProjectionTests(unittest.TestCase):
             with self.subTest(public_path=entry["public_path"]):
                 self.assertEqual(hashlib.sha256((ROOT / entry["public_path"]).read_bytes()).hexdigest(),
                                  entry["public_sha256"])
+        self.assertEqual(manifest["status_correction"]["reviewed_public_head"],
+                         "e635d14ec50a11ba502829708630446caf6d65b2")
+        for entry in manifest["files"]:
+            self.assertIn("initial_publication_sha256", entry)
+            if entry["public_path"].endswith(("/integration.py", "/qualification.py", "/evidence.py")):
+                self.assertNotEqual(entry["public_sha256"], entry["initial_publication_sha256"])
+                self.assertIn("operational", entry["adjustment"].lower())
+        for path, expected in manifest["additional_public_test_sha256"].items():
+            with self.subTest(additional_public_test=path):
+                self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected)
         for module in (integration, qualification, evidence):
             self.assertEqual(Path(module.__file__).resolve().parent,
                              ROOT / "scripts/b0/od_integration_v1")

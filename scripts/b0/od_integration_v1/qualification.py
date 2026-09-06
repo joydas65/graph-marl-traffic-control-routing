@@ -49,7 +49,8 @@ def _pair(n0, d0, *, repeat=False):
             raise ValueError("wrong pair roles")
         if n0["run_id"] == d0["run_id"] or n0["binding"] != d0["binding"]:
             raise ValueError("duplicate or substituted pair input")
-        fresh = [integration.validate_run(record) for record in (n0, d0)]
+        assessments = [integration.assess_run(record) for record in (n0, d0)]
+        fresh = [item["measurement"] for item in assessments]
         binding = n0["binding"]
         result.update(seed=binding["seed"], level=binding["level"],
                       run_ids=[n0["run_id"], d0["run_id"]])
@@ -57,9 +58,16 @@ def _pair(n0, d0, *, repeat=False):
         if any(status not in ("VALID", "INTEGRITY_FAILURE", "EVIDENCE_DEFICIENCY")
                for status in statuses):
             raise ValueError("unknown measurement status")
-        if "INTEGRITY_FAILURE" in statuses:
+        stops = [item["stop_status"] for item in assessments]
+        if "FAIL" in stops:
             result["reason_codes"] = ["MEASUREMENT_INTEGRITY_FAILURE"]
             result["measurement_reasons"] = [m["integrity_errors"] for m in fresh]
+            return result
+        if "BLOCKED" in stops:
+            result.update(pair_status="OPERATIONAL_BLOCKED", stop_status="BLOCKED",
+                          reason_codes=["SUPPORTED_OPERATIONAL_ABORT"],
+                          run_assessments=[{k:v for k,v in item.items() if k != "measurement"}
+                                           for item in assessments])
             return result
         if "EVIDENCE_DEFICIENCY" in statuses:
             result.update(pair_status="EVIDENCE_DEFICIENCY", stop_status="INCONCLUSIVE",
@@ -186,6 +194,8 @@ class SelectionSession:
         states = [item["pair_status"] for item in decisions]
         if "INTEGRITY_FAILURE" in states:
             self._decision = self._state("FAIL", ["SEED_MEASUREMENT_INTEGRITY_FAILURE"])
+        elif "OPERATIONAL_BLOCKED" in states:
+            self._decision = self._state("BLOCKED", ["SEED_OPERATIONAL_ABORT"])
         elif "EVIDENCE_DEFICIENCY" in states:
             self._decision = self._state("INCONCLUSIVE", ["SEED_MEASUREMENT_EVIDENCE_DEFICIENT"])
         elif "DOES_NOT_QUALIFY" in states:
@@ -212,6 +222,11 @@ class SelectionSession:
                    or record["binding"]["level"] != level for record in (n0, d0)):
                 raise ValueError("repeat must use the selected level and first seed")
             result = _pair(n0, d0, repeat=True)
+            if result["stop_status"] == "BLOCKED":
+                self._run_ids.update(ids)
+                self._decision = self._state("BLOCKED", ["SELECTED_REPEAT_OPERATIONAL_ABORT"], provisional=level)
+                self._decision["pair_decisions"] = [result]
+                return self.decision
             if result["pair_status"] != "QUALIFIES":
                 raise ValueError("repeat measurement or scientific qualification differs")
             original = self._levels[-1]["pairs"][0]

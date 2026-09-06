@@ -112,14 +112,21 @@ def _validate_payload(payload):
         _require(record.get("measurement") == measurement, "MEASUREMENT_REVALIDATION")
         _require(measurement.get("measurement_status") == "VALID", "INVALID_RUN_REQUIRES_FAILURE_RECORD")
     elif kind == "FAILURE":
-        _keys(record, ("failure_code", "measurement_status", "run", "raw_evidence"))
+        status_keys = ("experiment_status",) if "experiment_status" in record else ()
+        _keys(record, ("failure_code", "measurement_status", "run", "raw_evidence", *status_keys))
         _require(type(record["failure_code"]) is str and CODE.fullmatch(record["failure_code"]))
         if record["run"] is None:
-            _require(record["measurement_status"] is None)
+            _require(record["measurement_status"] is None and not status_keys)
         else:
-            from .integration import validate_run
+            from .integration import assess_run
             _require(type(record["run"]) is dict)
-            measurement = validate_run(record["run"])
+            assessment = assess_run(record["run"])
+            measurement = assessment["measurement"]
+            # Aborted-run failure envelopes must carry the independently
+            # revalidated stop. A verified persistence receipt is not PASS.
+            if record["run"]["operational_abort"] is not None or status_keys:
+                _require(record.get("experiment_status") == assessment["stop_status"],
+                         "FAILURE_EXPERIMENT_STATUS_CONTRADICTION")
             # Keep the original Adapter result verbatim. Integration may add
             # failure diagnostics; only its freshly revalidated status governs.
             _require(measurement.get("measurement_status") in
