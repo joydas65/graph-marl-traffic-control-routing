@@ -34,6 +34,10 @@ three seeds, so no demand level or dissertation effect threshold was selected.
 The next planned calibration axis is OD/corridor concentration at fixed 3X
 total demand; it has not been executed.
 
+The fixed-540-trip concentration protocol and corrected V2 OD/cutoff adapter
+are now prepared for independent pre-run review. Offline validation is not
+live-integration validation or a selected calibrated scenario.
+
 ## Research progression
 
 1. Preserve and audit the inherited DQN baseline.
@@ -51,6 +55,7 @@ total demand; it has not been executed.
 - [Inherited baseline audit](docs/research/baseline-audit.md)
 - [Deterministic B0 substrate and 1X exposure diagnosis](docs/experiments/EXP-B0-000.md)
 - [Baseline-only 2X–5X uniform-demand calibration](docs/experiments/EXP-B0-CAL-001.md)
+- [Fixed-3X OD protocol and corrected V2 adapter: pre-run checkpoint](docs/experiments/EXP-B0-OD-001.md)
 - [Paper MDP formulation for GitHub](docs/research/shreya-paper-mdp.md)
 - [Paper MDP formulation for Overleaf](docs/research/shreya-paper-mdp.tex)
 - [Monthly effort log](docs/progress/monthly-effort-log.md)
