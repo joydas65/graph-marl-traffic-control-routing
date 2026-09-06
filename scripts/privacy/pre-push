@@ -1,0 +1,29 @@
+#!/bin/sh
+# The installed copy uses a private common-directory snapshot, not the checkout.
+set -eu
+fail() { printf '%s\n' "PRIVACY_GUARD=REVIEW_REQUIRED:$1" >&2; exit 1; }
+common=$(git rev-parse --git-common-dir 2>/dev/null) || fail NOT_A_REPOSITORY
+common=$(CDPATH= cd -- "$common" 2>/dev/null && pwd -P) || fail COMMON_DIRECTORY
+if [ "${1-}" = "--check-install" ]; then
+    [ "$#" -eq 1 ] || fail ARGUMENTS
+    if git config --get-all core.hooksPath >/dev/null 2>&1; then
+        fail EXISTING_HOOKS_PATH
+    else
+        [ "$?" -eq 1 ] || fail CONFIG_INSPECTION
+    fi
+    [ ! -e "$common/hooks/pre-push" ] && [ ! -L "$common/hooks/pre-push" ] || fail EXISTING_HOOK
+    printf '%s\n' 'PRIVACY_GUARD=INSTALL_LOCATION_READY'
+    exit 0
+fi
+snapshot=$common/privacy-guard
+for name in check_push.py policy.json python-path; do
+    [ -f "$snapshot/$name" ] && [ -r "$snapshot/$name" ] && [ ! -L "$snapshot/$name" ] || fail INSTALLATION_INCOMPLETE
+done
+python=$(cat "$snapshot/python-path" 2>/dev/null) || fail INTERPRETER_CONFIGURATION
+[ "$(wc -l 2>/dev/null < "$snapshot/python-path" | tr -d ' ')" = 1 ] || fail INTERPRETER_CONFIGURATION
+case "$python" in /*) ;; *) fail INTERPRETER_CONFIGURATION ;; esac
+case "$python" in *'
+'*) fail INTERPRETER_CONFIGURATION ;; esac
+[ "$python" = "$(printf '%s' "$python" | tr -d '\r')" ] || fail INTERPRETER_CONFIGURATION
+[ -x "$python" ] || fail INTERPRETER_UNAVAILABLE
+"$python" -I -S -B "$snapshot/check_push.py" --repo "$PWD" --policy "$snapshot/policy.json" 2>/dev/null || fail CHECKER_REJECTED_OR_ERROR

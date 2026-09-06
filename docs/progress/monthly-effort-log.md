@@ -290,6 +290,15 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Verified 153 B0 offline tests: 88 original adapter cases, 13 correction cases, two public-projection cases and 50 unchanged public regressions; zero failures/errors/skips/collection errors, with 175 subtest callbacks separately counted. Compilation, complete/censored compatibility, strict JSON, twelve input readbacks and public dependency checks passed. No process/socket/simulator or ignored-workspace access was attempted by the guarded tests.
 - Research boundary: this is a draft-review checkpoint, not independent external approval, a live writer, simulator integration, OD-calibration evidence or a dissertation-treatment result. Independent public-source review remains the next gate; no merge, simulation, AWS, private-source execution, RL or routing work occurred.
 
+### Repository publication privacy hygiene: 6 September 2026
+
+- Added the [sanitation and local publication-privacy note](../decisions/0003-repository-publication-privacy.md), distinguishing freshly rechecked Git-object invariants from receipt-reported historical verification and accessibility. This is repository hygiene, not scientific progress.
+- Added one standard-library checker and thin pre-push entry point: fixed-checkpoint trust, superseded-history rejection, raw author/committer and message checks, all outgoing commit trees, bounded text inspection and sanitized fail-closed outcomes. No historical identity or private mapping is embedded in public fixtures.
+- Verified 46 focused offline tests with zero failures, errors, skips or collection errors; 28 subtests were counted separately. Tests use synthetic temporary Git repositories, including a filesystem-only bare remote that demonstrates Git invoking the hook and rejecting an unsafe push. Exact-blob review for one unchanged historical synthetic home-path fixture does not exempt private-value, credential or metadata checks. No scientific suite or simulation ran.
+- Installed the reviewed snapshot and private policy only in this checkout's Git common directory after confirming no custom hooks path or existing pre-push hook. All fourteen pre-existing hook files retained their bytes and permissions. Clones do not automatically inherit activation, and existing hook arrangements require review rather than replacement.
+- Prepared a private read-only plan for four local and two remote retained branches. Mapped-content comparison found no unique work, active worktree use or open-PR association for these targets; proposed dispositions still require fresh exact-ref authorization. No retained ref was modified, and complete historical erasure remains unestablished.
+- Preserved all eight historical SHA references, B0/OD sources, tests, contracts and results. Live integration and the output writer remain absent, OD calibration has not run, no concentration is selected, dissertation delta remains unset, and readiness remains false. The next gate is review of the hygiene PR and private retained-ref plan, followed by a return to the minimal OD integration layer.
+
 ---
 
 ## Monthly entry template
