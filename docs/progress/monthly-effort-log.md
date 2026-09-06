@@ -299,6 +299,14 @@ August 2026 to May/June 2027. This log begins with pre-project preparation in Ju
 - Prepared a private read-only plan for four local and two remote retained branches. Mapped-content comparison found no unique work, active worktree use or open-PR association for these targets; proposed dispositions still require fresh exact-ref authorization. No retained ref was modified, and complete historical erasure remains unestablished.
 - Preserved all eight historical SHA references, B0/OD sources, tests, contracts and results. Live integration and the output writer remain absent, OD calibration has not run, no concentration is selected, dissertation delta remains unset, and readiness remains false. The next gate is review of the hygiene PR and private retained-ref plan, followed by a return to the minimal OD integration layer.
 
+### Minimal B0 OD integration public pre-run checkpoint: 6 September 2026
+
+- Prepared the [offline integration checkpoint](../experiments/EXP-B0-OD-002.md) with three production modules, focused public tests and exact source/dependency projection identities. The integration and qualification sources are byte-identical to their validated originals; the writer changes only its isolated output-root expression.
+- Preserved Scientific Contract V1, Adapter V2, all twelve 540-trip allocations, measurement definitions, qualification precedence, first-qualifying/repeat rules and the future 24-plus-two simulation budget. Historical snapshots remain unchanged.
+- Verified 74 public integration tests and 94 subtests, plus 153 unchanged B0/adapter tests and 175 subtests, with zero failures/errors/skips/collection errors and zero forbidden-access attempts. The original 72-test surface remains intact; two publication checks add source/import identity and explicit oversize rejection.
+- Preserved the technical history of the initial 32 MiB writer-limit failure and its existing 64 MiB correction. The full 26-record synthetic fixture measures 56,899,689 bytes and passes actual write, independent hash/readback and finalization; this is not a traffic result or execution of the scientific budget.
+- Research boundary: thin live binding absent, no simulation or OD calibration, no selected concentration, dissertation delta unset, Candidate N parked and readiness false. Independent public-source review is pending; this checkpoint authorizes no merge or live validation. Historical privacy cleanup remains incomplete.
+
 ---
 
 ## Monthly entry template

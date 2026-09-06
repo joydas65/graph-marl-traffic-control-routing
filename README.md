@@ -38,6 +38,10 @@ The fixed-540-trip concentration protocol and corrected V2 OD/cutoff adapter
 are now prepared for independent pre-run review. Offline validation is not
 live-integration validation or a selected calibrated scenario.
 
+The minimal OD observation/qualification/selection and strict evidence pipeline
+is now offline-validated in a public pre-run checkpoint. Its thin live binding
+is absent; independent source review remains pending and readiness is false.
+
 ## Research progression
 
 1. Preserve and audit the inherited DQN baseline.
@@ -56,6 +60,7 @@ live-integration validation or a selected calibrated scenario.
 - [Deterministic B0 substrate and 1X exposure diagnosis](docs/experiments/EXP-B0-000.md)
 - [Baseline-only 2X–5X uniform-demand calibration](docs/experiments/EXP-B0-CAL-001.md)
 - [Fixed-3X OD protocol and corrected V2 adapter: pre-run checkpoint](docs/experiments/EXP-B0-OD-001.md)
+- [Minimal B0 OD integration: offline pre-run checkpoint](docs/experiments/EXP-B0-OD-002.md)
 - [Paper MDP formulation for GitHub](docs/research/shreya-paper-mdp.md)
 - [Paper MDP formulation for Overleaf](docs/research/shreya-paper-mdp.tex)
 - [Monthly effort log](docs/progress/monthly-effort-log.md)
