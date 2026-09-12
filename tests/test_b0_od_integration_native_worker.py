@@ -45,7 +45,9 @@ class NativeWorkerTests(unittest.TestCase):
         fixture = self.fixture(condition='D0')
         events = []
         done = self.execute(fixture, events)
-        self.assertEqual(set(done), {'receipt','grants','child_reaped','assessment','first_failure'})
+        self.assertEqual(set(done), {'receipt','grants','child_reaped','assessment','first_failure',
+                                    'cleanup_handoff'})
+        self.assertIsNone(done['cleanup_handoff'])  # No native GO context in this legacy double.
         self.assertEqual(done['assessment']['measurement_status'], 'VALID')
         self.assertIsNone(done['assessment']['stop_status'])
         self.assertIsNone(done['first_failure'])

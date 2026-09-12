@@ -53,3 +53,14 @@ deadline-interruptible and receives no nested supervisor. Offline doubles
 validate control flow only; real helper/OS/socket/SUMO behavior and listening
 scope remain later authorized checks. See the current implementation note for
 interfaces, timing boundaries, exact identities and validation results.
+
+## Evidence-gated terminal cleanup correction: 13 September 2026
+
+The [narrow correction](../experiments/b0-od-terminal-cleanup-correction-v1.md)
+adds one exception to unconditional final escalation: a complete, current
+run-bound child-wait handoff plus a non-reaping terminal observation of the
+retained verified worker permits skipping KILL. Signalling is permanently
+disabled before consuming worker status. Unknown child scope or unavailable
+terminal evidence earns no shortcut, and actual signal failures remain visible.
+Historical P2 results stay FAIL; this is an offline-only correction, not a
+diagnosis of the host's permission denial or native revalidation.

@@ -41,6 +41,21 @@ class PublicIntegrationProjectionTests(unittest.TestCase):
         self.assertFalse(manifest['native_factory']['native_process_test_executed'])
         self.assertFalse(manifest['native_factory']['pre_bootstrap_hard_deadline_claimed'])
         self.assertTrue(manifest['native_factory']['requires_exclusive_worker_reaping'])
+        cleanup = manifest['terminal_cleanup_correction']
+        self.assertEqual(cleanup['accepted_base'], '215ff23487df71fc1fa4d701e7e7959c43a9cf70')
+        self.assertEqual(cleanup['historical_results'], {'original_P2': 'FAIL', 'diagnostic_P2': 'FAIL'})
+        self.assertFalse(cleanup['native_revalidation_executed'])
+        self.assertFalse(cleanup['exact_native_denial_cause_proven'])
+        self.assertFalse(cleanup['ready_to_run'])
+        for path in ('scripts/b0/od_integration_v1/native_supervisor.py',
+                     'scripts/b0/od_integration_v1/native_worker.py'):
+            with self.subTest(terminal_cleanup_source=path):
+                self.assertEqual(cleanup['prior_source_test_sha256'][path],
+                                 manifest['publication_checkpoint']['reviewed_source_test_sha256'][path])
+                self.assertNotEqual(cleanup['prior_source_test_sha256'][path],
+                                    manifest['thin_binding']['current_source_test_sha256'][path])
+        self.assertIn('tests/test_b0_od_integration_terminal_cleanup.py',
+                      manifest['thin_binding']['current_source_test_sha256'])
         publication = manifest['publication_checkpoint']
         self.assertEqual(publication['reviewed_archive_sha256'],
                          '75a52955f7d01fe2ebb30ae4b2a288d465209823a059ebdab71d3c7215e58481')
