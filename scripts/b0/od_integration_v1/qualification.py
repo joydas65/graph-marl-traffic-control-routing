@@ -1,4 +1,4 @@
-"""Frozen-contract pair gates and a bounded synthetic first-qualifying ladder.
+"""Frozen-contract pair gates and a bounded, origin-bound first-qualifying ladder.
 
 No simulator or writer is launched here. Every pair is revalidated from its
 observations; durable acceptance is a separate, explicit readback operation.
@@ -16,6 +16,13 @@ from . import integration
 
 
 IDENTITY = "B0_OD_INTEGRATION_LAYER_V1"
+EVIDENCE_KINDS = ("SYNTHETIC", "LIVE")
+
+
+def _evidence_kind(value):
+    if type(value) is not str or value not in EVIDENCE_KINDS:
+        raise ValueError("explicit synthetic or live evidence origin required")
+    return value
 
 
 def _contract():
@@ -36,20 +43,26 @@ def _integer(value):
     return exact.numerator
 
 
-def _pair(n0, d0, *, repeat=False):
+def _pair(n0, d0, *, repeat=False, references=None):
     contract = _contract()
     result = {
-        "evidence_kind": "SYNTHETIC", "ready_to_run": False,
+        "evidence_kind": None, "ready_to_run": False,
         "pair_status": "INTEGRITY_FAILURE", "stop_status": "FAIL",
         "qualification_evaluated": False, "gates": {}, "reason_codes": [],
     }
     try:
+        if any(type(r) is not dict or type(r.get("schema_version")) is not int or r["schema_version"] != 2 for r in (n0, d0)):
+            raise ValueError("schema-2 finalization evidence required")
+        origin = _evidence_kind(n0.get("evidence_kind"))
+        if _evidence_kind(d0.get("evidence_kind")) != origin:
+            raise ValueError("mixed pair evidence origins")
+        result["evidence_kind"] = origin
         expected = ("N0-CAL-R", "D0-CAL-R") if repeat else ("N0", "D0")
         if (n0["condition_label"], d0["condition_label"]) != expected:
             raise ValueError("wrong pair roles")
         if n0["run_id"] == d0["run_id"] or n0["binding"] != d0["binding"]:
             raise ValueError("duplicate or substituted pair input")
-        assessments = [integration.assess_run(record) for record in (n0, d0)]
+        assessments = [integration.assess_run(record, references=references) for record in (n0, d0)]
         fresh = [item["measurement"] for item in assessments]
         binding = n0["binding"]
         result.update(seed=binding["seed"], level=binding["level"],
@@ -119,9 +132,9 @@ def _pair(n0, d0, *, repeat=False):
         return result
 
 
-def qualify_pair(n0, d0):
+def qualify_pair(n0, d0, *, references=None):
     """Recompute measurements, then apply exact gates to one original N0/D0 pair."""
-    return _pair(n0, d0)
+    return _pair(n0, d0, references=references)
 
 
 def _canonical(value):
@@ -140,7 +153,9 @@ def _without_operational(value, excluded):
 class SelectionSession:
     """At most four ordered three-seed levels and one exact two-run repeat."""
 
-    def __init__(self):
+    def __init__(self, *, evidence_kind="SYNTHETIC", references=None):
+        self._evidence_kind = _evidence_kind(evidence_kind)
+        self._references = references
         self._rules = _contract()
         self._levels = []
         self._repeats = None
@@ -151,7 +166,7 @@ class SelectionSession:
     def _state(self, status, reasons=(), provisional=None):
         return {
             "status": status, "reason_codes": list(reasons),
-            "provisional_level": provisional, "evidence_kind": "SYNTHETIC",
+            "provisional_level": provisional, "evidence_kind": self._evidence_kind,
             "selected_calibrated_od_concentration": None, "ready_to_run": False,
             "scientific_records": len(self._levels) * 6,
             "repeat_records": 0 if self._repeats is None else 2,
@@ -161,8 +176,10 @@ class SelectionSession:
     def decision(self):
         result = copy.deepcopy(self._decision)
         if self._accepted:
-            result.update(status="PASS", readback_verified=True,
-                          synthetic_selected_level=result["provisional_level"])
+            result.update(status="PASS", readback_verified=True)
+            key = ("synthetic_selected_level" if self._evidence_kind == "SYNTHETIC"
+                   else "observed_selected_level")
+            result[key] = result["provisional_level"]
         return result
 
     def add_level(self, level, pairs):
@@ -179,6 +196,10 @@ class SelectionSession:
             if not isinstance(pair, (list, tuple)) or len(pair) != 2:
                 raise ValueError("each seed requires one complete N0/D0 pair")
             n0, d0 = pair
+            if any(type(r) is not dict or type(r.get("schema_version")) is not int or r["schema_version"] != 2 for r in pair):
+                raise ValueError("mixed or legacy selection history")
+            if any(_evidence_kind(r.get("evidence_kind")) != self._evidence_kind for r in pair):
+                raise ValueError("mixed selection evidence origins")
             if any(record["binding"]["seed"] != seed or record["binding"]["level"] != level
                    for record in (n0, d0)):
                 raise ValueError("seed or concentration evidence is out of order")
@@ -190,7 +211,7 @@ class SelectionSession:
             raise ValueError("scientific evidence exceeds the frozen bound")
         self._levels.append({"level": level, "pairs": prepared})
         self._run_ids.update(run_ids)
-        decisions = [qualify_pair(pair["N0"], pair["D0"]) for pair in prepared]
+        decisions = [qualify_pair(pair["N0"], pair["D0"], references=self._references) for pair in prepared]
         states = [item["pair_status"] for item in decisions]
         if "INTEGRITY_FAILURE" in states:
             self._decision = self._state("FAIL", ["SEED_MEASUREMENT_INTEGRITY_FAILURE"])
@@ -211,6 +232,11 @@ class SelectionSession:
     def add_repeats(self, n0, d0):
         if self._decision["status"] != "PROVISIONAL" or self._repeats is not None:
             raise ValueError("exactly one repeat pair is permitted after the first qualifier")
+        if any(type(r) is not dict or type(r.get("schema_version")) is not int
+               or r["schema_version"] != 2 for r in (n0, d0)):
+            raise ValueError("mixed or legacy repeat history")
+        if any(_evidence_kind(r.get("evidence_kind")) != self._evidence_kind for r in (n0, d0)):
+            raise ValueError("mixed repeat evidence origins")
         level = self._decision["provisional_level"]
         self._repeats = {"N0": copy.deepcopy(n0), "D0": copy.deepcopy(d0)}
         repeat_rule = self._rules["selected_deterministic_repeat"]
@@ -221,7 +247,7 @@ class SelectionSession:
             if any(record["binding"]["seed"] != repeat_rule["seed"]
                    or record["binding"]["level"] != level for record in (n0, d0)):
                 raise ValueError("repeat must use the selected level and first seed")
-            result = _pair(n0, d0, repeat=True)
+            result = _pair(n0, d0, repeat=True, references=self._references)
             if result["stop_status"] == "BLOCKED":
                 self._run_ids.update(ids)
                 self._decision = self._state("BLOCKED", ["SELECTED_REPEAT_OPERATIONAL_ABORT"], provisional=level)
@@ -233,8 +259,8 @@ class SelectionSession:
             excluded = set(repeat_rule["operational_fields_excluded"])
             for condition, repeat_record in (("N0", n0), ("D0", d0)):
                 previous = original[condition]
-                left = integration.normalized_scientific(previous)
-                right = integration.normalized_scientific(repeat_record)
+                left = integration.normalized_scientific(previous, references=self._references)
+                right = integration.normalized_scientific(repeat_record, references=self._references)
                 if (set(left) != set(repeat_rule["normalized_fields"])
                         or set(right) != set(repeat_rule["normalized_fields"])
                         or _canonical(left) != _canonical(right)
@@ -247,10 +273,10 @@ class SelectionSession:
         return self.decision
 
     def to_record(self):
-        """Return replayable synthetic evidence, never a real selected scenario."""
+        """Return origin-labelled replayable evidence, never execution permission."""
         return copy.deepcopy({
-            "schema_version": 1, "integration_identity": IDENTITY,
-            "evidence_kind": "SYNTHETIC", "ready_to_run": False,
+            "schema_version": 2, "integration_identity": IDENTITY,
+            "evidence_kind": self._evidence_kind, "ready_to_run": False,
             "levels": self._levels, "repeats": self._repeats,
             "decision": self._decision,
         })
@@ -260,7 +286,7 @@ class SelectionSession:
             raise ValueError("successful repeat and a new verified readback are required")
         from . import evidence
         try:
-            payload = evidence.readback(receipt)
+            payload = evidence.readback(receipt, references=self._references)
             if (payload["record_kind"] != "SELECTION"
                     or _canonical(payload["record"]) != _canonical(self.to_record())):
                 raise ValueError("readback does not describe this exact selection")
@@ -274,26 +300,33 @@ class SelectionSession:
         return self.decision
 
 
-def validate_selection_record(record):
+def validate_selection_record(record, *, references=None):
     """Recompute the complete bounded history; no stored status is authoritative."""
     keys = {"schema_version", "integration_identity", "evidence_kind", "ready_to_run",
             "levels", "repeats", "decision"}
     if (not isinstance(record, dict) or set(record) != keys
-            or type(record["schema_version"]) is not int or record["schema_version"] != 1
+            or type(record["schema_version"]) is not int or record["schema_version"] != 2
             or record["integration_identity"] != IDENTITY
-            or record["evidence_kind"] != "SYNTHETIC" or record["ready_to_run"] is not False
+            or type(record["evidence_kind"]) is not str or record["evidence_kind"] not in EVIDENCE_KINDS
+            or record["ready_to_run"] is not False
             or not isinstance(record["levels"], list) or not record["levels"]):
-        raise ValueError("invalid synthetic selection envelope")
-    session = SelectionSession()
+        raise ValueError("invalid origin-bound selection envelope")
+    session = SelectionSession(evidence_kind=record["evidence_kind"], references=references)
+    from .finalization import require_supported_assertions
     for level in record["levels"]:
         if not isinstance(level, dict) or set(level) != {"level", "pairs"} or not isinstance(level["pairs"], list):
             raise ValueError("invalid level evidence")
         if any(not isinstance(pair, dict) or set(pair) != {"N0", "D0"} for pair in level["pairs"]):
             raise ValueError("invalid seed-pair evidence")
+        for pair in level["pairs"]:
+            for run in pair.values():
+                require_supported_assertions(run, references=references)
         session.add_level(level["level"], [(pair["N0"], pair["D0"]) for pair in level["pairs"]])
     if record["repeats"] is not None:
         if not isinstance(record["repeats"], dict) or set(record["repeats"]) != {"N0", "D0"}:
             raise ValueError("invalid repeat evidence")
+        for run in record["repeats"].values():
+            require_supported_assertions(run, references=references)
         session.add_repeats(record["repeats"]["N0"], record["repeats"]["D0"])
     if _canonical(session.to_record()) != _canonical(record):
         raise ValueError("stored decision differs from revalidated evidence")

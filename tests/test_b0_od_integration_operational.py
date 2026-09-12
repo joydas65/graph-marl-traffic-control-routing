@@ -1,6 +1,7 @@
 """Actual-core, fake-only abort regressions; no live-runtime claims."""
 
 import copy
+from b0_od_integration_fixtures import REFERENCES, observe
 from pathlib import Path
 import tempfile
 import unittest
@@ -13,14 +14,14 @@ from test_b0_od_integration_qualification import record, pairs
 
 class OperationalAbortTests(unittest.TestCase):
     def assert_stop(self, run, expected="BLOCKED"):
-        assessed = core.assess_run(run)
+        assessed = core.assess_run(run, references=REFERENCES)
         self.assertEqual(assessed["stop_status"], expected, assessed["reason_codes"])
         self.assertNotEqual(assessed["measurement"]["measurement_status"], "VALID")
         other = record("D0" if run["condition_label"] == "N0" else "N0")
         pair = (run, other) if run["condition_label"] == "N0" else (other, run)
         with patch.object(q.cutoff_measurement, "paired_local_response",
                           side_effect=AssertionError("aborted pair must not evaluate gates")):
-            result = q.qualify_pair(*pair)
+            result = q.qualify_pair(*pair, references=REFERENCES)
         self.assertEqual(result["stop_status"], expected)
         self.assertFalse(result["qualification_evaluated"])
         self.assertEqual(result["gates"], {})
@@ -29,7 +30,7 @@ class OperationalAbortTests(unittest.TestCase):
     def test_first_advance_abort_preserves_failure_and_stops(self):
         binding = core.build_binding(core.repository_root(), 20260904, "C1")
         backend = FakeBackend(binding, fail_step=0)
-        run = core.observe_run(binding, "N0", "SYNTHETIC-FIRST-ABORT", backend, backend)
+        run = observe(binding, "N0", "SYNTHETIC-FIRST-ABORT", backend, backend)
         self.assertEqual(run["failure"], {"kind": "TECHNICAL", "stage": "OBSERVATION", "code": "OSError"})
         self.assertEqual(run["observations"]["step_intervals"], [])
         self.assertEqual(run["observations"]["queue_trace"], [])
@@ -37,7 +38,7 @@ class OperationalAbortTests(unittest.TestCase):
         self.assertEqual(run["cleanup_failures"], [])
         self.assertTrue(backend.closed)
         self.assertEqual(self.assert_stop(run)["pair_status"], "OPERATIONAL_BLOCKED")
-        session = q.SelectionSession(); incoming = pairs("C1")
+        session = q.SelectionSession(references=REFERENCES); incoming = pairs("C1")
         incoming[0] = (run, incoming[0][1])
         self.assertEqual(session.add_level("C1", incoming)["status"], "BLOCKED")
         for level in ("C1", "C2"):
@@ -102,7 +103,7 @@ class OperationalAbortTests(unittest.TestCase):
         for field in ("route_file_sha256", "implementation_sha256", "scientific_configuration"):
             with self.subTest(binding=field):
                 run = record(fail_step=50); run["binding"][field] = "CHANGED"
-                self.assertEqual(q.qualify_pair(run, record("D0"))["stop_status"], "FAIL")
+                self.assertEqual(q.qualify_pair(run, record("D0"), references=REFERENCES)["stop_status"], "FAIL")
 
     def test_observed_overflow_collision_and_forbidden_lane_keep_fail_precedence(self):
         for options in ({"waiting_overflow": True}, {"collision_at": 20}):
@@ -119,7 +120,7 @@ class OperationalAbortTests(unittest.TestCase):
                 self.control_snapshot["scientific_configuration"]["dynamic_rerouting"] = True
                 raise OSError("synthetic abort with forbidden control")
         backend = ChangedAfterAbort(binding)
-        self.assert_stop(core.observe_run(binding, "N0", "SYNTHETIC-CHANGED-CONTROL", backend, backend), "FAIL")
+        self.assert_stop(observe(binding, "N0", "SYNTHETIC-CHANGED-CONTROL", backend, backend), "FAIL")
 
     def test_incomplete_readback_or_partial_advance_is_not_supported(self):
         binding = core.build_binding(core.repository_root(), 20260904, "C1")
@@ -128,7 +129,7 @@ class OperationalAbortTests(unittest.TestCase):
                 self.time += 1
                 raise OSError("synthetic ambiguous advance")
         backend = Advanced(binding)
-        self.assert_stop(core.observe_run(binding, "N0", "SYNTHETIC-PARTIAL-ADVANCE", backend, backend), "FAIL")
+        self.assert_stop(observe(binding, "N0", "SYNTHETIC-PARTIAL-ADVANCE", backend, backend), "FAIL")
 
     def test_missing_output_and_cleanup_after_supported_abort_do_not_make_valid(self):
         for options in ({"missing_output": True}, {"close_failure": True}):
@@ -137,52 +138,52 @@ class OperationalAbortTests(unittest.TestCase):
 
     def test_independent_other_run_and_seed_failure_precede_blocked(self):
         aborted = record(fail_step=0)
-        self.assertEqual(q.qualify_pair(aborted, record("D0", waiting_overflow=True))["stop_status"], "FAIL")
+        self.assertEqual(q.qualify_pair(aborted, record("D0", waiting_overflow=True), references=REFERENCES)["stop_status"], "FAIL")
         incoming = pairs("C1"); incoming[0] = (aborted, incoming[0][1])
         incoming[1] = (record(seed=20260905, waiting_overflow=True), incoming[1][1])
-        self.assertEqual(q.SelectionSession().add_level("C1", incoming)["status"], "FAIL")
+        self.assertEqual(q.SelectionSession(references=REFERENCES).add_level("C1", incoming)["status"], "FAIL")
 
     def test_blocked_repeat_stops_and_revalidates_without_selection(self):
-        session = q.SelectionSession(); session.add_level("C1", pairs("C1"))
+        session = q.SelectionSession(references=REFERENCES); session.add_level("C1", pairs("C1"))
         decision = session.add_repeats(record("N0-CAL-R", fail_step=50), record("D0-CAL-R"))
         self.assertEqual(decision["status"], "BLOCKED")
         self.assertIsNone(decision["selected_calibrated_od_concentration"])
-        self.assertEqual(q.validate_selection_record(session.to_record()), decision)
+        self.assertEqual(q.validate_selection_record(session.to_record(), references=REFERENCES), decision)
         with self.assertRaises(ValueError): session.add_repeats(None, None)
         with self.assertRaises(ValueError): session.finalize(None)
 
     def test_blocked_failure_and_session_survive_writer_and_readback_not_pass(self):
         run = record(fail_step=50)
-        session = q.SelectionSession(); incoming = pairs("C1"); incoming[0] = (run, incoming[0][1])
+        session = q.SelectionSession(references=REFERENCES); incoming = pairs("C1"); incoming[0] = (run, incoming[0][1])
         session.add_level("C1", incoming)
         parent = evidence.WORKSPACE / "synthetic-test-outputs"; parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(dir=parent) as temporary:
             output = Path(temporary)
-            failure = {**evidence.BASE, "record_kind": "FAILURE", "record": {
+            failure = {**evidence.PAYLOAD_BASE, "record_kind": "FAILURE", "record": {
                 "failure_code": "SUPPORTED_OPERATIONAL_ABORT", "experiment_status": "BLOCKED",
-                "measurement_status": core.validate_run(run)["measurement_status"], "run": run, "raw_evidence": None}}
-            receipt = evidence.write_once(output, "abort.json", failure)
-            self.assertEqual(evidence.readback(receipt), failure)
+                "measurement_status": core.validate_run(run, references=REFERENCES)["measurement_status"], "run": run, "raw_evidence": None}}
+            receipt = evidence.write_once(output, "abort.json", failure, references=REFERENCES)
+            self.assertEqual(evidence.readback(receipt, references=REFERENCES), failure)
             self.assertEqual(receipt["persistence_status"], "VERIFIED")
-            payload = {**evidence.BASE, "record_kind": "SELECTION", "record": session.to_record()}
-            saved = evidence.write_once(output, "selection.json", payload)
-            self.assertEqual(evidence.readback(saved), payload)
+            payload = {**evidence.PAYLOAD_BASE, "record_kind": "SELECTION", "record": session.to_record()}
+            saved = evidence.write_once(output, "selection.json", payload, references=REFERENCES)
+            self.assertEqual(evidence.readback(saved, references=REFERENCES), payload)
             self.assertEqual(session.decision["status"], "BLOCKED")
             with self.assertRaises(ValueError): session.finalize(saved)
             changed = copy.deepcopy(payload); changed["record"]["decision"]["status"] = "PASS"
             with self.assertRaises((ValueError, evidence.EvidenceError)):
-                evidence.write_once(output, "false-pass.json", changed)
+                evidence.write_once(output, "false-pass.json", changed, references=REFERENCES)
             for label in (None, "PASS", "FAIL"):
                 with self.subTest(label=label):
                     bad = copy.deepcopy(failure)
                     if label is None: del bad["record"]["experiment_status"]
                     else: bad["record"]["experiment_status"] = label
                     with self.assertRaises(evidence.EvidenceError):
-                        evidence.write_once(output, "bad-"+str(label)+".json", bad)
+                        evidence.write_once(output, "bad-"+str(label)+".json", bad, references=REFERENCES)
             # Corrupted stored bytes retain readback FAIL, never BLOCKED/PASS.
             (output / "abort.json").write_bytes(b"{}\n")
             with self.assertRaises(evidence.EvidenceError) as caught:
-                evidence.readback(receipt)
+                evidence.readback(receipt, references=REFERENCES)
             self.assertEqual(caught.exception.experiment_status, "FAIL")
 
 

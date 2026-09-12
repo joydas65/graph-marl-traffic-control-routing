@@ -13,79 +13,106 @@
       "public_sha256": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
       "adjustment": "NONE",
       "initial_publication_sha256": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
-      "initial_publication_adjustment": "NONE"
+      "initial_publication_adjustment": "NONE",
+      "accepted_checkpoint_sha256": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "accepted_checkpoint_adjustment": "NONE",
+      "reviewed_finalization_sha256": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c"
     },
     {
       "original_component": "b0_od_integration_v1/integration.py",
       "original_validated_sha256": "fa99994afb7e453df39b8efc441b2cf5174304c657fadecebf2ee40bb81df4ab",
       "public_path": "scripts/b0/od_integration_v1/integration.py",
-      "public_sha256": "aee3028c1e2fd6d8972955bbd5375cff083a1787f5ab26409182d28338a5de37",
-      "adjustment": "Operational-status correction: explicit unchanged-clock step-abort readback, verified prefix assessment, full-H measurement remains invalid.",
+      "public_sha256": "9c472cca52f50350fa5b4fa0bb851dd28d8a727f947bab288c97abea6e2ca82f",
+      "adjustment": "Operational-status correction: explicit unchanged-clock step-abort readback, verified prefix assessment, full-H measurement remains invalid. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "fa99994afb7e453df39b8efc441b2cf5174304c657fadecebf2ee40bb81df4ab",
-      "initial_publication_adjustment": "NONE"
+      "initial_publication_adjustment": "NONE",
+      "accepted_checkpoint_sha256": "aee3028c1e2fd6d8972955bbd5375cff083a1787f5ab26409182d28338a5de37",
+      "accepted_checkpoint_adjustment": "Operational-status correction: explicit unchanged-clock step-abort readback, verified prefix assessment, full-H measurement remains invalid.",
+      "reviewed_finalization_sha256": "3b0b6cf8e50e80c0ce3f894f1ab70412f643e60bcf5b7e6953126ae4806ec767"
     },
     {
       "original_component": "b0_od_integration_v1/qualification.py",
       "original_validated_sha256": "e683e39cc266822f3a02315341292faaba15219713029693993d78556677a349",
       "public_path": "scripts/b0/od_integration_v1/qualification.py",
-      "public_sha256": "955c13ee956a929bce167eb6d61ea335967944596c7539959f55353c2fd3aec3",
-      "adjustment": "Operational-status correction: FAIL-before-BLOCKED run, pair, session and repeat stop propagation without scientific gate changes.",
+      "public_sha256": "c7ba3158f9b222c0dd51337a8888b6f6462ed743abcc0e07b42daf880138f42c",
+      "adjustment": "Operational-status correction: FAIL-before-BLOCKED run, pair, session and repeat stop propagation without scientific gate changes. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "e683e39cc266822f3a02315341292faaba15219713029693993d78556677a349",
-      "initial_publication_adjustment": "NONE"
+      "initial_publication_adjustment": "NONE",
+      "accepted_checkpoint_sha256": "955c13ee956a929bce167eb6d61ea335967944596c7539959f55353c2fd3aec3",
+      "accepted_checkpoint_adjustment": "Operational-status correction: FAIL-before-BLOCKED run, pair, session and repeat stop propagation without scientific gate changes.",
+      "reviewed_finalization_sha256": "1714474bde733113268f3b4e831939f64c6487eff3cd521fb02cf407fcfe9182"
     },
     {
       "original_component": "b0_od_integration_v1/evidence.py",
       "original_validated_sha256": "1694adb14332b89b45c4f095fed16d5cf0526869e621a361091625aee89abc47",
       "public_path": "scripts/b0/od_integration_v1/evidence.py",
-      "public_sha256": "11b2995f5f161be2dff062a5d2c119fe396a954f2582e242e37de7576e5cb517",
-      "adjustment": "Isolated public WORKSPACE expression plus operational-status correction: failure envelope retains and revalidates operational experiment status independently of persistence success.",
+      "public_sha256": "19146748f828369bc4286816f8725c560b8ede956677cc09e34cd1035bb501c2",
+      "adjustment": "Isolated public WORKSPACE expression plus operational-status correction: failure envelope retains and revalidates operational experiment status independently of persistence success. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "d9cdf1a34825492be5ed108fe443462a724af330277476bee46bd369aa8a03c5",
-      "initial_publication_adjustment": "WORKSPACE output-root expression only; isolated repository-relative output directory."
+      "initial_publication_adjustment": "WORKSPACE output-root expression only; isolated repository-relative output directory.",
+      "accepted_checkpoint_sha256": "11b2995f5f161be2dff062a5d2c119fe396a954f2582e242e37de7576e5cb517",
+      "accepted_checkpoint_adjustment": "Isolated public WORKSPACE expression plus operational-status correction: failure envelope retains and revalidates operational experiment status independently of persistence success.",
+      "reviewed_finalization_sha256": "673c9627ac6c2b8797e222d8497fd580b02c55f6e69b2883c3bf94f89d36f09f"
     },
     {
       "original_component": "tests/fake_backend.py",
       "original_validated_sha256": "58d849ffaa2380817c6497562acf6ba59b8b552ed96fd6ac5341556223c48e13",
       "public_path": "tests/b0_od_integration_fixtures.py",
-      "public_sha256": "ba6c45c27842015584e480528ff2c35998fdff74a38ba3b039d6c5f98330c178",
-      "adjustment": "Public package import only.",
+      "public_sha256": "16586bcd84f822057e1cef14bddff80f1bcf1b916596931bf815d43dd5ea0849",
+      "adjustment": "Public package import only. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "ba6c45c27842015584e480528ff2c35998fdff74a38ba3b039d6c5f98330c178",
-      "initial_publication_adjustment": "Public package import only."
+      "initial_publication_adjustment": "Public package import only.",
+      "accepted_checkpoint_sha256": "ba6c45c27842015584e480528ff2c35998fdff74a38ba3b039d6c5f98330c178",
+      "accepted_checkpoint_adjustment": "Public package import only.",
+      "reviewed_finalization_sha256": "16586bcd84f822057e1cef14bddff80f1bcf1b916596931bf815d43dd5ea0849"
     },
     {
       "original_component": "tests/test_integration.py",
       "original_validated_sha256": "157aa5d0267105d5261f0030169792e07553c0de2b2660308f92092d44e25d24",
       "public_path": "tests/test_b0_od_integration_observation.py",
-      "public_sha256": "9390d76d87cf19a349ea544ae1a946913d84756b37a7fa36f6887a1fcf15c306",
-      "adjustment": "Public package/fixture imports; output-root binding and parent-directory creation only.",
+      "public_sha256": "256b45517078dd4a2a0c00145fac23f479e67057fcdc93f4271710f160bd3845",
+      "adjustment": "Public package/fixture imports; output-root binding and parent-directory creation only. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "9390d76d87cf19a349ea544ae1a946913d84756b37a7fa36f6887a1fcf15c306",
-      "initial_publication_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation only."
+      "initial_publication_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation only.",
+      "accepted_checkpoint_sha256": "9390d76d87cf19a349ea544ae1a946913d84756b37a7fa36f6887a1fcf15c306",
+      "accepted_checkpoint_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation only.",
+      "reviewed_finalization_sha256": "256b45517078dd4a2a0c00145fac23f479e67057fcdc93f4271710f160bd3845"
     },
     {
       "original_component": "tests/test_qualification.py",
       "original_validated_sha256": "7f59edfc8015436071984a13a73bd01e486d24e527531a6a3b2a85cea17ab805",
       "public_path": "tests/test_b0_od_integration_qualification.py",
-      "public_sha256": "9da901ee1b473f83235adee6985f4a946bcd8e05be7396ee3142f32c821c4f71",
-      "adjustment": "Public package/fixture imports; output-root binding and parent-directory creation; print measured C4 payload byte count.",
+      "public_sha256": "a0dedc0a4e56375808c02150751ca4bbacd67df0f6bd2eaa9dff4e4e1fd02e55",
+      "adjustment": "Public package/fixture imports; output-root binding and parent-directory creation; print measured C4 payload byte count. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "9da901ee1b473f83235adee6985f4a946bcd8e05be7396ee3142f32c821c4f71",
-      "initial_publication_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation; print measured C4 payload byte count."
+      "initial_publication_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation; print measured C4 payload byte count.",
+      "accepted_checkpoint_sha256": "9da901ee1b473f83235adee6985f4a946bcd8e05be7396ee3142f32c821c4f71",
+      "accepted_checkpoint_adjustment": "Public package/fixture imports; output-root binding and parent-directory creation; print measured C4 payload byte count.",
+      "reviewed_finalization_sha256": "a0dedc0a4e56375808c02150751ca4bbacd67df0f6bd2eaa9dff4e4e1fd02e55"
     },
     {
       "original_component": "tests/test_evidence.py",
       "original_validated_sha256": "3fedcba213e18e358273ea0a9beb13052cb962254b3e110548e4a71e6c1c6012",
       "public_path": "tests/test_b0_od_integration_evidence.py",
-      "public_sha256": "bfaaee1f7f3ab46888a9f6e4b2393ff9d60f1959f79b7b296fcfd4265b7df2e9",
-      "adjustment": "Public package/fixture imports; output parent-directory creation only.",
+      "public_sha256": "cf2a4b95a559938c1352a4fe4cde835205c948484c44d2e2424f4876efa7075c",
+      "adjustment": "Public package/fixture imports; output parent-directory creation only. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "bfaaee1f7f3ab46888a9f6e4b2393ff9d60f1959f79b7b296fcfd4265b7df2e9",
-      "initial_publication_adjustment": "Public package/fixture imports; output parent-directory creation only."
+      "initial_publication_adjustment": "Public package/fixture imports; output parent-directory creation only.",
+      "accepted_checkpoint_sha256": "bfaaee1f7f3ab46888a9f6e4b2393ff9d60f1959f79b7b296fcfd4265b7df2e9",
+      "accepted_checkpoint_adjustment": "Public package/fixture imports; output parent-directory creation only.",
+      "reviewed_finalization_sha256": "cf2a4b95a559938c1352a4fe4cde835205c948484c44d2e2424f4876efa7075c"
     },
     {
       "original_component": "tests/run_offline.py",
       "original_validated_sha256": "dc26de2ffd595d6d077b639bed2f18d2625ae60cbd4dfb564c10487ca2e14371",
       "public_path": "tests/run_b0_od_integration_offline.py",
-      "public_sha256": "9c9a5cb68bd6b233d8e7d0c2dc398259a6c2968c69c528054d1c365c1610d0e4",
-      "adjustment": "Public repository/test/output paths and source inventory; separate existing-regression discovery excluding integration tests. Runtime denial and counting logic preserved.",
+      "public_sha256": "5b4739131fabde4c0827bb7bd3fa1ab3fa8e8f38965cb778c4131efeea400b03",
+      "adjustment": "Public repository/test/output paths and source inventory; separate existing-regression discovery excluding integration tests. Runtime denial and counting logic preserved. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
       "initial_publication_sha256": "9c9a5cb68bd6b233d8e7d0c2dc398259a6c2968c69c528054d1c365c1610d0e4",
-      "initial_publication_adjustment": "Public repository/test/output paths and source inventory; separate existing-regression discovery excluding integration tests. Runtime denial and counting logic preserved."
+      "initial_publication_adjustment": "Public repository/test/output paths and source inventory; separate existing-regression discovery excluding integration tests. Runtime denial and counting logic preserved.",
+      "accepted_checkpoint_sha256": "9c9a5cb68bd6b233d8e7d0c2dc398259a6c2968c69c528054d1c365c1610d0e4",
+      "accepted_checkpoint_adjustment": "Public repository/test/output paths and source inventory; separate existing-regression discovery excluding integration tests. Runtime denial and counting logic preserved.",
+      "reviewed_finalization_sha256": "5b4739131fabde4c0827bb7bd3fa1ab3fa8e8f38965cb778c4131efeea400b03"
     }
   ],
   "additional_publication_tests": "Initial public projection added identity/import-location and oversize rejection. Correction adds preserved-provenance assertions and fake-only operational-status regressions; no scientific assertions weakened.",
@@ -108,7 +135,184 @@
     "supported_abort": "OSError raised by simulationStep, verified unchanged-clock boundary and consistent observed prefix; not a blanket TECHNICAL-label rule."
   },
   "additional_public_test_sha256": {
+    "tests/test_b0_od_integration_projection.py": "387457b9512e79c4e778ffb77d2d88a21d77358e8500c54b695e65ac32998dca",
+    "tests/test_b0_od_integration_operational.py": "cc855016fe3c3d2d595f3815787aa6f10d639d738245c90bb6ab7a89a79c290d"
+  },
+  "accepted_checkpoint": {
+    "revision": "c0be5ca5c0116179f901bd00410c74e581799c87",
+    "implementation_sha256": {
+      "__init__.py": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "integration.py": "aee3028c1e2fd6d8972955bbd5375cff083a1787f5ab26409182d28338a5de37",
+      "qualification.py": "955c13ee956a929bce167eb6d61ea335967944596c7539959f55353c2fd3aec3",
+      "evidence.py": "11b2995f5f161be2dff062a5d2c119fe396a954f2582e242e37de7576e5cb517"
+    }
+  },
+  "accepted_checkpoint_additional_public_test_sha256": {
     "tests/test_b0_od_integration_projection.py": "bcdb64b3dcf14870b70ced6e70051b8ae0cfa4dfd7b336906892acab7f303343",
     "tests/test_b0_od_integration_operational.py": "ab5afc555fef46a4abc08d1dbcda4212e2c0c435921779dbbb5800384c64ee45"
+  },
+  "finalization_extension": {
+    "run_selection_envelope_schema": 2,
+    "finalization_version": 1,
+    "persistence_marker_receipt_schema": 1,
+    "legacy_audit": "EXPLICIT_READ_ONLY_UNVERIFIED",
+    "current_additions_sha256": {
+      "scripts/b0/od_integration_v1/finalization.py": "a3da71244f6e8a9bd63a8b324dd85be186b4847023440e7b87df735dac75d4a8",
+      "tests/test_b0_od_integration_finalization.py": "f62f7dac689998881d64b60fe7af5a4397b112d9b5767283a0fad5bae2154b03"
+    },
+    "preserved_characterization_sha256": {
+      "docs/experiments/b0-od-live-binding-v1-stop-note.md": "e89d26eaba286d5e375cb3fe70ab67845a0371d202d336d4d246c44ee7dad0ab",
+      "tests/test_od_live_binding_finalization_boundary.py": "b75d800332163d9b4cd3c9bf7793b2195cec9aa6a8dac0e9ec0d1c795535a3b1"
+    },
+    "reviewed_export_sha256": {
+      "docs/experiments/b0-od-finalization-contract-extension-v1-proposal.md": "bb2108850877a53689ff7d7e6db231ca777aacebac429fc5801f3d7416d03cb3",
+      "docs/experiments/b0-od-finalization-extension-v1-implementation.md": "2bdba3896c5425dddb618635e8971a45e614618af1db3a4aecc8ca5465656369",
+      "scripts/b0/od_integration_v1/evidence.py": "673c9627ac6c2b8797e222d8497fd580b02c55f6e69b2883c3bf94f89d36f09f",
+      "scripts/b0/od_integration_v1/finalization.py": "1e8d2cabab7e973347b4e0ba962b8dfc45d571404b45fc08284e148fff5b2a58",
+      "scripts/b0/od_integration_v1/integration.py": "3b0b6cf8e50e80c0ce3f894f1ab70412f643e60bcf5b7e6953126ae4806ec767",
+      "scripts/b0/od_integration_v1/qualification.py": "1714474bde733113268f3b4e831939f64c6487eff3cd521fb02cf407fcfe9182",
+      "tests/b0_od_integration_fixtures.py": "16586bcd84f822057e1cef14bddff80f1bcf1b916596931bf815d43dd5ea0849",
+      "tests/reference/b0_od_integration_v1_projection.json": "4df2e3546dd72a80ec1e572c711f2736557f514f755b49c1d89840631bfe853e",
+      "tests/run_b0_od_integration_offline.py": "5b4739131fabde4c0827bb7bd3fa1ab3fa8e8f38965cb778c4131efeea400b03",
+      "tests/test_b0_od_integration_evidence.py": "cf2a4b95a559938c1352a4fe4cde835205c948484c44d2e2424f4876efa7075c",
+      "tests/test_b0_od_integration_finalization.py": "f62f7dac689998881d64b60fe7af5a4397b112d9b5767283a0fad5bae2154b03",
+      "tests/test_b0_od_integration_observation.py": "256b45517078dd4a2a0c00145fac23f479e67057fcdc93f4271710f160bd3845",
+      "tests/test_b0_od_integration_operational.py": "cc855016fe3c3d2d595f3815787aa6f10d639d738245c90bb6ab7a89a79c290d",
+      "tests/test_b0_od_integration_projection.py": "4938bb50815e1f66af455432cd423bd404a2ba67035838c09744129291bb272c",
+      "tests/test_b0_od_integration_qualification.py": "a0dedc0a4e56375808c02150751ca4bbacd67df0f6bd2eaa9dff4e4e1fd02e55"
+    }
+  },
+  "thin_binding": {
+    "implementation_status": "NATIVE_FACTORY_IMPLEMENTED_OFFLINE_ONLY",
+    "native_factory_status": "IMPLEMENTED_OFFLINE_ONLY",
+    "intended_sumo_version": "1.27.1",
+    "intended_traci_protocol": 22,
+    "supported_evidence_origins": [
+      "SYNTHETIC",
+      "LIVE"
+    ],
+    "live_validated": false,
+    "reviewed_export_archive_sha256": "18da6341cc5d209bfc0d2d552e6f0b58853b372c974131e238d7f9876b3ec21b",
+    "current_source_test_sha256": {
+      "scripts/b0/od_integration_v1/__init__.py": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "scripts/b0/od_integration_v1/evidence.py": "19146748f828369bc4286816f8725c560b8ede956677cc09e34cd1035bb501c2",
+      "scripts/b0/od_integration_v1/finalization.py": "a3da71244f6e8a9bd63a8b324dd85be186b4847023440e7b87df735dac75d4a8",
+      "scripts/b0/od_integration_v1/integration.py": "9c472cca52f50350fa5b4fa0bb851dd28d8a727f947bab288c97abea6e2ca82f",
+      "scripts/b0/od_integration_v1/live_binding.py": "5729d5c991e9c056145d7ae94e36e90a7b08775830f0b077d30c1622ba8f0303",
+      "scripts/b0/od_integration_v1/native_mapping.py": "04497999bf864c9e7f97f831bffe7ccad2f40403c807977bf6b34640a110a543",
+      "scripts/b0/od_integration_v1/native_supervisor.py": "9bf22935df3078ba51384625541dc19bd57306f811346e895efefb6ba8d4c1ad",
+      "scripts/b0/od_integration_v1/native_transport.py": "50c9b4bcd3a6794604bfd94fa221a403e1ff1ebd3ffa4790eb9863d9ac8c5cf2",
+      "scripts/b0/od_integration_v1/native_worker.py": "6202db3d60752a1c737e4ec01abeae42707846e91bbd7d22bbc2efca8e1701b4",
+      "scripts/b0/od_integration_v1/owned_runtime.py": "d86f892316e0bdaf694ab054c7112d6e123c0001a8dab93467f88043f5be76b1",
+      "scripts/b0/od_integration_v1/qualification.py": "c7ba3158f9b222c0dd51337a8888b6f6462ed743abcc0e07b42daf880138f42c",
+      "tests/test_b0_od_integration_evidence.py": "cf2a4b95a559938c1352a4fe4cde835205c948484c44d2e2424f4876efa7075c",
+      "tests/test_b0_od_integration_finalization.py": "f62f7dac689998881d64b60fe7af5a4397b112d9b5767283a0fad5bae2154b03",
+      "tests/test_b0_od_integration_live_binding.py": "b6d4fd834ded2b8eae25b6668180411f7e4042023a9c3d4de2d9476ea8e746f8",
+      "tests/test_b0_od_integration_native_ipc.py": "012c86aedcdca0fcdfacb3ae623f6d2663731ea1f7060cec79528505df67d744",
+      "tests/test_b0_od_integration_native_mapping.py": "ca3dd537bcab99dc38b5c97f926b375a475f221ca74384ad5a4d00d023d95d86",
+      "tests/test_b0_od_integration_native_supervisor.py": "a8faecdf5245b46c956545e72d4777972247aae82176af9710b3691073620912",
+      "tests/test_b0_od_integration_native_transport.py": "03d796a30f36798bd0854838cd0c34eb17e770d162fcbdc61b2f68ad00a73b4c",
+      "tests/test_b0_od_integration_native_worker.py": "a2b1020e31db9cef56f4bc0b67c29a14209775e367cb9b5b079c9e9dbd8f545f",
+      "tests/test_b0_od_integration_observation.py": "256b45517078dd4a2a0c00145fac23f479e67057fcdc93f4271710f160bd3845",
+      "tests/test_b0_od_integration_operational.py": "cc855016fe3c3d2d595f3815787aa6f10d639d738245c90bb6ab7a89a79c290d",
+      "tests/test_b0_od_integration_origin.py": "68c288181d827ac9ae6332a4b3fd591f3292af488611a40c5528ff3c70705c9d",
+      "tests/test_b0_od_integration_owned_runtime.py": "ef7817885a4486e9d736a0d95116117101a7b8b575305251d11112e8a9c419f9",
+      "tests/test_b0_od_integration_projection.py": "387457b9512e79c4e778ffb77d2d88a21d77358e8500c54b695e65ac32998dca",
+      "tests/test_b0_od_integration_qualification.py": "a0dedc0a4e56375808c02150751ca4bbacd67df0f6bd2eaa9dff4e4e1fd02e55",
+      "tests/b0_od_integration_fixtures.py": "16586bcd84f822057e1cef14bddff80f1bcf1b916596931bf815d43dd5ea0849",
+      "tests/run_b0_od_integration_offline.py": "5b4739131fabde4c0827bb7bd3fa1ab3fa8e8f38965cb778c4131efeea400b03"
+    }
+  },
+  "native_factory": {
+    "prior_status": "UNRESOLVED_BOUNDED_ACQUISITION",
+    "prior_manifest_sha256": "c582b3267a4472cce89d22f3ebe302afd4a69df79a7bf1e16eaeba845284917a",
+    "prior_source_test_sha256": {
+      "scripts/b0/od_integration_v1/__init__.py": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "scripts/b0/od_integration_v1/evidence.py": "19146748f828369bc4286816f8725c560b8ede956677cc09e34cd1035bb501c2",
+      "scripts/b0/od_integration_v1/finalization.py": "990a2faf8ddd0029fd644e13101e1958eba50ed50c1486cd1b77d3ca6e5b2d86",
+      "scripts/b0/od_integration_v1/integration.py": "9c472cca52f50350fa5b4fa0bb851dd28d8a727f947bab288c97abea6e2ca82f",
+      "scripts/b0/od_integration_v1/live_binding.py": "5729d5c991e9c056145d7ae94e36e90a7b08775830f0b077d30c1622ba8f0303",
+      "scripts/b0/od_integration_v1/native_mapping.py": "04497999bf864c9e7f97f831bffe7ccad2f40403c807977bf6b34640a110a543",
+      "scripts/b0/od_integration_v1/owned_runtime.py": "d86f892316e0bdaf694ab054c7112d6e123c0001a8dab93467f88043f5be76b1",
+      "scripts/b0/od_integration_v1/qualification.py": "c7ba3158f9b222c0dd51337a8888b6f6462ed743abcc0e07b42daf880138f42c",
+      "tests/test_b0_od_integration_evidence.py": "cf2a4b95a559938c1352a4fe4cde835205c948484c44d2e2424f4876efa7075c",
+      "tests/test_b0_od_integration_finalization.py": "f62f7dac689998881d64b60fe7af5a4397b112d9b5767283a0fad5bae2154b03",
+      "tests/test_b0_od_integration_live_binding.py": "b6d4fd834ded2b8eae25b6668180411f7e4042023a9c3d4de2d9476ea8e746f8",
+      "tests/test_b0_od_integration_native_mapping.py": "ca3dd537bcab99dc38b5c97f926b375a475f221ca74384ad5a4d00d023d95d86",
+      "tests/test_b0_od_integration_observation.py": "256b45517078dd4a2a0c00145fac23f479e67057fcdc93f4271710f160bd3845",
+      "tests/test_b0_od_integration_operational.py": "cc855016fe3c3d2d595f3815787aa6f10d639d738245c90bb6ab7a89a79c290d",
+      "tests/test_b0_od_integration_origin.py": "68c288181d827ac9ae6332a4b3fd591f3292af488611a40c5528ff3c70705c9d",
+      "tests/test_b0_od_integration_owned_runtime.py": "ef7817885a4486e9d736a0d95116117101a7b8b575305251d11112e8a9c419f9",
+      "tests/test_b0_od_integration_projection.py": "b6635d8fdf468b83e225963915f2a4877ea6abd80328749d9271a87e12d8f896",
+      "tests/test_b0_od_integration_qualification.py": "a0dedc0a4e56375808c02150751ca4bbacd67df0f6bd2eaa9dff4e4e1fd02e55",
+      "tests/b0_od_integration_fixtures.py": "16586bcd84f822057e1cef14bddff80f1bcf1b916596931bf815d43dd5ea0849",
+      "tests/run_b0_od_integration_offline.py": "5b4739131fabde4c0827bb7bd3fa1ab3fa8e8f38965cb778c4131efeea400b03"
+    },
+    "native_process_test_executed": false,
+    "pre_bootstrap_hard_deadline_claimed": false,
+    "requires_exclusive_worker_reaping": true,
+    "scope": "One verified POSIX session before GO; fixed monotonic phase/exchange/total deadlines and one cleanup budget. Native timing remains unvalidated.",
+    "entry_points": [
+      "native_supervisor.run_native",
+      "native_worker.execute_worker",
+      "native_transport.connect_native"
+    ],
+    "bootstrap_limitation": "Initial supervisor-to-worker Popen/OS bootstrap is not interruptible; no GO or SUMO acquisition until returned worker ownership is verified.",
+    "forced_child_scope": "UNRESOLVED_UNLESS_CHILD_REAPING_EVIDENCE_EXISTS",
+    "deadline_fields": [
+      "runtime.startup",
+      "runtime.connect",
+      "runtime.transport",
+      "runtime.close",
+      "runtime.wait",
+      "runtime.terminate_wait",
+      "runtime.kill_wait",
+      "bootstrap",
+      "total",
+      "finalize",
+      "cleanup"
+    ]
+  },
+  "publication_checkpoint": {
+    "date": "2026-09-12",
+    "accepted_base": "c0be5ca5c0116179f901bd00410c74e581799c87",
+    "reviewed_archive_sha256": "75a52955f7d01fe2ebb30ae4b2a288d465209823a059ebdab71d3c7215e58481",
+    "reviewed_inventory_sha256": "3e319930ebcc95c2aee455e007d1195d93d23b4b1040b6b0ef472500400c76e0",
+    "reviewed_manifest_sha256": "75e530eae0267328abdd937d04e1f151cf1a68e008b6db3220a0065b3154445b",
+    "reviewed_source_test_sha256": {
+      "scripts/b0/od_integration_v1/__init__.py": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
+      "scripts/b0/od_integration_v1/evidence.py": "19146748f828369bc4286816f8725c560b8ede956677cc09e34cd1035bb501c2",
+      "scripts/b0/od_integration_v1/finalization.py": "990a2faf8ddd0029fd644e13101e1958eba50ed50c1486cd1b77d3ca6e5b2d86",
+      "scripts/b0/od_integration_v1/integration.py": "9c472cca52f50350fa5b4fa0bb851dd28d8a727f947bab288c97abea6e2ca82f",
+      "scripts/b0/od_integration_v1/live_binding.py": "5729d5c991e9c056145d7ae94e36e90a7b08775830f0b077d30c1622ba8f0303",
+      "scripts/b0/od_integration_v1/native_mapping.py": "04497999bf864c9e7f97f831bffe7ccad2f40403c807977bf6b34640a110a543",
+      "scripts/b0/od_integration_v1/native_supervisor.py": "9bf22935df3078ba51384625541dc19bd57306f811346e895efefb6ba8d4c1ad",
+      "scripts/b0/od_integration_v1/native_transport.py": "50c9b4bcd3a6794604bfd94fa221a403e1ff1ebd3ffa4790eb9863d9ac8c5cf2",
+      "scripts/b0/od_integration_v1/native_worker.py": "6202db3d60752a1c737e4ec01abeae42707846e91bbd7d22bbc2efca8e1701b4",
+      "scripts/b0/od_integration_v1/owned_runtime.py": "d86f892316e0bdaf694ab054c7112d6e123c0001a8dab93467f88043f5be76b1",
+      "scripts/b0/od_integration_v1/qualification.py": "c7ba3158f9b222c0dd51337a8888b6f6462ed743abcc0e07b42daf880138f42c",
+      "tests/test_b0_od_integration_evidence.py": "cf2a4b95a559938c1352a4fe4cde835205c948484c44d2e2424f4876efa7075c",
+      "tests/test_b0_od_integration_finalization.py": "f62f7dac689998881d64b60fe7af5a4397b112d9b5767283a0fad5bae2154b03",
+      "tests/test_b0_od_integration_live_binding.py": "b6d4fd834ded2b8eae25b6668180411f7e4042023a9c3d4de2d9476ea8e746f8",
+      "tests/test_b0_od_integration_native_ipc.py": "012c86aedcdca0fcdfacb3ae623f6d2663731ea1f7060cec79528505df67d744",
+      "tests/test_b0_od_integration_native_mapping.py": "ca3dd537bcab99dc38b5c97f926b375a475f221ca74384ad5a4d00d023d95d86",
+      "tests/test_b0_od_integration_native_supervisor.py": "a8faecdf5245b46c956545e72d4777972247aae82176af9710b3691073620912",
+      "tests/test_b0_od_integration_native_transport.py": "03d796a30f36798bd0854838cd0c34eb17e770d162fcbdc61b2f68ad00a73b4c",
+      "tests/test_b0_od_integration_native_worker.py": "a2b1020e31db9cef56f4bc0b67c29a14209775e367cb9b5b079c9e9dbd8f545f",
+      "tests/test_b0_od_integration_observation.py": "256b45517078dd4a2a0c00145fac23f479e67057fcdc93f4271710f160bd3845",
+      "tests/test_b0_od_integration_operational.py": "cc855016fe3c3d2d595f3815787aa6f10d639d738245c90bb6ab7a89a79c290d",
+      "tests/test_b0_od_integration_origin.py": "68c288181d827ac9ae6332a4b3fd591f3292af488611a40c5528ff3c70705c9d",
+      "tests/test_b0_od_integration_owned_runtime.py": "ef7817885a4486e9d736a0d95116117101a7b8b575305251d11112e8a9c419f9",
+      "tests/test_b0_od_integration_projection.py": "77f1cca87997bab204eaf73d3d6c532420031d25d896a5c52a956cafd162e228",
+      "tests/test_b0_od_integration_qualification.py": "a0dedc0a4e56375808c02150751ca4bbacd67df0f6bd2eaa9dff4e4e1fd02e55",
+      "tests/b0_od_integration_fixtures.py": "16586bcd84f822057e1cef14bddff80f1bcf1b916596931bf815d43dd5ea0849",
+      "tests/run_b0_od_integration_offline.py": "5b4739131fabde4c0827bb7bd3fa1ab3fa8e8f38965cb778c4131efeea400b03"
+    },
+    "editorial_adjustment": {
+      "path": "scripts/b0/od_integration_v1/finalization.py",
+      "kind": "OPENING_DOCSTRING_ONLY",
+      "behavior_changed": false
+    },
+    "review_claim": "User-reported independent source review and subset rerun: 112 tests / 194 subtests; not full-suite, native, GitHub or faculty approval."
   }
 }

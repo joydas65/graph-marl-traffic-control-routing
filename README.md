@@ -39,8 +39,10 @@ are now prepared for independent pre-run review. Offline validation is not
 live-integration validation or a selected calibrated scenario.
 
 The minimal OD observation/qualification/selection and strict evidence pipeline
-is now offline-validated in a public pre-run checkpoint. Its thin live binding
-is absent; independent source review remains pending and readiness is false.
+is now offline-validated. The schema-2 finalization extension, thin collector
+and concrete native factories are prepared as a
+[draft pre-run checkpoint](docs/experiments/EXP-B0-OD-003.md).
+Native runtime behavior remains unvalidated and readiness is false.
 
 ## Research progression
 

@@ -48,6 +48,7 @@ class Counted(unittest.TextTestResult):
 
 def hashes():
     paths=sorted((ROOT/'scripts/b0/od_integration_v1').glob('*.py'))+sorted((ROOT/'tests').glob('test_b0_od_integration_*.py'))+[ROOT/'tests/b0_od_integration_fixtures.py',Path(__file__).resolve()]
+    paths.append(ROOT/'tests/reference/b0_od_integration_v1_projection.json')
     return {str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
 def run(kind):

@@ -1,6 +1,7 @@
 """Synthetic, workspace-local writer tests; no simulator or process launches."""
 
 import copy
+from b0_od_integration_fixtures import REFERENCES, observe
 import hashlib
 import json
 import os
@@ -27,7 +28,7 @@ def actual_run(kind):
 
 def failure_payload(raw=None):
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "integration_identity": "B0_OD_INTEGRATION_LAYER_V1",
         "evidence_kind": "SYNTHETIC",
         "ready_to_run": False,
@@ -57,12 +58,12 @@ class EvidenceTests(unittest.TestCase):
 
     def assert_incomplete(self, receipt=None):
         with self.assertRaises(evidence.EvidenceError):
-            evidence.readback(self.receipt() if receipt is None else receipt)
+            evidence.readback(self.receipt() if receipt is None else receipt, references=REFERENCES)
 
     def test_failure_roundtrip_keeps_scientific_failure_and_nulls(self):
-        receipt = evidence.write_once(self.output, self.name, self.payload)
+        receipt = evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         self.assertEqual(receipt, self.receipt())
-        decoded = evidence.readback(receipt)
+        decoded = evidence.readback(receipt, references=REFERENCES)
         self.assertEqual(decoded, self.payload)
         self.assertEqual(decoded["record_kind"], "FAILURE")
         self.assertIsNone(decoded["record"]["raw_evidence"]["waitingTime"])
@@ -71,7 +72,7 @@ class EvidenceTests(unittest.TestCase):
 
     def test_deterministic_utf8_and_one_terminal_newline(self):
         payload = failure_payload({"label": "synthetic Δ", "b": 2, "a": 1})
-        receipt = evidence.write_once(self.output, self.name, payload)
+        receipt = evidence.write_once(self.output, self.name, payload, references=REFERENCES)
         expected = (json.dumps(payload, ensure_ascii=False, allow_nan=False, sort_keys=True,
                                separators=(",", ":")) + "\n").encode("utf-8")
         self.assertEqual((self.output / self.name).read_bytes(), expected)
@@ -84,7 +85,7 @@ class EvidenceTests(unittest.TestCase):
                 name = "nonfinite-" + str(index) + ".json"
                 payload = failure_payload({"waitingTime": value})
                 with self.assertRaises(evidence.EvidenceError) as caught:
-                    evidence.write_once(self.output, name, payload)
+                    evidence.write_once(self.output, name, payload, references=REFERENCES)
                 error = caught.exception
                 self.assertEqual(error.code, "SERIALIZATION_FAILURE")
                 self.assertEqual(error.experiment_status, "FAIL")
@@ -110,29 +111,29 @@ class EvidenceTests(unittest.TestCase):
                 payload.update(replacement)
                 name = "invalid-" + str(index) + ".json"
                 with self.assertRaises(evidence.EvidenceError):
-                    evidence.write_once(self.output, name, payload)
+                    evidence.write_once(self.output, name, payload, references=REFERENCES)
                 self.assertFalse((self.output / name).exists())
 
     def test_failure_record_cannot_declare_valid_measurement(self):
         payload = copy.deepcopy(self.payload)
         payload["record"]["measurement_status"] = "VALID"
         with self.assertRaises(evidence.EvidenceError):
-            evidence.write_once(self.output, self.name, payload)
+            evidence.write_once(self.output, self.name, payload, references=REFERENCES)
         self.assertFalse((self.output / self.name).exists())
 
     def test_non_json_type_is_not_implicitly_converted(self):
         payload = failure_payload({"sequence": (1, 2)})
         with self.assertRaises(evidence.EvidenceError):
-            evidence.write_once(self.output, self.name, payload)
+            evidence.write_once(self.output, self.name, payload, references=REFERENCES)
 
     def test_actual_valid_run_roundtrip_reuses_production_accounting(self):
         run = actual_run("valid")
         self.assertEqual(run["measurement"]["measurement_status"], "VALID")
         self.assertEqual(run["measurement"]["metrics"]["scheduled_trips"], 540)
         self.assertEqual(run["measurement"]["metrics"]["restricted_mean_trip_time_seconds"], 101)
-        payload = {**evidence.BASE, "record_kind": "RUN", "record": run}
-        receipt = evidence.write_once(self.output, self.name, payload)
-        self.assertEqual(evidence.readback(receipt), payload)
+        payload = {**evidence.PAYLOAD_BASE, "record_kind": "RUN", "record": run}
+        receipt = evidence.write_once(self.output, self.name, payload, references=REFERENCES)
+        self.assertEqual(evidence.readback(receipt, references=REFERENCES), payload)
 
     def test_actual_waiting_overflow_roundtrips_only_as_failure(self):
         run = actual_run("overflow")
@@ -141,12 +142,12 @@ class EvidenceTests(unittest.TestCase):
         self.assertIn("AGGREGATE_NATIVE_WAITING_NONFINITE", measured["integrity_errors"])
         self.assertIsNone(measured["metrics"]["sumo_tripinfo_waiting_time_seconds_total"])
         with self.assertRaises(evidence.EvidenceError):
-            evidence.write_once(self.output, "unsafe-run.json", {**evidence.BASE, "record_kind": "RUN", "record": run})
-        payload = {**evidence.BASE, "record_kind": "FAILURE", "record": {
+            evidence.write_once(self.output, "unsafe-run.json", {**evidence.PAYLOAD_BASE, "record_kind": "RUN", "record": run}, references=REFERENCES)
+        payload = {**evidence.PAYLOAD_BASE, "record_kind": "FAILURE", "record": {
             "failure_code": "SYNTHETIC_WAITING_OVERFLOW", "measurement_status": "INTEGRITY_FAILURE",
-            "run": run, "raw_evidence": None}}
-        receipt = evidence.write_once(self.output, self.name, payload)
-        decoded = evidence.readback(receipt)
+            "run": run, "raw_evidence": None, "experiment_status": "FAIL"}}
+        receipt = evidence.write_once(self.output, self.name, payload, references=REFERENCES)
+        decoded = evidence.readback(receipt, references=REFERENCES)
         self.assertEqual(decoded, payload)
         self.assertEqual(decoded["record"]["run"]["measurement"], measured)
         self.assertIsNone(decoded["record"]["run"]["measurement"]["metrics"]["sumo_tripinfo_waiting_time_seconds_total"])
@@ -155,29 +156,29 @@ class EvidenceTests(unittest.TestCase):
         run = actual_run("deficient")
         self.assertEqual(run["measurement"]["measurement_status"], "EVIDENCE_DEFICIENCY")
         self.assertIs(run["output_finalized"], False)
-        payload = {**evidence.BASE, "record_kind": "FAILURE", "record": {
+        payload = {**evidence.PAYLOAD_BASE, "record_kind": "FAILURE", "record": {
             "failure_code": "SYNTHETIC_MISSING_OUTPUT", "measurement_status": "EVIDENCE_DEFICIENCY",
-            "run": run, "raw_evidence": None}}
-        receipt = evidence.write_once(self.output, self.name, payload)
-        self.assertEqual(evidence.readback(receipt), payload)
+            "run": run, "raw_evidence": None, "experiment_status": "INCONCLUSIVE"}}
+        receipt = evidence.write_once(self.output, self.name, payload, references=REFERENCES)
+        self.assertEqual(evidence.readback(receipt, references=REFERENCES), payload)
 
     def test_actual_valid_run_cannot_be_relabelled_as_invalid_failure(self):
         run = actual_run("valid")
-        payload = {**evidence.BASE, "record_kind": "FAILURE", "record": {
+        payload = {**evidence.PAYLOAD_BASE, "record_kind": "FAILURE", "record": {
             "failure_code": "SYNTHETIC_FALSE_FAILURE", "measurement_status": "INTEGRITY_FAILURE",
             "run": run, "raw_evidence": None}}
         with self.assertRaises(evidence.EvidenceError) as caught:
-            evidence.write_once(self.output, self.name, payload)
+            evidence.write_once(self.output, self.name, payload, references=REFERENCES)
         self.assertEqual(caught.exception.code, "FAILURE_STATUS_CONTRADICTION")
 
     def test_actual_nonfinite_raw_value_is_retained_in_memory_not_serialized(self):
         run = actual_run("overflow")
         run["observations"]["tripinfo_records"][0]["waitingTime"] = float("nan")
-        payload = {**evidence.BASE, "record_kind": "FAILURE", "record": {
+        payload = {**evidence.PAYLOAD_BASE, "record_kind": "FAILURE", "record": {
             "failure_code": "SYNTHETIC_NONFINITE_RAW", "measurement_status": "INTEGRITY_FAILURE",
             "run": run, "raw_evidence": None}}
         with self.assertRaises(evidence.EvidenceError) as caught:
-            evidence.write_once(self.output, self.name, payload)
+            evidence.write_once(self.output, self.name, payload, references=REFERENCES)
         self.assertEqual(caught.exception.code, "SERIALIZATION_FAILURE")
         self.assertFalse((self.output / self.name).exists())
         self.assertIsNotNone(caught.exception.failure_receipt_name)
@@ -185,9 +186,9 @@ class EvidenceTests(unittest.TestCase):
     def test_unsafe_names_and_outside_directory_rejected(self):
         for name in ("../escape.json", "nested/data.json", "/absolute.json", "x..json", "x.xml"):
             with self.subTest(name=name), self.assertRaises(evidence.EvidenceError):
-                evidence.write_once(self.output, name, self.payload)
+                evidence.write_once(self.output, name, self.payload, references=REFERENCES)
         with self.assertRaises(evidence.EvidenceError) as caught:
-            evidence.write_once(evidence.WORKSPACE.parent, self.name, self.payload)
+            evidence.write_once(evidence.WORKSPACE.parent, self.name, self.payload, references=REFERENCES)
         self.assertEqual(caught.exception.code, "OUTPUT_OUTSIDE_WORKSPACE")
         self.assertEqual(list(self.output.iterdir()), [])
 
@@ -199,18 +200,18 @@ class EvidenceTests(unittest.TestCase):
                 existing.write_bytes(b"PRESERVE_SYNTHETIC_BYTES")
                 before = set(self.output.iterdir())
                 with self.assertRaises(evidence.EvidenceError) as caught:
-                    evidence.write_once(self.output, name, self.payload)
+                    evidence.write_once(self.output, name, self.payload, references=REFERENCES)
                 self.assertEqual(caught.exception.code, "DESTINATION_CONFLICT")
                 self.assertEqual(existing.read_bytes(), b"PRESERVE_SYNTHETIC_BYTES")
                 self.assertEqual(set(self.output.iterdir()), before)
 
     def test_second_write_preserves_first_completed_record(self):
-        receipt = evidence.write_once(self.output, self.name, self.payload)
+        receipt = evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         before = {path.name: path.read_bytes() for path in self.output.iterdir()}
         with self.assertRaises(evidence.EvidenceError):
-            evidence.write_once(self.output, self.name, failure_payload({"different": True}))
+            evidence.write_once(self.output, self.name, failure_payload({"different": True}), references=REFERENCES)
         self.assertEqual({path.name: path.read_bytes() for path in self.output.iterdir()}, before)
-        self.assertEqual(evidence.readback(receipt), self.payload)
+        self.assertEqual(evidence.readback(receipt, references=REFERENCES), self.payload)
 
     def test_symlink_destination_and_dangling_destination_rejected(self):
         target = self.output / "target.txt"
@@ -220,7 +221,7 @@ class EvidenceTests(unittest.TestCase):
                 name = "link-" + str(index) + ".json"
                 (self.output / name).symlink_to(destination)
                 with self.assertRaises(evidence.EvidenceError):
-                    evidence.write_once(self.output, name, self.payload)
+                    evidence.write_once(self.output, name, self.payload, references=REFERENCES)
                 self.assertTrue((self.output / name).is_symlink())
         self.assertEqual(target.read_text(), "PRESERVE")
 
@@ -230,7 +231,7 @@ class EvidenceTests(unittest.TestCase):
         alias = self.output / "alias"
         alias.symlink_to(real, target_is_directory=True)
         with self.assertRaises(evidence.EvidenceError):
-            evidence.write_once(alias, self.name, self.payload)
+            evidence.write_once(alias, self.name, self.payload, references=REFERENCES)
         self.assertEqual(list(real.iterdir()), [])
 
     def test_short_data_write_keeps_pending_and_cannot_complete(self):
@@ -244,7 +245,7 @@ class EvidenceTests(unittest.TestCase):
 
         with patch.object(evidence.os, "write", side_effect=short_second):
             with self.assertRaises(evidence.EvidenceError) as caught:
-                evidence.write_once(self.output, self.name, self.payload)
+                evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         self.assertEqual(caught.exception.code, "SHORT_WRITE")
         self.assertEqual(caught.exception.experiment_status, "BLOCKED")
         self.assertTrue((self.output / (self.name + ".pending")).exists())
@@ -262,7 +263,7 @@ class EvidenceTests(unittest.TestCase):
 
         with patch.object(evidence.os, "write", side_effect=short_third):
             with self.assertRaises(evidence.EvidenceError):
-                evidence.write_once(self.output, self.name, self.payload)
+                evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         self.assertTrue((self.output / (self.name + ".pending")).exists())
         self.assert_incomplete()
 
@@ -279,7 +280,7 @@ class EvidenceTests(unittest.TestCase):
 
         with patch.object(evidence.os, "fsync", side_effect=fail_second):
             with self.assertRaises(evidence.EvidenceError) as caught:
-                evidence.write_once(self.output, self.name, self.payload)
+                evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         self.assertEqual(caught.exception.experiment_status, "BLOCKED")
         self.assert_incomplete()
 
@@ -292,7 +293,7 @@ class EvidenceTests(unittest.TestCase):
 
         with patch.object(evidence, "_read", side_effect=corrupt):
             with self.assertRaises(evidence.EvidenceError) as caught:
-                evidence.write_once(self.output, self.name, self.payload)
+                evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         self.assertEqual(caught.exception.code, "READBACK_MISMATCH")
         self.assertFalse((self.output / (self.name + ".complete.json")).exists())
         self.assert_incomplete()
@@ -306,7 +307,7 @@ class EvidenceTests(unittest.TestCase):
 
         with patch.object(evidence, "_read", side_effect=corrupt):
             with self.assertRaises(evidence.EvidenceError) as caught:
-                evidence.write_once(self.output, self.name, self.payload)
+                evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         self.assertEqual(caught.exception.code, "MARKER_READBACK_MISMATCH")
         self.assertTrue((self.output / (self.name + ".complete.json")).exists())
         self.assertTrue((self.output / (self.name + ".pending")).exists())
@@ -315,7 +316,7 @@ class EvidenceTests(unittest.TestCase):
     def test_final_latch_removal_failure_does_not_complete(self):
         with patch.object(evidence.os, "unlink", side_effect=OSError("synthetic unlink failure")):
             with self.assertRaises(evidence.EvidenceError) as caught:
-                evidence.write_once(self.output, self.name, self.payload)
+                evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         self.assertEqual(caught.exception.experiment_status, "BLOCKED")
         self.assertTrue((self.output / (self.name + ".pending")).exists())
         self.assert_incomplete()
@@ -339,7 +340,7 @@ class EvidenceTests(unittest.TestCase):
         try:
             with patch.object(evidence, "_create", side_effect=track), patch.object(evidence.os, "close", side_effect=fail_outer_close):
                 with self.assertRaises(evidence.EvidenceError) as caught:
-                    evidence.write_once(self.output, self.name, self.payload)
+                    evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
             self.assertTrue(target["failed"])
             self.assertEqual(caught.exception.experiment_status, "BLOCKED")
         finally:
@@ -350,25 +351,25 @@ class EvidenceTests(unittest.TestCase):
         self.assert_incomplete()
 
     def test_independent_readback_detects_data_corruption(self):
-        receipt = evidence.write_once(self.output, self.name, self.payload)
+        receipt = evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         (self.output / self.name).write_bytes(b"{}\n")
         with self.assertRaises(evidence.EvidenceError) as caught:
-            evidence.readback(receipt)
+            evidence.readback(receipt, references=REFERENCES)
         self.assertEqual(caught.exception.code, "READBACK_MISMATCH")
 
     def test_independent_readback_rejects_missing_marker(self):
-        receipt = evidence.write_once(self.output, self.name, self.payload)
+        receipt = evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         (self.output / (self.name + ".complete.json")).unlink()
         with self.assertRaises(evidence.EvidenceError) as caught:
-            evidence.readback(receipt)
+            evidence.readback(receipt, references=REFERENCES)
         self.assertEqual(caught.exception.code, "READBACK_MISSING")
 
     def test_independent_readback_rejects_modified_receipt(self):
-        receipt = evidence.write_once(self.output, self.name, self.payload)
+        receipt = evidence.write_once(self.output, self.name, self.payload, references=REFERENCES)
         for key, value in (("sha256", "0" * 64), ("byte_count", receipt["byte_count"] + 1),
                            ("ready_to_run", True), ("output_directory", "../outside")):
             with self.subTest(key=key), self.assertRaises(evidence.EvidenceError):
-                evidence.readback({**receipt, key: value})
+                evidence.readback({**receipt, key: value}, references=REFERENCES)
 
     def test_xml_uses_same_completion_and_independent_validator(self):
         raw = b'<routes><vehicle id="synthetic_0"/></routes>\n'
@@ -382,10 +383,10 @@ class EvidenceTests(unittest.TestCase):
 
         receipt = evidence.write_input_once(self.output, "synthetic.rou.xml", raw, validate)
         self.assertEqual(receipt["sha256"], hashlib.sha256(raw).hexdigest())
-        self.assertEqual(evidence.readback(receipt, validator=validate), raw)
+        self.assertEqual(evidence.readback(receipt, validator=validate, references=REFERENCES), raw)
         self.assertGreaterEqual(len(calls), 3)
         with self.assertRaises(evidence.EvidenceError):
-            evidence.readback(receipt)
+            evidence.readback(receipt, references=REFERENCES)
 
     def test_xml_revalidation_failure_withholds_completion(self):
         raw = b"<routes/>\n"
