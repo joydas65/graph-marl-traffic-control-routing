@@ -2,9 +2,37 @@
 import copy
 import hashlib
 from pathlib import Path
+import tempfile
 import xml.etree.ElementTree as ET
 
-from scripts.b0.od_integration_v1 import integration as core
+from scripts.b0.od_integration_v1 import integration as core, evidence, finalization
+
+# Each grant is explicitly installed by the fixture owner before observation.
+# The actual production functions receive this context; no validator is stubbed.
+REFERENCES = finalization.ReferenceContext(())
+_TEMPORARIES = []
+
+
+def observe(binding, condition, run_id, connection, collector):
+    parent = evidence.WORKSPACE / 'synthetic-test-outputs'
+    parent.mkdir(parents=True, exist_ok=True)
+    temporary = tempfile.TemporaryDirectory(prefix='terminal-', dir=parent)
+    _TEMPORARIES.append(temporary)
+    collector.output_path = Path(temporary.name)
+    original = collector.output_path / 'original.xml'
+    original.write_bytes(b'')
+    metadata = original.stat()
+    collector.expected_output = dict(device=metadata.st_dev, inode=metadata.st_ino,
+                                     byte_count=None, sha256=None)
+    # Optional explicitly synthetic post-exit content-baseline premise. Never
+    # infer a native capture time or compare a running output's normal growth.
+    if getattr(collector, 'expected_snapshot', None) is not None:
+        collector.expected_output.update(collector.expected_snapshot)
+    collector.run_id = run_id
+    collector.capture_condition = condition
+    REFERENCES.authorize(finalization.ReferenceGrant(run_id, condition, core.digest(binding),
+        str(collector.output_path.relative_to(evidence.WORKSPACE)), collector.expected_output))
+    return core.observe_run(binding, condition, run_id, connection, collector, references=REFERENCES)
 
 
 class FakeBackend:
@@ -88,7 +116,7 @@ class FakeBackend:
     def diagnostics(self,view):
         return {'collisions':int(self.time==self.collision_at),'invalid_routes':0,'simulator_errors':0}
 
-    def finalize_output(self):
+    def tripinfo_bytes(self):
         self.log.append(('output',self.time)); self.output_checked=True
         if not self.closed: raise AssertionError('output read before close/finalization')
         if self.missing_output: return b'<tripinfos><tripinfo'
@@ -102,6 +130,32 @@ class FakeBackend:
             wait=1e308 if self.waiting_overflow and i<2 else self.halt_samples[v]
             ET.SubElement(root,'tripinfo',{'id':v,'depart':str(self.departure[v]),'arrival':str(arrive),'waitingTime':str(wait)})
         return ET.tostring(root,encoding='utf-8')
+
+    def finalize_output(self, result):
+        raw = self.tripinfo_bytes()
+        # A deliberately synthetic process/diagnostic capture, not native proof.
+        original = self.output_path / 'original.xml'
+        original.write_bytes(raw)
+        metadata = original.stat()
+        observed = dict(device=metadata.st_dev, inode=metadata.st_ino,
+                        byte_count=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+        result['process'] = dict(state='EXITED', exit_code=0)
+        result['diagnostics'] = dict(coverage='COMPLETE', counts=dict.fromkeys(finalization.COUNTS, 0))
+        result['tripinfo'].update(availability='AVAILABLE', identity='MATCH')
+        observations = dict(expected=copy.deepcopy(self.expected_output), observed=observed)
+        artifacts = {}
+        capture = dict(run_id=self.run_id, condition_label=self.capture_condition,
+                       binding_sha256=core.digest(self.binding), process=result['process'],
+                       output_observations=observations)
+        diagnostics = dict(mapping=finalization.SYNTHETIC_MAPPING, evidence_kind='SYNTHETIC',
+                           complete=True, events=[])
+        for key, data, name in (('tripinfo', raw, 'retained.xml'),
+                               ('capture', evidence._encode(capture), 'capture.json'),
+                               ('diagnostics', evidence._encode(diagnostics), 'diagnostics.json')):
+            (self.output_path / name).write_bytes(data)
+            artifacts[key] = dict(name=name, byte_count=len(data), sha256=hashlib.sha256(data).hexdigest())
+        result['output_identity'] = dict(output_directory=str(self.output_path.relative_to(evidence.WORKSPACE)),
+            artifacts=artifacts, output_observations=observations)
 
     def __getattr__(self,name):
         if name.startswith(('set','change','reroute')): raise AssertionError('forbidden synthetic setter')
@@ -159,4 +213,4 @@ class Lane:
 def good_record(repo=None,seed=20260904,level='C1',condition_label='N0',run_id=None,**options):
     binding=core.build_binding(core.repository_root() if repo is None else Path(repo),seed,level)
     backend=FakeBackend(binding,condition_label,**options)
-    return core.observe_run(binding,condition_label,run_id or f'SYNTHETIC-{seed}-{level}-{condition_label}',backend,backend)
+    return observe(binding,condition_label,run_id or f'SYNTHETIC-{seed}-{level}-{condition_label}',backend,backend)

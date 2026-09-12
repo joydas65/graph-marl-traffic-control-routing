@@ -1,4 +1,4 @@
-"""Small synthetic-only write-once evidence and independent readback.
+"""Small origin-bound write-once evidence and independent readback.
 
 Completion requires data plus its verified marker and absence of the pending
 latch. The latch is removed only after every write, readback and close passes.
@@ -24,8 +24,10 @@ MAX_BYTES = 64 * 1024 * 1024
 NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,119}\Z")
 CODE = re.compile(r"[A-Z][A-Z0-9_]{0,79}\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
+EVIDENCE_KINDS = ("SYNTHETIC", "LIVE")
 BASE = {"schema_version": 1, "integration_identity": IDENTITY,
         "evidence_kind": "SYNTHETIC", "ready_to_run": False}
+PAYLOAD_BASE = {**BASE, "schema_version": 2}
 
 
 class EvidenceError(RuntimeError):
@@ -43,6 +45,15 @@ def _require(condition, code="EVIDENCE_SCHEMA"):
 
 def _keys(value, keys):
     _require(type(value) is dict and set(value) == set(keys))
+
+
+def _origin(value):
+    _require(type(value) is str and value in EVIDENCE_KINDS, "EVIDENCE_ORIGIN")
+    return value
+
+
+def _origin_base(evidence_kind):
+    return {**BASE, "evidence_kind": _origin(evidence_kind)}
 
 
 def _json_types(value, depth=0):
@@ -91,24 +102,31 @@ def _decode(raw):
     return value
 
 
-def _base(value):
-    _require(type(value.get("schema_version")) is int and value["schema_version"] == 1)
+def _base(value, version=1):
+    _require(type(value.get("schema_version")) is int and value["schema_version"] == version)
     _require(value.get("integration_identity") == IDENTITY)
-    _require(value.get("evidence_kind") == "SYNTHETIC" and value.get("ready_to_run") is False)
+    _origin(value.get("evidence_kind"))
+    _require(value.get("ready_to_run") is False)
 
 
-def _validate_payload(payload):
+def _validate_payload(payload, *, references=None):
     _keys(payload, (*BASE, "record_kind", "record"))
-    _base(payload)
+    _base(payload, version=2)
     kind, record = payload["record_kind"], payload["record"]
     _require(type(record) is dict)
     if kind == "SELECTION":
         from .qualification import validate_selection_record
-        decision = validate_selection_record(record)
+        _require(record.get("evidence_kind") == payload["evidence_kind"], "EVIDENCE_ORIGIN_MISMATCH")
+        _require(type(record.get("schema_version")) is int and record["schema_version"] == payload["schema_version"])
+        decision = validate_selection_record(record, references=references)
         _require(record.get("decision") == decision, "DECISION_REVALIDATION")
     elif kind == "RUN":
         from .integration import validate_run
-        measurement = validate_run(record)
+        from .finalization import require_supported_assertions
+        _require(record.get("evidence_kind") == payload["evidence_kind"], "EVIDENCE_ORIGIN_MISMATCH")
+        _require(type(record.get("schema_version")) is int and record["schema_version"] == payload["schema_version"])
+        measurement = validate_run(record, references=references)
+        require_supported_assertions(record, references=references)
         _require(record.get("measurement") == measurement, "MEASUREMENT_REVALIDATION")
         _require(measurement.get("measurement_status") == "VALID", "INVALID_RUN_REQUIRES_FAILURE_RECORD")
     elif kind == "FAILURE":
@@ -119,20 +137,24 @@ def _validate_payload(payload):
             _require(record["measurement_status"] is None and not status_keys)
         else:
             from .integration import assess_run
+            from .finalization import require_supported_assertions
             _require(type(record["run"]) is dict)
-            assessment = assess_run(record["run"])
+            _require(record["run"].get("evidence_kind") == payload["evidence_kind"], "EVIDENCE_ORIGIN_MISMATCH")
+            _require(type(record["run"].get("schema_version")) is int
+                     and record["run"]["schema_version"] == payload["schema_version"])
+            assessment = assess_run(record["run"], references=references)
+            require_supported_assertions(record["run"], references=references)
             measurement = assessment["measurement"]
             # Aborted-run failure envelopes must carry the independently
             # revalidated stop. A verified persistence receipt is not PASS.
-            if record["run"]["operational_abort"] is not None or status_keys:
-                _require(record.get("experiment_status") == assessment["stop_status"],
-                         "FAILURE_EXPERIMENT_STATUS_CONTRADICTION")
             # Keep the original Adapter result verbatim. Integration may add
             # failure diagnostics; only its freshly revalidated status governs.
             _require(measurement.get("measurement_status") in
                      ("INTEGRITY_FAILURE", "EVIDENCE_DEFICIENCY"), "FAILURE_STATUS_CONTRADICTION")
             _require(record["measurement_status"] == measurement["measurement_status"],
                      "FAILURE_STATUS_CONTRADICTION")
+            _require(record.get("experiment_status") == assessment["stop_status"],
+                     "FAILURE_EXPERIMENT_STATUS_CONTRADICTION")
     else:
         raise EvidenceError("RECORD_KIND")
 
@@ -192,7 +214,8 @@ def _create(directory, name, raw):
 
 
 def _read(directory, name):
-    descriptor = os.open(name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=directory)
+    # A substituted FIFO must not block before the regular-file check.
+    descriptor = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
     try:
         metadata = os.fstat(descriptor)
         _require(stat.S_ISREG(metadata.st_mode) and metadata.st_nlink == 1, "UNSAFE_READBACK_OBJECT")
@@ -210,10 +233,10 @@ def _read(directory, name):
         os.close(descriptor)
 
 
-def _checked_data(raw, format, validator=None):
+def _checked_data(raw, format, validator=None, *, references=None):
     if format == "JSON":
         value = _decode(raw)
-        _validate_payload(value)
+        _validate_payload(value, references=references)
         return value
     _require(format == "XML" and callable(validator), "INPUT_VALIDATOR_REQUIRED")
     _require(raw.endswith(b"\n") and not raw.endswith(b"\n\n"), "INPUT_NEWLINE")
@@ -222,7 +245,7 @@ def _checked_data(raw, format, validator=None):
     return raw
 
 
-def _verify(directory, name, *, allow_pending=False, validator=None):
+def _verify(directory, name, *, allow_pending=False, validator=None, references=None):
     _require(allow_pending or not _exists(directory, name + ".pending"), "INCOMPLETE_WRITE")
     marker = _decode(_read(directory, name + ".complete.json"))
     _keys(marker, (*BASE, "name", "format", "byte_count", "sha256", "state"))
@@ -232,16 +255,25 @@ def _verify(directory, name, *, allow_pending=False, validator=None):
     _require(type(marker["byte_count"]) is int and 0 < marker["byte_count"] <= MAX_BYTES
              and type(marker["sha256"]) is str and SHA256.fullmatch(marker["sha256"]), "COMPLETION_MARKER")
     _name(name, marker["format"])
+    if allow_pending:
+        pending = _decode(_read(directory, name + ".pending"))
+        _keys(pending, (*BASE, "state"))
+        _base(pending)
+        _require(pending["state"] == "INCOMPLETE"
+                 and pending["evidence_kind"] == marker["evidence_kind"], "PENDING_ORIGIN_MISMATCH")
     raw = _read(directory, name)
     _require(len(raw) == marker["byte_count"] and hashlib.sha256(raw).hexdigest() == marker["sha256"],
              "READBACK_MISMATCH")
-    return _checked_data(raw, marker["format"], validator), marker
+    checked = _checked_data(raw, marker["format"], validator, references=references)
+    if marker["format"] == "JSON":
+        _require(checked["evidence_kind"] == marker["evidence_kind"], "EVIDENCE_ORIGIN_MISMATCH")
+    return checked, marker
 
 
-def _failure_receipt(directory, name, code, experiment_status):
+def _failure_receipt(directory, name, code, experiment_status, evidence_kind):
     # This distinct attempt receipt cannot complete or replace the failed data.
     receipt_name = name + ".failure-" + uuid.uuid4().hex + ".json"
-    raw = _encode({**BASE, "record_kind": "WRITE_FAILURE", "failure_code": code,
+    raw = _encode({**_origin_base(evidence_kind), "record_kind": "WRITE_FAILURE", "failure_code": code,
                    "experiment_status": experiment_status, "completed": False,
                    "payload_preserved": False})
     try:
@@ -253,9 +285,21 @@ def _failure_receipt(directory, name, code, experiment_status):
     return None
 
 
-def _write(output_dir, name, payload, format, validator=None):
+def _validated_experiment_failed(payload):
+    """Use only AFTER actual payload revalidation; no independent assessment."""
+    return ((payload["record_kind"] == "FAILURE" and payload["record"].get("experiment_status") == "FAIL")
+            or (payload["record_kind"] == "SELECTION" and payload["record"]["decision"]["status"] == "FAIL"))
+
+
+def _write(output_dir, name, payload, format, validator=None, *, references=None,
+           evidence_kind="SYNTHETIC"):
     directory = None
+    experiment_failed = False
     try:
+        if format == "JSON":
+            _require(type(payload) is dict)
+            evidence_kind = _origin(payload.get("evidence_kind"))
+        base = _origin_base(evidence_kind)
         _name(name, format)
         with _directory(output_dir) as (directory, path):
             for suffix in ("", ".pending", ".complete.json"):
@@ -263,17 +307,18 @@ def _write(output_dir, name, payload, format, validator=None):
             try:
                 raw = _encode(payload) if format == "JSON" else payload
                 _require(type(raw) is bytes and 0 < len(raw) <= MAX_BYTES, "PAYLOAD_SIZE_LIMIT")
-                _checked_data(raw, format, validator)
-                _create(directory, name + ".pending", _encode({**BASE, "state": "INCOMPLETE"}))
+                checked = _checked_data(raw, format, validator, references=references)
+                experiment_failed = format == "JSON" and _validated_experiment_failed(checked)
+                _create(directory, name + ".pending", _encode({**base, "state": "INCOMPLETE"}))
                 _create(directory, name, raw)
                 _require(_read(directory, name) == raw, "READBACK_MISMATCH")
-                marker = {**BASE, "name": name, "format": format, "byte_count": len(raw),
+                marker = {**base, "name": name, "format": format, "byte_count": len(raw),
                           "sha256": hashlib.sha256(raw).hexdigest(), "state": "VERIFIED"}
                 marker_raw = _encode(marker)
                 _create(directory, name + ".complete.json", marker_raw)
                 _require(_read(directory, name + ".complete.json") == marker_raw, "MARKER_READBACK_MISMATCH")
-                _verify(directory, name, allow_pending=True, validator=validator)
-                receipt = {"schema_version": 1, "evidence_kind": "SYNTHETIC", "ready_to_run": False,
+                _verify(directory, name, allow_pending=True, validator=validator, references=references)
+                receipt = {"schema_version": 1, "evidence_kind": evidence_kind, "ready_to_run": False,
                            "persistence_status": "VERIFIED", "output_directory": str(path.relative_to(WORKSPACE)),
                            "name": name, "format": format, "sha256": marker["sha256"], "byte_count": len(raw)}
                 pending_path = path / (name + ".pending")
@@ -289,7 +334,9 @@ def _write(output_dir, name, payload, format, validator=None):
                     "IO_FAILURE" if isinstance(error, OSError) else "VALIDATION_FAILURE")
                 status = error.experiment_status if isinstance(error, EvidenceError) else (
                     "BLOCKED" if isinstance(error, OSError) else "FAIL")
-                failure_name = _failure_receipt(directory, name, code, status)
+                if experiment_failed:
+                    status = "FAIL"
+                failure_name = _failure_receipt(directory, name, code, status, evidence_kind)
                 raise EvidenceError(code, failure_name, status) from error
         # The directory descriptor has now closed successfully. This exact-path
         # unlink is the final filesystem action; its failure retains the latch.
@@ -299,27 +346,29 @@ def _write(output_dir, name, payload, format, validator=None):
         raise
     except (Exception, KeyboardInterrupt) as error:
         if isinstance(error, OSError):
-            raise EvidenceError("IO_FAILURE", experiment_status="BLOCKED") from error
+            raise EvidenceError("IO_FAILURE", experiment_status="FAIL" if experiment_failed else "BLOCKED") from error
         raise EvidenceError("UNSAFE_PATH_OR_VALIDATION_FAILURE") from error
 
 
-def write_once(output_dir, name, payload):
-    """Write one strictly validated synthetic JSON envelope, never overwrite."""
-    return _write(output_dir, name, payload, "JSON")
+def write_once(output_dir, name, payload, *, references=None):
+    """Write one explicit-origin JSON envelope; origin is not authorization."""
+    return _write(output_dir, name, payload, "JSON", references=references)
 
 
-def write_input_once(output_dir, name, raw, validator):
+def write_input_once(output_dir, name, raw, validator, *, evidence_kind="SYNTHETIC"):
     """Materialize the generated XML with the same write-once/readback rule."""
-    return _write(output_dir, name, raw, "XML", validator)
+    return _write(output_dir, name, raw, "XML", validator, evidence_kind=evidence_kind)
 
 
-def readback(receipt, *, validator=None):
+def readback(receipt, *, validator=None, references=None):
     """Independently verify completion, bytes/hash, schema and scientific status."""
+    experiment_failed = False
     try:
         _keys(receipt, ("schema_version", "evidence_kind", "ready_to_run", "persistence_status",
                         "output_directory", "name", "format", "sha256", "byte_count"))
         _require(type(receipt["schema_version"]) is int and receipt["schema_version"] == 1
-                 and receipt["evidence_kind"] == "SYNTHETIC" and receipt["ready_to_run"] is False
+                 and type(receipt["evidence_kind"]) is str and receipt["evidence_kind"] in EVIDENCE_KINDS
+                 and receipt["ready_to_run"] is False
                  and receipt["persistence_status"] == "VERIFIED", "RECEIPT_SCHEMA")
         relative = receipt["output_directory"]
         _require(type(relative) is str and not relative.startswith("/") and ".." not in relative.split("/"),
@@ -327,15 +376,17 @@ def readback(receipt, *, validator=None):
         _require(receipt["format"] in ("JSON", "XML"), "RECEIPT_SCHEMA")
         _name(receipt["name"], receipt["format"])
         with _directory(WORKSPACE / relative) as (directory, _):
-            value, marker = _verify(directory, receipt["name"], validator=validator)
-            _require(all(receipt[key] == marker[key] for key in ("name", "format", "sha256", "byte_count")),
+            value, marker = _verify(directory, receipt["name"], validator=validator, references=references)
+            _require(all(receipt[key] == marker[key] for key in
+                         ("name", "format", "sha256", "byte_count", "evidence_kind")),
                      "RECEIPT_MISMATCH")
+            experiment_failed = marker["format"] == "JSON" and _validated_experiment_failed(value)
             return value
     except EvidenceError:
         raise
     except FileNotFoundError as error:
         raise EvidenceError("READBACK_MISSING") from error
     except OSError as error:
-        raise EvidenceError("IO_FAILURE", experiment_status="BLOCKED") from error
+        raise EvidenceError("IO_FAILURE", experiment_status="FAIL" if experiment_failed else "BLOCKED") from error
     except (Exception, KeyboardInterrupt) as error:
         raise EvidenceError("READBACK_FAILURE") from error
