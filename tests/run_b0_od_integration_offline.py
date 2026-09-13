@@ -8,6 +8,7 @@ import json
 import tempfile
 import time
 import unittest
+import signal
 
 ROOT=Path(__file__).resolve().parents[1]
 WORKSPACE=ROOT/'.local-evidence'/'b0-od-integration-public-v1'
@@ -22,6 +23,17 @@ class NoRuntime(importlib.abc.MetaPathFinder):
         if fullname.split('.')[0] in {'traci','libsumo','sumolib','torch','numpy','boto3','botocore'}:
             attempts.append('RUNTIME_IMPORT'); raise RuntimeError('forbidden runtime import')
 sys.meta_path.insert(0,NoRuntime())
+
+# These OS calls do not all emit Python audit events. Tests must explicitly
+# inject replacements; an accidental native lifecycle call fails closed.
+def no_native_lifecycle(*args, **kwargs):
+    attempts.append('NATIVE_WAIT_SIGNAL_OR_SCOPE')
+    raise RuntimeError('forbidden native wait, signal or scope observation')
+for name in ('kill', 'killpg', 'wait', 'waitpid', 'waitid', 'wait3', 'wait4',
+             'getpgid', 'getsid'):
+    if hasattr(os, name):
+        setattr(os, name, no_native_lifecycle)
+signal.signal = no_native_lifecycle
 
 def audit(event,args):
     if event.startswith(('subprocess.','socket.')) or event in {'os.system','os.posix_spawn','os.fork','os.exec','os.spawn'}:

@@ -6,6 +6,7 @@ this research-process supervisor independently bounds worker work and IPC.
 Importing this module does not launch a helper, SUMO, or any socket.
 """
 from dataclasses import asdict, dataclass, fields
+import errno
 import hashlib
 import json
 import math
@@ -66,8 +67,8 @@ def remaining(deadline, clock):
 def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: False):
     """Production coordination with injectable OS/IPC/clock operations.
 
-    Never wait/poll/reap the worker until AFTER the last scope signal. This
-    reserves its PID against reuse while signalling a group whose leader exits.
+    Never consume worker status while further scope signalling is possible.
+    A terminal observation alone never proves the owned child was reaped.
     Result is an operational receipt, not a schema-2 scientific run.
     """
     if type(bounds) is not SupervisorBounds:
@@ -78,6 +79,8 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
         late_messages=[],
         ownership_verified=False, go_sent=False, worker_reaped=False,
         worker_exit_code=None, child_scope='UNRESOLVED', normal_finalization=False,
+        terminal_cleanup=False, scope_signalling_disabled=False,
+        worker_ownership_unresolved=False, worker_reap_within_deadline=False,
         bootstrap_limitation='PRE_HANDLE_OS_BOOTSTRAP_NOT_INTERRUPTIBLE')
     handle = None
     phase = 'BOOTSTRAP'
@@ -85,6 +88,11 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
     total_end = None
     exchange_end = None
     candidate = None
+    owned_pid = None
+    child_pid = None
+    cleanup_token = None
+    child_wait_verified = False
+    terminal_exit_code = None
 
     def finding(operation, code, **extra):
         event = dict(operation=operation, code=code, **extra)
@@ -101,10 +109,50 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
             raise InterruptedError('SUPERVISOR_CANCELLED')
         remaining(limit, clock)
 
+    def disable_signalling():
+        # One-way, including when a later wait fails or consumes ownership.
+        result['scope_signalling_disabled'] = True
+        disable = getattr(ops, 'disable_signalling', None)
+        if disable is not None:
+            try:
+                disable(handle)
+            except BaseException as error:
+                fail('CLEANUP', 'SIGNALLING_DISABLE_UNRESOLVED', exception=type(error).__name__)
+
+    def observe_worker():
+        if (type(owned_pid) is not int or owned_pid <= 1 or
+                type(handle.pid) is not int or handle.pid != owned_pid or
+                getattr(handle, 'returncode', None) is not None):
+            observed = dict(state='UNSAFE', code='RETAINED_HANDLE_CHANGED_OR_REAPED')
+        else:
+            observe = getattr(ops, 'observe_worker', None)
+            try:
+                observed = (observe(handle) if observe is not None else
+                            dict(state='UNAVAILABLE', code='NO_NONREAPING_FACILITY'))
+            except ChildProcessError:
+                observed = dict(state='UNSAFE', code='WORKER_REAPING_OWNERSHIP_LOST')
+            except BaseException as error:
+                fail('CLEANUP', 'WORKER_OBSERVATION_ERROR', exception=type(error).__name__)
+                observed = dict(state='UNAVAILABLE', code='OBSERVATION_ERROR')
+        if (type(observed) is not dict or observed.get('state') not in
+                ('TERMINAL', 'NO_STATUS', 'UNAVAILABLE', 'UNSAFE')):
+            observed = dict(state='UNSAFE', code='WORKER_OBSERVATION_SCHEMA')
+        if observed['state'] == 'TERMINAL' and (
+                type(observed.get('pid')) is not int or observed['pid'] != owned_pid or
+                type(observed.get('exit_code')) is not int):
+            observed = dict(state='UNSAFE', code='WORKER_OBSERVATION_IDENTITY')
+        finding('CLEANUP', 'WORKER_NONREAPING_OBSERVATION', observation=observed)
+        if observed['state'] == 'UNSAFE':
+            result['worker_ownership_unresolved'] = True
+            fail('CLEANUP', 'WORKER_OWNERSHIP_UNRESOLVED')
+            disable_signalling()
+        return observed
+
     try:
         # No claim that a later elapsed-time check interrupted this call.
         check(deadline)
         handle = ops.bootstrap(plan, bounds)
+        owned_pid = handle.pid
         result['ownership_verified'] = ops.verify_scope(handle) is True
         if not result['ownership_verified']:
             raise RuntimeError('WORKER_SCOPE_NOT_VERIFIED')
@@ -137,17 +185,21 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
                 deadline = min(total_end, started + bounds.runtime.startup)
                 check(deadline)
                 # A short fixed control message, not a scientific result payload.
+                cleanup_token = os.urandom(16).hex()
                 ops.send(handle, {'type':'GO', 'total_deadline':total_end,
-                                 'startup_deadline':deadline}, deadline)
+                                 'startup_deadline':deadline,
+                                 'cleanup_token':cleanup_token}, deadline)
                 result['go_sent'] = True
                 check(deadline)
             elif kind == 'CHILD':
-                if phase != 'STARTUP' or type(message.get('pid')) is not int or message['pid'] <= 0:
+                if (phase != 'STARTUP' or type(message.get('pid')) is not int or
+                        message['pid'] <= 1 or message['pid'] == owned_pid):
                     raise ValueError('CHILD_MESSAGE_ORDER')
                 if any(x['code'] == 'CHILD_HANDLE_REPORTED' for x in result['findings']):
                     raise ValueError('SECOND_CHILD_FORBIDDEN')
                 # Observation only; never an authority for PID/group signalling.
                 finding(phase, 'CHILD_HANDLE_REPORTED')
+                child_pid = message['pid']
             elif kind == 'PHASE':
                 new = message.get('phase')
                 valid = ((phase == 'STARTUP' and new == 'CONNECT') or
@@ -191,6 +243,16 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
                 if phase != 'FINALIZE' or exchange_end is not None:
                     raise ValueError('DONE_BEFORE_FINALIZATION')
                 candidate = {key:value for key,value in message.items() if key != 'type'}
+                if candidate.get('cleanup_handoff') is not None:
+                    # Only small already-delivered IPC data; no evidence-file IO.
+                    from .native_worker import validate_cleanup_handoff
+                    validate_cleanup_handoff(plan, candidate, worker_pid=owned_pid,
+                                             child_pid=child_pid, token=cleanup_token)
+                    child_wait_verified = True
+                    finding(phase, 'OWNED_CHILD_WAIT_VERIFIED')
+                else:
+                    finding(phase, 'CHILD_WAIT_UNVERIFIED')
+                check(active_end)
                 result['worker_result'] = candidate
                 result['normal_finalization'] = True
             else:
@@ -199,6 +261,7 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
         # A setup failure AFTER a handle exists must return ownership to cleanup.
         if handle is None and getattr(error, 'worker_handle', None) is not None:
             handle = error.worker_handle
+            owned_pid = handle.pid
             try:
                 result['ownership_verified'] = ops.verify_scope(handle) is True
             except BaseException:
@@ -210,6 +273,7 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
             finding('BOOTSTRAP_CLEANUP', 'DESCRIPTOR_CLOSE_FAILED', exception=name)
         # candidate is never accepted through this path, even if files exist.
         candidate = None
+        child_wait_verified = False
         result['normal_finalization'] = False
     finally:
         if handle is not None:
@@ -220,23 +284,53 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
             for sig in ('TERM','KILL'):
                 try:
                     remaining(cleanup_end, clock)
+                    observed = observe_worker()
+                    if result['scope_signalling_disabled']:
+                        break
+                    remaining(cleanup_end, clock)
+                    if (sig == 'KILL' and result['ownership_verified'] and
+                            child_wait_verified and candidate is not None and
+                            observed['state'] == 'TERMINAL'):
+                        if cancelled():
+                            fail('CLEANUP', 'CANCELLED')
+                            candidate = None
+                        else:
+                            disable_signalling()
+                            result['terminal_cleanup'] = True
+                            terminal_exit_code = observed['exit_code']
+                            finding('CLEANUP', 'KILL_SKIPPED_VERIFIED_CHILD_WAIT_AND_TERMINAL_WORKER')
+                            break
                     method(handle, sig)
                     finding('CLEANUP', 'SIGNAL_ATTEMPT_COMPLETED', signal=sig)
                 except BaseException as error:
-                    fail('CLEANUP', 'SIGNAL_UNRESOLVED', exception=type(error).__name__)
+                    fail('CLEANUP', 'SIGNAL_UNRESOLVED', signal=sig,
+                         exception=type(error).__name__,
+                         errno=error.errno if type(getattr(error, 'errno', None)) is int else None)
+                    if isinstance(error, ChildProcessError):
+                        result['worker_ownership_unresolved'] = True
+                        disable_signalling()
                 if sig == 'TERM':
                     try:
                         ops.pause(grace_end)
                     except BaseException as error:
                         fail('CLEANUP', 'GRACE_INTERRUPTED', exception=type(error).__name__)
             # No more signalling after this point, including a failed wait.
+            if not result['scope_signalling_disabled']:
+                disable_signalling()
             try:
+                if result['worker_ownership_unresolved']:
+                    # Popen.wait may turn ECHILD into zero. Do not manufacture
+                    # reaping evidence after our exclusive ownership was lost.
+                    raise ChildProcessError('WORKER_OWNERSHIP_UNRESOLVED')
                 remaining(cleanup_end, clock)
                 code = ops.reap(handle, cleanup_end)
                 if type(code) is not int:
                     raise ValueError('WORKER_EXIT_CODE_REQUIRED')
                 result['worker_reaped'], result['worker_exit_code'] = True, code
                 remaining(cleanup_end, clock)
+                if result['terminal_cleanup'] and code != terminal_exit_code:
+                    raise ValueError('WORKER_TERMINAL_REAP_CONTRADICTION')
+                result['worker_reap_within_deadline'] = True
             except BaseException as error:
                 fail('CLEANUP', 'WORKER_REAP_UNRESOLVED', exception=type(error).__name__)
             try:
@@ -250,7 +344,7 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
         except BaseException as error:
             fail('CLEANUP', 'CANCELLATION_CHECK_FAILED', exception=type(error).__name__)
             candidate = None
-    if candidate is not None and candidate.get('child_reaped') is True and result['worker_reaped']:
+    if candidate is not None and child_wait_verified and result['worker_reap_within_deadline']:
         result['child_scope'] = 'REPORTED_CHILD_REAPED_AND_WORKER_REAPED'
     if candidate is not None and result['worker_reaped']:
         result['status'] = 'WORKER_COMPLETED' if result['first_failure'] is None else 'COMPLETED_WITH_FAILURE'
@@ -269,6 +363,9 @@ class NativeIPC:
         self.clock, self.popen, self.selector = clock, popen, selector
         self.buffer = b''
         self._handles = []  # keep unreaped handles alive throughout ownership
+        self._handle_pids = {}
+        self._verified_handles = set()
+        self._signalling_disabled = set()
 
     def bootstrap(self, plan, bounds):
         from .live_binding import validate_plan
@@ -295,6 +392,7 @@ class NativeIPC:
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
                 start_new_session=True, close_fds=True, bufsize=0)
             self._handles.append(handle)
+            self._handle_pids[id(handle)] = handle.pid
             os.set_blocking(handle.stdin.fileno(), False)
             os.set_blocking(handle.stdout.fileno(), False)
         except BaseException as error:
@@ -313,8 +411,54 @@ class NativeIPC:
         return handle
 
     def verify_scope(self, handle):
-        return (type(handle.pid) is int and handle.pid > 1 and
+        self._guard_handle(handle)
+        verified = (type(handle.pid) is int and handle.pid > 1 and
                 os.getpgid(handle.pid) == handle.pid and os.getsid(handle.pid) == handle.pid)
+        if verified:
+            self._verified_handles.add(id(handle))
+        return verified
+
+    def disable_signalling(self, handle):
+        self._signalling_disabled.add(id(handle))
+
+    def _guard_handle(self, handle):
+        if (not any(item is handle for item in self._handles) or
+                self._handle_pids.get(id(handle)) != handle.pid or
+                type(handle.pid) is not int or handle.pid <= 1 or
+                getattr(handle, 'returncode', None) is not None or
+                id(handle) in self._signalling_disabled or
+                signal.getsignal(signal.SIGCHLD) != signal.SIG_DFL):
+            self.disable_signalling(handle)
+            raise ChildProcessError(errno.ECHILD, 'WORKER_OWNERSHIP_UNRESOLVED')
+
+    def observe_worker(self, handle):
+        """Non-consuming worker-only status; no group-absence/credential claim."""
+        try:
+            self._guard_handle(handle)
+            names = ('waitid', 'P_PID', 'WEXITED', 'WNOHANG', 'WNOWAIT',
+                     'CLD_EXITED', 'CLD_KILLED', 'CLD_DUMPED')
+            if any(getattr(os, name, None) is None for name in names):
+                return dict(state='UNAVAILABLE', code='NO_NONREAPING_FACILITY')
+            value = os.waitid(os.P_PID, handle.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+            self._guard_handle(handle)
+        except ChildProcessError:
+            self.disable_signalling(handle)
+            return dict(state='UNSAFE', code='WORKER_REAPING_OWNERSHIP_LOST')
+        except OSError as error:
+            return dict(state='UNAVAILABLE', code='WAITID_ERROR',
+                        exception=type(error).__name__, errno=error.errno)
+        if value is None:
+            return dict(state='NO_STATUS', code='NO_WORKER_STATUS_AVAILABLE')
+        if type(value.si_pid) is not int or value.si_pid != handle.pid:
+            self.disable_signalling(handle)
+            return dict(state='UNSAFE', code='WAITID_WRONG_PID')
+        if type(value.si_code) is not int or type(value.si_status) is not int:
+            return dict(state='UNAVAILABLE', code='WAITID_STATUS_SCHEMA')
+        if value.si_code == os.CLD_EXITED and 0 <= value.si_status <= 255:
+            return dict(state='TERMINAL', pid=value.si_pid, exit_code=value.si_status)
+        if value.si_code in (os.CLD_KILLED, os.CLD_DUMPED) and value.si_status > 0:
+            return dict(state='TERMINAL', pid=value.si_pid, exit_code=-value.si_status)
+        return dict(state='NO_STATUS', code='WORKER_NOT_OBSERVED_TERMINAL')
 
     def send(self, handle, message, deadline):
         if message.get('type') == 'GO':
@@ -362,12 +506,17 @@ class NativeIPC:
     def signal_group(self, handle, sig):
         # The caller has NOT reaped the leader; PID reuse is excluded under the
         # documented exclusive-child-reaper assumption. Never trust IPC PIDs.
+        self._guard_handle(handle)
+        if id(handle) not in self._verified_handles:
+            self.disable_signalling(handle)
+            raise ChildProcessError(errno.ECHILD, 'WORKER_SCOPE_NOT_VERIFIED')
         try:
             os.killpg(handle.pid, signal.SIGTERM if sig == 'TERM' else signal.SIGKILL)
         except ProcessLookupError:
             pass  # no absence claim; descendant reaping remains unestablished
 
     def signal_worker(self, handle, sig):
+        self._guard_handle(handle)
         try:
             os.kill(handle.pid, signal.SIGTERM if sig == 'TERM' else signal.SIGKILL)
         except ProcessLookupError:
@@ -378,6 +527,7 @@ class NativeIPC:
             self.selector([],[],[],min(deadline-self.clock(), .1))
 
     def reap(self, handle, deadline):
+        self.disable_signalling(handle)
         return handle.wait(timeout=remaining(deadline,self.clock))
 
     def finish(self, handle):
@@ -414,6 +564,9 @@ def run_native(plan, bounds, *, python_executable, python_sha256,
                 result['first_failure'] = event.copy()
             result['status'] = 'RESULT_UNVERIFIED'
             result['normal_finalization'] = False
+            # Keep historical cleanup decisions/actual worker wait observations,
+            # but do not retain a positive child-scope claim after failed readback.
+            result['child_scope'] = 'UNRESOLVED'
     # Explicit operational/interruption receipt, NOT a manufactured schema-2 run.
     raw = io._encode(result)
     with io._directory(plan.output_path) as (fd, _):
@@ -458,7 +611,8 @@ def worker_main():
     bounds=SupervisorBounds(runtime=runtime,**b)
     try:
         payload=execute_worker(plan,runtime,emit,clock=time.monotonic,owned_scope_verified=True,
-            startup_deadline=message['startup_deadline'],total_deadline=message['total_deadline'])
+            startup_deadline=message['startup_deadline'],total_deadline=message['total_deadline'],
+            cleanup_token=message['cleanup_token'],worker_pid=pid)
         emit({'type':'DONE',**payload})
     except BaseException as error:
         emit({'type':'ERROR','exception':type(error).__name__,

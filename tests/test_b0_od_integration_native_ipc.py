@@ -18,7 +18,7 @@ class Clock:
 
 
 def handle():
-    return SimpleNamespace(pid=43210,
+    return SimpleNamespace(pid=43210, returncode=None,
         stdin=SimpleNamespace(fileno=lambda:91,close=Mock()),
         stdout=SimpleNamespace(fileno=lambda:92,close=Mock()),wait=Mock(return_value=0))
 
@@ -28,6 +28,9 @@ class NativeIPCTests(unittest.TestCase):
         self.clock=Clock()
         self.ops=n.NativeIPC('/synthetic/python','0'*64,clock=self.clock)
         self.h=handle()
+        self.ops._handles.append(self.h)
+        self.ops._handle_pids[id(self.h)]=self.h.pid
+        self.ops._verified_handles.add(id(self.h))
 
     def test_bootstrap_calls_actual_popen_shape_once_with_owned_session(self):
         f=Fixture(); self.addCleanup(f.close)

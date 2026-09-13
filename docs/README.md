@@ -17,6 +17,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 
 ## Evidence and decisions
 
+- [`experiments/b0-od-terminal-cleanup-correction-v1.md`](experiments/b0-od-terminal-cleanup-correction-v1.md): evidence-gated terminal cleanup correction and offline regressions; historical P2 failures retained, no native revalidation or readiness claim.
 - [`progress/monthly-effort-log.md`](progress/monthly-effort-log.md): chronological effort and evidence log.
 - [`experiments/EXP-B0-000.md`](experiments/EXP-B0-000.md): deterministic fixed-time 3×3 SUMO substrate validation, direct exposure diagnosis, and the 1X `TOO_WEAK` scenario verdict.
 - [`experiments/EXP-B0-CAL-001.md`](experiments/EXP-B0-CAL-001.md): frozen baseline-only 2X–5X uniform-demand calibration, its complete aggregate result, and the `NO_QUALIFYING_DEMAND_LEVEL` decision.

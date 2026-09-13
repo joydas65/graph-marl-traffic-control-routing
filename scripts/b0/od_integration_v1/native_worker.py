@@ -140,10 +140,11 @@ class _ObservedProcess:
     def __init__(self, target, finalize):
         self.target, self.finalize = target, finalize
         self.exit_code = None
+        self._pid = getattr(target, "pid", None)
 
     @property
     def pid(self):
-        return getattr(self.target, "pid", None)
+        return self._pid
 
     def wait(self, *, timeout):
         def wait():
@@ -164,6 +165,17 @@ class _ObservedProcess:
         return (type(self.exit_code) is int
                 or type(getattr(self.target, "exit_code", None)) is int)
 
+    @property
+    def wait_evidence(self):
+        # Not the broader late-return/reaped hint. Only an actual returned wait
+        # on this retained child supplies the terminal-shortcut evidence.
+        if (type(self.pid) is int and self.pid > 1 and
+                type(getattr(self.target, "pid", None)) is int and
+                getattr(self.target, "pid", None) == self.pid and
+                type(self.exit_code) is int):
+            return dict(pid=self.pid, exit_code=self.exit_code, wait_returned=True)
+        return None
+
 
 class _FinalizingTransport:
     """One close boundary, not a per-getter proxy or client modification."""
@@ -182,7 +194,7 @@ class _FinalizingTransport:
 def execute_worker(plan, bounds, emit, *, process_factory=None,
                    transport_factory=None, clock=time.monotonic,
                    owned_scope_verified=False, startup_deadline=None,
-                   total_deadline=None):
+                   total_deadline=None, cleanup_token=None, worker_pid=None):
     """Run one owned acquisition and hand off a bounded, independently read receipt.
 
     A normal return is a small DONE payload, not an experiment PASS. On error the
@@ -197,6 +209,11 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
              "BOTH_OFFLINE_FACTORIES_REQUIRED")
     _require(plan.evidence_kind == ("SYNTHETIC" if injected else "LIVE"),
              "WORKER_FACTORY_ORIGIN_MISMATCH")
+    has_cleanup_context = cleanup_token is not None or worker_pid is not None
+    _require((injected and not has_cleanup_context) or
+             (type(cleanup_token) is str and len(cleanup_token) == 32 and
+              all(c in '0123456789abcdef' for c in cleanup_token) and
+              type(worker_pid) is int and worker_pid > 1), "WORKER_CLEANUP_CONTEXT")
     for deadline in (startup_deadline, total_deadline):
         _require(deadline is None or (type(deadline) in (int, float) and math.isfinite(deadline)),
                  "WORKER_ABSOLUTE_DEADLINE")
@@ -359,9 +376,21 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
         check_total()
         _require(io.readback(receipt, references=references) == payload, "WORKER_READBACK_MISMATCH")
         check_total()
+        process = state["process"]
+        cleanup_handoff = None
+        if (has_cleanup_context and process is not None and process.wait_evidence is not None and
+                state["launches"] == 1 and observed.run["finalization"]["process"] ==
+                dict(state="EXITED", exit_code=process.wait_evidence["exit_code"])):
+            cleanup_handoff = dict(version=1, run_id=plan.run_id,
+                condition_label=plan.condition, evidence_kind=plan.evidence_kind,
+                binding_sha256=core.digest(plan.binding), output_directory=plan.output_directory,
+                worker_pid=worker_pid, token=cleanup_token, child_launches=state["launches"],
+                child_wait=process.wait_evidence if process is not None else None,
+                finalization_process=copy.deepcopy(observed.run["finalization"]["process"]))
         return dict(receipt=receipt, grants=[asdict(grant) for grant in references._grants],
                     child_reaped=state["process"] is not None and state["process"].reaped,
-                    assessment=state["assessment"], first_failure=state["first_failure"])
+                    assessment=state["assessment"], first_failure=state["first_failure"],
+                    cleanup_handoff=cleanup_handoff)
     except BaseException as error:
         first_failure(getattr(error, "ownership_evidence", {}).get("first_failure") or
                       dict(kind="OPERATIONAL", stage="WORKER", code=type(error).__name__))
@@ -378,16 +407,48 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
         raise
 
 
-def validate_worker_result(plan, done):
-    """Independently read one completed handoff using the explicit worker grant.
+def validate_cleanup_handoff(plan, done, *, worker_pid, child_pid, token):
+    """Small in-memory closure from the trusted worker's current GO/DONE pipe.
 
-    No directory discovery or inferred authorization from a stored run occurs.
-    This post-cleanup readback is ordinary bounded-size filesystem I/O, not a
-    claim of a hard real-time filesystem guarantee under arbitrary OS failure.
+    Correlation is not attestation against a compromised worker. The fixed
+    factory covers one inherited-scope child, never arbitrary descendants.
+    Full scientific receipt readback remains outside critical cleanup.
     """
-    live.validate_plan(plan)
+    _handoff_references(plan, done)
+    handoff = done.get("cleanup_handoff")
+    _require(type(handoff) is dict and set(handoff) == {
+        "version", "run_id", "condition_label", "evidence_kind", "binding_sha256",
+        "output_directory", "worker_pid", "token", "child_launches", "child_wait",
+        "finalization_process"}, "CLEANUP_HANDOFF_SCHEMA")
+    _require(type(handoff["version"]) is int and handoff["version"] == 1 and
+             type(token) is str and len(token) == 32 and
+             all(c in '0123456789abcdef' for c in token) and
+             handoff["token"] == token and type(worker_pid) is int and worker_pid > 1 and
+             type(handoff["worker_pid"]) is int and handoff["worker_pid"] == worker_pid,
+             "CLEANUP_HANDOFF_WORKER_BINDING")
+    _require((handoff["run_id"], handoff["condition_label"], handoff["evidence_kind"],
+              handoff["binding_sha256"], handoff["output_directory"]) ==
+             (plan.run_id, plan.condition, plan.evidence_kind, core.digest(plan.binding),
+              plan.output_directory), "CLEANUP_HANDOFF_RUN_BINDING")
+    wait = handoff["child_wait"]
+    _require(type(handoff["child_launches"]) is int and handoff["child_launches"] == 1 and
+             type(child_pid) is int and child_pid > 1 and child_pid != worker_pid and
+             done.get("child_reaped") is True and type(wait) is dict and set(wait) == {
+                 "pid", "exit_code", "wait_returned"} and
+             type(wait["pid"]) is int and wait["pid"] == child_pid and
+             type(wait["exit_code"]) is int and wait["wait_returned"] is True,
+             "CLEANUP_HANDOFF_CHILD_WAIT")
+    process = handoff["finalization_process"]
+    _require(type(process) is dict and set(process) == {"state", "exit_code"} and
+             process["state"] == "EXITED" and type(process["exit_code"]) is int and
+             process["exit_code"] == wait["exit_code"], "CLEANUP_HANDOFF_PROCESS_CONTRADICTION")
+
+
+def _handoff_references(plan, done):
+    """Validate already-received identities/shape only; never open evidence."""
     _require(type(done) is dict and set(done) == {
-        "receipt", "grants", "child_reaped", "assessment", "first_failure"}, "WORKER_DONE_SCHEMA")
+        "receipt", "grants", "child_reaped", "assessment", "first_failure", "cleanup_handoff"},
+        "WORKER_DONE_SCHEMA")
     _require(type(done["child_reaped"]) is bool, "WORKER_CHILD_REAPING")
     _require(type(done["grants"]) is list and len(done["grants"]) == 1, "WORKER_GRANT_COUNT")
     raw_grant = done["grants"][0]
@@ -402,10 +463,39 @@ def validate_worker_result(plan, done):
              "WORKER_GRANT_BINDING")
     references = final.ReferenceContext((grant,))
     receipt = done["receipt"]
-    _require(type(receipt) is dict and receipt.get("name") == RESULT_NAME
+    _require(type(receipt) is dict and set(receipt) == {
+        "schema_version", "evidence_kind", "ready_to_run", "persistence_status",
+        "output_directory", "name", "format", "sha256", "byte_count"} and
+             type(receipt["schema_version"]) is int and receipt["schema_version"] == 1 and
+             receipt["ready_to_run"] is False and receipt["persistence_status"] == "VERIFIED" and
+             type(receipt["sha256"]) is str and io.SHA256.fullmatch(receipt["sha256"]) and
+             type(receipt["byte_count"]) is int and 0 < receipt["byte_count"] <= io.MAX_BYTES and
+             receipt.get("name") == RESULT_NAME
              and receipt.get("output_directory") == plan.output_directory
              and receipt.get("evidence_kind") == plan.evidence_kind
              and receipt.get("format") == "JSON", "WORKER_RECEIPT_BINDING")
+    assessment = done["assessment"]
+    _require(type(assessment) is dict and set(assessment) == {
+        "measurement_status", "stop_status", "reason_codes"} and
+             assessment["measurement_status"] in ("VALID", "EVIDENCE_DEFICIENCY", "INTEGRITY_FAILURE") and
+             assessment["stop_status"] in (None, "FAIL", "BLOCKED", "INCONCLUSIVE") and
+             type(assessment["reason_codes"]) is list and
+             all(type(code) is str for code in assessment["reason_codes"]) and
+             (done["first_failure"] is None or type(done["first_failure"]) is dict),
+             "WORKER_HANDOFF_ASSESSMENT_SCHEMA")
+    return references
+
+
+def validate_worker_result(plan, done):
+    """Independently read one completed handoff using the explicit worker grant.
+
+    No directory discovery or inferred authorization from a stored run occurs.
+    This post-cleanup readback is ordinary bounded-size filesystem I/O, not a
+    claim of a hard real-time filesystem guarantee under arbitrary OS failure.
+    """
+    live.validate_plan(plan)
+    references = _handoff_references(plan, done)
+    receipt = done["receipt"]
     payload = io.readback(receipt, references=references)
     _require(payload["record_kind"] in ("RUN", "FAILURE"), "WORKER_RECORD_KIND")
     run = payload["record"] if payload["record_kind"] == "RUN" else payload["record"]["run"]
@@ -418,6 +508,14 @@ def validate_worker_result(plan, done):
     _require(done["assessment"] == summary, "WORKER_ASSESSMENT_MISMATCH")
     _require(done["child_reaped"] == (run["finalization"]["process"]["state"] == "EXITED"),
              "WORKER_CHILD_REAPING")
+    handoff = done["cleanup_handoff"]
+    if handoff is not None:
+        _require(type(handoff) is dict and type(handoff.get("child_wait")) is dict,
+                 "CLEANUP_HANDOFF_SCHEMA")
+        validate_cleanup_handoff(plan, done, worker_pid=handoff.get("worker_pid"),
+                                 child_pid=handoff["child_wait"].get("pid"), token=handoff.get("token"))
+        _require(handoff["finalization_process"] == run["finalization"]["process"],
+                 "CLEANUP_HANDOFF_READBACK_CONTRADICTION")
     expected_failure = run["failure"]
     if expected_failure is None and assessed["stop_status"] is not None:
         expected_failure = dict(kind="INTEGRITY" if assessed["stop_status"] == "FAIL" else "EVIDENCE",

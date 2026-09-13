@@ -41,6 +41,42 @@ class PublicIntegrationProjectionTests(unittest.TestCase):
         self.assertFalse(manifest['native_factory']['native_process_test_executed'])
         self.assertFalse(manifest['native_factory']['pre_bootstrap_hard_deadline_claimed'])
         self.assertTrue(manifest['native_factory']['requires_exclusive_worker_reaping'])
+        cleanup = manifest['terminal_cleanup_correction']
+        self.assertEqual(cleanup['accepted_base'], '215ff23487df71fc1fa4d701e7e7959c43a9cf70')
+        self.assertEqual(cleanup['historical_results'], {'original_P2': 'FAIL', 'diagnostic_P2': 'FAIL'})
+        self.assertFalse(cleanup['native_revalidation_executed'])
+        self.assertFalse(cleanup['exact_native_denial_cause_proven'])
+        self.assertFalse(cleanup['ready_to_run'])
+        for path in ('scripts/b0/od_integration_v1/native_supervisor.py',
+                     'scripts/b0/od_integration_v1/native_worker.py'):
+            with self.subTest(terminal_cleanup_source=path):
+                self.assertEqual(cleanup['prior_source_test_sha256'][path],
+                                 manifest['publication_checkpoint']['reviewed_source_test_sha256'][path])
+                self.assertNotEqual(cleanup['prior_source_test_sha256'][path],
+                                    manifest['thin_binding']['current_source_test_sha256'][path])
+        self.assertIn('tests/test_b0_od_integration_terminal_cleanup.py',
+                      manifest['thin_binding']['current_source_test_sha256'])
+        correction = manifest['inconclusive_handoff_correction']
+        self.assertEqual(correction['reviewed_head'],
+                         '7e1733ad11f2b240f80c942a79fb91c6799c2024')
+        self.assertEqual(correction['reviewed_tree'],
+                         '3d53dcebcf7cc06f85aa858fa06f3401add6c99c')
+        self.assertEqual(correction['prior_validation']['integration'],
+                         {'tests': 361, 'subtests': 536})
+        self.assertEqual(correction['prior_validation']['existing'],
+                         {'tests': 153, 'subtests': 175})
+        self.assertFalse(correction['native_revalidation_executed'])
+        prior = correction['prior_source_test_sha256']
+        current = manifest['thin_binding']['current_source_test_sha256']
+        self.assertEqual(prior['scripts/b0/od_integration_v1/native_worker.py'],
+                         'd6504c1b2c13ecc7fb297561844b9732d6a649ab41838f7842c336472d545b64')
+        self.assertNotEqual(prior['scripts/b0/od_integration_v1/native_worker.py'],
+                            current['scripts/b0/od_integration_v1/native_worker.py'])
+        for path in prior:
+            if path.startswith('scripts/') and not path.endswith('/native_worker.py'):
+                with self.subTest(unchanged_inconclusive_dependency=path):
+                    self.assertEqual(prior[path], current[path])
+        self.assertIn('tests/test_b0_od_integration_inconclusive_handoff.py', current)
         publication = manifest['publication_checkpoint']
         self.assertEqual(publication['reviewed_archive_sha256'],
                          '75a52955f7d01fe2ebb30ae4b2a288d465209823a059ebdab71d3c7215e58481')

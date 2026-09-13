@@ -195,7 +195,9 @@ class SupervisorControlFlowTests(unittest.TestCase):
         self.assertTrue(result["ownership_verified"])
         self.assertTrue(result["go_sent"])
         self.assertTrue(result["worker_reaped"])
-        self.assertEqual(result["child_scope"], "REPORTED_CHILD_REAPED_AND_WORKER_REAPED")
+        # Legacy boolean-only DONE is not concrete run-bound child-wait proof.
+        self.assertEqual(result["child_scope"], "UNRESOLVED")
+        self.assertFalse(result["terminal_cleanup"])
         self.assertNotIn("type", result["worker_result"])
         self.assertEqual(result["worker_result"], {
             "child_reaped": True,
