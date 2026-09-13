@@ -478,7 +478,7 @@ def _handoff_references(plan, done):
     _require(type(assessment) is dict and set(assessment) == {
         "measurement_status", "stop_status", "reason_codes"} and
              assessment["measurement_status"] in ("VALID", "EVIDENCE_DEFICIENCY", "INTEGRITY_FAILURE") and
-             assessment["stop_status"] in (None, "FAIL", "BLOCKED") and
+             assessment["stop_status"] in (None, "FAIL", "BLOCKED", "INCONCLUSIVE") and
              type(assessment["reason_codes"]) is list and
              all(type(code) is str for code in assessment["reason_codes"]) and
              (done["first_failure"] is None or type(done["first_failure"]) is dict),
