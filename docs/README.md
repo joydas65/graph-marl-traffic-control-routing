@@ -39,6 +39,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 - [`decisions/0002-compute-and-experiment-environments.md`](decisions/0002-compute-and-experiment-environments.md): separation of the development host, reconstructed compatibility environment, canonical dissertation infrastructure, and optional exploratory compute.
 - [`decisions/0003-repository-publication-privacy.md`](decisions/0003-repository-publication-privacy.md): metadata-sanitation evidence boundaries, bounded local pre-push privacy guard, and retained-ref review requirements; repository hygiene only.
 - [`decisions/0004-b0-native-representations-and-ownership.md`](decisions/0004-b0-native-representations-and-ownership.md): historical 9 September native-representation decision and 10 September scoped-ownership completion; bootstrap, exclusive-reaper and forced-cleanup limits remain explicit.
+- [`decisions/0005-b0-precompletion-worker-abort-lifecycle.md`](decisions/0005-b0-precompletion-worker-abort-lifecycle.md): genuine-worker pre-completion reservation and returned-handle ownership; offline-only evidence, historical P3 failures and post-DONE/parent-loss limits preserved.
 - [`mentoring/2026-07-initial-guidance.md`](mentoring/2026-07-initial-guidance.md): technical guidance received during project initiation.
 - [`mentoring/2026-07-27-joint-mentor-meeting.md`](mentoring/2026-07-27-joint-mentor-meeting.md): joint discussion with Arghya and Shreya.
 - [`learning/question-bank.md`](learning/question-bank.md): mentor questions and technical preparation prompts.

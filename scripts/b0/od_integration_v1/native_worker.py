@@ -42,13 +42,21 @@ def _remaining(clock, deadline):
     return remaining
 
 
-class _NativeProcess:
-    """One actual Popen handle; never signal a process name or unrelated group."""
+def _check_shutdown(shutdown_requested):
+    if shutdown_requested is not None and shutdown_requested():
+        raise InterruptedError("WORKER_SHUTDOWN_REQUESTED")
 
-    def __init__(self, process, clock):
-        self.process, self.clock = process, clock
-        self.pid = process.pid
+
+class _RetainedNativeProcess:
+    """Bounded operations on the exact returned Popen, including adapter failure."""
+
+    def __init__(self, clock):
+        self.process, self.clock = None, clock
         self.exit_code = None
+
+    @property
+    def pid(self):
+        return self.process.pid
 
     def wait(self, *, timeout):
         deadline = _deadline(self.clock, timeout)
@@ -73,7 +81,15 @@ class _NativeProcess:
         _remaining(self.clock, deadline)
 
 
-def _spawn_native(plan, *, deadline, clock):
+class _NativeProcess(_RetainedNativeProcess):
+    """One actual Popen handle; never signal a process name or unrelated group."""
+
+    def __init__(self, process, clock):
+        super().__init__(clock)
+        self.process = process
+
+
+def _spawn_native(plan, *, deadline, clock, shutdown_requested=None):
     """Concrete acquisition, used only behind execute_worker's ownership gate.
 
     Worker bootstrap establishes RLIMIT_FSIZE before GO. Child log descriptors
@@ -83,6 +99,9 @@ def _spawn_native(plan, *, deadline, clock):
     import subprocess
     descriptors = []
     acquired, first, cleanup = None, None, []
+    # Allocate the cleanup-compatible slot before acquisition. Assignment of the
+    # actual returned handle precedes adapter construction or an abort check.
+    retained = _RetainedNativeProcess(clock)
     try:
         with io._directory(plan.output_path) as (directory, _):
             for name in ("original-stdout.log", "original-stderr.log"):
@@ -91,10 +110,12 @@ def _spawn_native(plan, *, deadline, clock):
         # Popen has no creation timeout. The already-owning supervisor independently
         # enforces startup expiry, including a child whose handle never returns.
         _remaining(clock, deadline)
-        process = subprocess.Popen(plan.argv, stdin=subprocess.DEVNULL,
-                                   stdout=descriptors[0], stderr=descriptors[1],
-                                   close_fds=True)
-        acquired = _NativeProcess(process, clock)
+        _check_shutdown(shutdown_requested)
+        retained.process = subprocess.Popen(plan.argv, stdin=subprocess.DEVNULL,
+                                            stdout=descriptors[0], stderr=descriptors[1],
+                                            close_fds=True)
+        _check_shutdown(shutdown_requested)
+        acquired = _NativeProcess(retained.process, clock)
     except BaseException as error:
         first = error
     for descriptor in descriptors:
@@ -106,10 +127,10 @@ def _spawn_native(plan, *, deadline, clock):
                 first = error
     if first is not None:
         first.native_cleanup = cleanup
-        if acquired is not None:
+        if retained.process is not None:
             # The factory failed after acquisition. Preserve the exact returned
             # handle so its caller can clean it without a second launch.
-            first.unreturned_process = acquired
+            first.unreturned_process = acquired if acquired is not None else retained
         raise first
     return acquired
 
@@ -194,16 +215,20 @@ class _FinalizingTransport:
 def execute_worker(plan, bounds, emit, *, process_factory=None,
                    transport_factory=None, clock=time.monotonic,
                    owned_scope_verified=False, startup_deadline=None,
-                   total_deadline=None, cleanup_token=None, worker_pid=None):
+                   total_deadline=None, cleanup_token=None, worker_pid=None,
+                   shutdown_requested=None):
     """Run one owned acquisition and hand off a bounded, independently read receipt.
 
     A normal return is a small DONE payload, not an experiment PASS. On error the
     original exception propagates with ``worker_failure`` attached for the sole
     supervisor ERROR receipt. Forced termination cannot produce this normal
     return and cannot manufacture a schema-2 cutoff or finalization record.
+    Shutdown is cooperative at forward-work boundaries only: exact-handle
+    close/wait and FINALIZE exchanges remain available after it is observed.
     """
     _require(owned_scope_verified is True, "OWNED_SCOPE_REQUIRED")
     _require(type(bounds) is RuntimeBounds and callable(emit), "WORKER_ARGUMENTS")
+    _require(shutdown_requested is None or callable(shutdown_requested), "WORKER_SHUTDOWN_PREDICATE")
     injected = process_factory is not None or transport_factory is not None
     _require(not injected or (callable(process_factory) and callable(transport_factory)),
              "BOTH_OFFLINE_FACTORIES_REQUIRED")
@@ -281,12 +306,15 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
                                                         exception=type(error).__name__))
 
     def start(plan, *, timeout):
+        _check_shutdown(shutdown_requested)
         _require(state["launches"] == 0, "SECOND_CHILD_LAUNCH_FORBIDDEN")
         state["launches"] += 1
         deadline = bounded_deadline(timeout, startup_deadline)
         try:
+            _check_shutdown(shutdown_requested)
             target = (process_factory(plan, timeout=_remaining(clock, deadline)) if injected
-                      else _spawn_native(plan, deadline=deadline, clock=clock))
+                      else _spawn_native(plan, deadline=deadline, clock=clock,
+                                         shutdown_requested=shutdown_requested))
         except BaseException as error:
             state["native_cleanup"].extend(getattr(error, "native_cleanup", []))
             acquired = getattr(error, "unreturned_process", None)
@@ -300,6 +328,7 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
         process = _ObservedProcess(target, finalize)
         state["process"] = process
         try:
+            _check_shutdown(shutdown_requested)
             _remaining(clock, deadline)
             if process.pid is not None:
                 _require(type(process.pid) is int and process.pid > 0, "NATIVE_CHILD_PID")
@@ -311,9 +340,11 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
         return process
 
     def connect(*, process, plan, timeout, transport_timeout):
+        _check_shutdown(shutdown_requested)
         deadline = bounded_deadline(timeout)
         state["phase"] = "CONNECT"
         emit(dict(type="PHASE", phase="CONNECT", deadline=deadline))
+        _check_shutdown(shutdown_requested)
         if injected:
             transport = transport_factory(process=process, plan=plan,
                                           timeout=_remaining(clock, deadline),
@@ -324,17 +355,24 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
                 _require(kind in ("BEGIN", "END"), "WORKER_EXCHANGE_KIND")
                 if state["phase"] in ("RUN", "FINALIZE"):
                     if kind == "BEGIN":
+                        if state["phase"] == "RUN":
+                            _check_shutdown(shutdown_requested)
                         check_total()
                     deadline = min(absolute_deadline, total_deadline) if total_deadline is not None else absolute_deadline
                     emit(dict(type="EXCHANGE_" + kind, deadline=deadline))
+                    if kind == "BEGIN" and state["phase"] == "RUN":
+                        _check_shutdown(shutdown_requested)
+            _check_shutdown(shutdown_requested)
             transport = connect_native(process, plan, _remaining(clock, deadline),
                                        transport_timeout, clock=clock, on_exchange=exchange)
         _require(transport is not None, "CONNECTION_HANDLE_REQUIRED")
         wrapped = _FinalizingTransport(transport, finalize)
         try:
+            _check_shutdown(shutdown_requested)
             _remaining(clock, deadline)
             state["phase"] = "RUN"
             emit(dict(type="PHASE", phase="RUN"))
+            _check_shutdown(shutdown_requested)
         except BaseException as error:
             first_failure(dict(kind="OPERATIONAL", stage="TRANSPORT_CONNECT", code=type(error).__name__))
             try:
@@ -357,6 +395,7 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
         state["observation"] = observed
         first_failure(observed.run["failure"] or observed.ownership["first_failure"])
         check_total()
+        _check_shutdown(shutdown_requested)
         assessment = core.assess_run(observed.run, references=references)
         state["assessment"] = summary(assessment)
         if assessment["stop_status"] is not None:
@@ -371,11 +410,14 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
                 failure_code="WORKER_RUN_ASSESSMENT_STOP",
                 measurement_status=assessment["measurement"]["measurement_status"],
                 experiment_status=assessment["stop_status"], run=observed.run, raw_evidence=None))
+        _check_shutdown(shutdown_requested)
         receipt = io.write_once(plan.output_path, RESULT_NAME, payload, references=references)
         state["receipt"] = receipt
         check_total()
+        _check_shutdown(shutdown_requested)
         _require(io.readback(receipt, references=references) == payload, "WORKER_READBACK_MISMATCH")
         check_total()
+        _check_shutdown(shutdown_requested)
         process = state["process"]
         cleanup_handoff = None
         if (has_cleanup_context and process is not None and process.wait_evidence is not None and
@@ -387,6 +429,7 @@ def execute_worker(plan, bounds, emit, *, process_factory=None,
                 worker_pid=worker_pid, token=cleanup_token, child_launches=state["launches"],
                 child_wait=process.wait_evidence if process is not None else None,
                 finalization_process=copy.deepcopy(observed.run["finalization"]["process"]))
+        _check_shutdown(shutdown_requested)
         return dict(receipt=receipt, grants=[asdict(grant) for grant in references._grants],
                     child_reaped=state["process"] is not None and state["process"].reaped,
                     assessment=state["assessment"], first_failure=state["first_failure"],

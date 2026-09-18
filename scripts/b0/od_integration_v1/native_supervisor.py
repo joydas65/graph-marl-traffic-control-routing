@@ -576,53 +576,207 @@ def run_native(plan, bounds, *, python_executable, python_sha256,
     return result
 
 
-def worker_main():
-    """Gated private worker entry. Never called by offline tests or imports."""
-    import resource
-    from .live_binding import LaunchPlan
-    from .native_worker import execute_worker
-    pid = os.getpid()
-    if os.getpgrp() != pid or os.getsid(0) != pid:
-        raise RuntimeError('WORKER_NOT_SESSION_LEADER')
-    resource.setrlimit(resource.RLIMIT_FSIZE,(io.MAX_BYTES,io.MAX_BYTES))
-    def emit(message):
-        raw = json.dumps(message,allow_nan=False,separators=(',',':')).encode()+b'\n'
-        if len(raw)>NativeIPC.MAX_MESSAGE:
+class _WorkerLifecycle:
+    """Worker-local reservation, not parent acceptance or child-closure evidence."""
+
+    def __init__(self):
+        self.state = 'PRE_COMPLETION'
+        self.term_state = None
+        self.acquisition_possible = False
+        self.first_error = None
+        self.reporting_error = None
+        self.exit_reason = None
+
+    def on_term(self, signum, frame):
+        # Only latch the phase of the first TERM. No exceptions, IO or cleanup.
+        if self.term_state is None:
+            self.term_state = self.state
+
+    def reserve(self):
+        self.state = 'ABORT_RESERVED'
+
+    def shutdown_requested(self):
+        if self.term_state in ('PRE_COMPLETION', 'ABORT_RESERVED'):
+            self.reserve()
+        return self.state == 'ABORT_RESERVED'
+
+    def forward(self):
+        if self.shutdown_requested():
+            raise InterruptedError('WORKER_SHUTDOWN_REQUESTED')
+
+    def arm_completed(self):
+        self.forward()
+        # This assignment is the arming boundary, AFTER full DONE emission.
+        # A TERM latched before it wins even if it interrupts the preceding check.
+        self.state = 'COMPLETED_HANDOFF'
+        self.forward()
+
+    def exit(self, code, reason):
+        self.exit_reason = reason
+        self.state = 'ORDINARY_EXIT'
+        return code
+
+
+class _WorkerControl:
+    """Dormant genuine pipe/signal operations; offline worker_main injects these."""
+
+    INTERVAL = .1  # observation interval, never a new execution/cleanup budget
+    clock = staticmethod(time.monotonic)
+
+    def install_term(self, handler):
+        signal.signal(signal.SIGTERM, handler)  # caught, not SIG_IGN or a mask
+
+    def setup(self):
+        import resource
+        pid = os.getpid()
+        if os.getpgrp() != pid or os.getsid(0) != pid:
+            raise RuntimeError('WORKER_NOT_SESSION_LEADER')
+        resource.setrlimit(resource.RLIMIT_FSIZE, (io.MAX_BYTES, io.MAX_BYTES))
+        os.set_blocking(0, False)
+        os.set_blocking(1, False)
+        return pid
+
+    def _ready(self, reading):
+        end = self.clock() + self.INTERVAL
+        while True:
+            left = end - self.clock()
+            if left <= 0:
+                return False
+            try:
+                readable, writable, _ = select.select([0] if reading else [],
+                    [] if reading else [1], [], min(left, self.INTERVAL))
+                return bool(readable if reading else writable)
+            except InterruptedError:
+                # Recompute the SAME interval; a returning handler may restart IO.
+                continue
+
+    def read(self):
+        if not self._ready(True):
+            return None
+        try:
+            return os.read(0, 4096)
+        except (BlockingIOError, InterruptedError):
+            return None
+
+    def write(self, raw):
+        if not self._ready(False):
+            return None
+        try:
+            # setup may have failed before nonblocking mode was installed.
+            # A ready owned pipe accepts at most PIPE_BUF bytes without a
+            # blocking large-write wait; this also bounds an ERROR attempt.
+            count = os.write(1, raw[:select.PIPE_BUF])
+        except (BlockingIOError, InterruptedError):
+            return None
+        if count <= 0:
+            raise EOFError('SUPERVISOR_PIPE_CLOSED')
+        return count
+
+
+def _park_worker(lifecycle, ops):
+    # A healthy parent owns the lifetime cap (original grace/cleanup deadline).
+    # EOF/error is unsupported parent loss, not proof that a child is absent.
+    while True:
+        lifecycle.shutdown_requested()
+        if lifecycle.state == 'COMPLETED_HANDOFF' and lifecycle.term_state is not None:
+            return lifecycle.exit(0, 'COMPLETED_TERM')
+        try:
+            chunk = ops.read()
+        except InterruptedError:
+            continue
+        except Exception:
+            return lifecycle.exit(1, 'CONTROL_PIPE_ERROR')
+        if chunk == b'':
+            return lifecycle.exit(1, 'PARENT_EOF')
+        if chunk is not None and lifecycle.state == 'COMPLETED_HANDOFF':
+            return lifecycle.exit(1, 'UNEXPECTED_CONTROL')
+        # A GO may already be queued when an early TERM/setup failure reserves
+        # the worker. Drain it without parsing/launching, never exit because of it.
+
+
+def worker_main(*, ops=None, lifecycle=None, execute=None):
+    """Genuine worker entry; offline tests inject ALL native control operations.
+
+    Pre-completion failures reserve the leader through parent TERM/grace/KILL.
+    Fully published DONE is NOT parent acceptance; post-DONE aborts are outside
+    the stronger reservation guarantee. Parent loss exits nonzero without any
+    new launch, cleanup budget or claim about an unreported child.
+    """
+    ops = _WorkerControl() if ops is None else ops
+    lifecycle = _WorkerLifecycle() if lifecycle is None else lifecycle
+    installed = False
+
+    def emit(message, *, forward=False, single_attempt=False):
+        raw = json.dumps(message, allow_nan=False, separators=(',', ':')).encode()+b'\n'
+        if len(raw) > NativeIPC.MAX_MESSAGE:
             raise ValueError('IPC_MESSAGE_TOO_LARGE')
-        offset=0
-        while offset<len(raw):
-            count=os.write(1,raw[offset:])
-            if count<=0:
-                raise EOFError('SUPERVISOR_PIPE_CLOSED')
-            offset+=count
-    emit({'type':'READY','pid':pid})
-    # Before GO, EOF aborts with no SUMO acquisition. Parent bootstrap deadline
-    # covers a returned worker; it cannot interrupt pre-handle process creation.
-    line=sys.stdin.buffer.readline(NativeIPC.MAX_MESSAGE+1)
-    if not line.endswith(b'\n') or len(line)>NativeIPC.MAX_MESSAGE:
-        return
-    message=json.loads(line)
-    if message.get('type')!='GO':
-        return
-    remaining(message['startup_deadline'],time.monotonic)
-    data=message['plan']; data['argv']=tuple(data['argv'])
-    plan=LaunchPlan(**data)
-    b=message['bounds']; runtime=RuntimeBounds(**b.pop('runtime'))
-    bounds=SupervisorBounds(runtime=runtime,**b)
+        offset = 0
+        while offset < len(raw):
+            if forward:
+                lifecycle.forward()
+            count = ops.write(raw[offset:])
+            if count is not None:
+                if type(count) is not int or count <= 0 or count > len(raw)-offset:
+                    raise EOFError('SUPERVISOR_PIPE_WRITE_INVALID')
+                offset += count
+            if single_attempt and offset != len(raw):
+                raise OSError('ERROR_REPORT_UNAVAILABLE')
+        if forward:
+            lifecycle.forward()
+
     try:
-        payload=execute_worker(plan,runtime,emit,clock=time.monotonic,owned_scope_verified=True,
-            startup_deadline=message['startup_deadline'],total_deadline=message['total_deadline'],
-            cleanup_token=message['cleanup_token'],worker_pid=pid)
-        emit({'type':'DONE',**payload})
+        ops.install_term(lifecycle.on_term)
+        installed = True
+        pid = ops.setup()
+        from .live_binding import LaunchPlan
+        from .native_worker import execute_worker
+        execute = execute_worker if execute is None else execute
+        emit({'type': 'READY', 'pid': pid}, forward=True)
+        line = b''
+        while b'\n' not in line:
+            lifecycle.forward()
+            chunk = ops.read()
+            lifecycle.forward()
+            if chunk == b'':
+                return lifecycle.exit(1, 'PARENT_EOF_BEFORE_GO')
+            if chunk is not None:
+                line += chunk
+                if len(line) > NativeIPC.MAX_MESSAGE:
+                    raise ValueError('IPC_MESSAGE_TOO_LARGE')
+        if not line.endswith(b'\n') or line.count(b'\n') != 1:
+            raise ValueError('ONE_GO_MESSAGE_REQUIRED')
+        message = json.loads(line)
+        if message.get('type') != 'GO':
+            raise ValueError('GO_REQUIRED')
+        remaining(message['startup_deadline'], ops.clock)
+        data = dict(message['plan']); data['argv'] = tuple(data['argv'])
+        plan = LaunchPlan(**data)
+        b = dict(message['bounds']); runtime = RuntimeBounds(**b.pop('runtime'))
+        SupervisorBounds(runtime=runtime, **b)
+        lifecycle.forward()
+        lifecycle.acquisition_possible = True  # conservative, never child evidence
+        payload = execute(plan, runtime, emit, clock=ops.clock, owned_scope_verified=True,
+            startup_deadline=message['startup_deadline'], total_deadline=message['total_deadline'],
+            cleanup_token=message['cleanup_token'], worker_pid=pid,
+            shutdown_requested=lifecycle.shutdown_requested)
+        emit({'type': 'DONE', **payload}, forward=True)
+        lifecycle.arm_completed()
     except BaseException as error:
-        emit({'type':'ERROR','exception':type(error).__name__,
-              'worker_failure':getattr(error,'worker_failure',None)})
-    # Stay unreaped as the PID reservation until the supervisor terminates this
-    # exact group. EOF allows exit if the supervisor disappears; no new launch.
-    sys.stdin.buffer.read(1)
+        if not installed:
+            raise  # cannot promise reservation before handler installation
+        lifecycle.reserve()
+        lifecycle.first_error = type(error).__name__
+        try:
+            # One finite write observation only; blocked/broken error reporting
+            # must not prevent entry to ordinary reservation. No retry budget.
+            emit({'type': 'ERROR', 'exception': type(error).__name__,
+                  'worker_failure': getattr(error, 'worker_failure', None)}, single_attempt=True)
+        except BaseException as reporting:
+            lifecycle.reporting_error = type(reporting).__name__
+    return _park_worker(lifecycle, ops)
 
 
 if __name__ == '__main__':
     if sys.argv[1:] != ['--worker']:
         raise SystemExit('worker entry only')
-    worker_main()
+    raise SystemExit(worker_main())
