@@ -68,6 +68,14 @@ class PublicIntegrationProjectionTests(unittest.TestCase):
         self.assertFalse(correction['native_revalidation_executed'])
         prior = correction['prior_source_test_sha256']
         current = manifest['thin_binding']['current_source_test_sha256']
+        lifecycle = manifest['precompletion_abort_lifecycle']
+        pre_lifecycle = lifecycle['prior_source_test_sha256']
+        self.assertEqual(lifecycle['accepted_base'], '43a7c42d69ddac6f7d4fc26265cd870016945500')
+        self.assertEqual(lifecycle['accepted_tree'], '22484b05142fee3348e72635834e2163418dea00')
+        self.assertEqual(lifecycle['prior_validation']['integration'], {'tests':369, 'subtests':577})
+        self.assertFalse(lifecycle['updated_worker_native_validation'])
+        self.assertFalse(lifecycle['abort_cleanup_ack_implemented'])
+        self.assertFalse(lifecycle['ready_to_run'])
         self.assertEqual(prior['scripts/b0/od_integration_v1/native_worker.py'],
                          'd6504c1b2c13ecc7fb297561844b9732d6a649ab41838f7842c336472d545b64')
         self.assertNotEqual(prior['scripts/b0/od_integration_v1/native_worker.py'],
@@ -75,7 +83,20 @@ class PublicIntegrationProjectionTests(unittest.TestCase):
         for path in prior:
             if path.startswith('scripts/') and not path.endswith('/native_worker.py'):
                 with self.subTest(unchanged_inconclusive_dependency=path):
-                    self.assertEqual(prior[path], current[path])
+                    self.assertEqual(prior[path], pre_lifecycle[path])
+        lifecycle_changes = {'scripts/b0/od_integration_v1/native_supervisor.py',
+                             'scripts/b0/od_integration_v1/native_worker.py'}
+        self.assertEqual(set(lifecycle['changed_production_paths']), lifecycle_changes)
+        for path, expected in pre_lifecycle.items():
+            if path.startswith('scripts/'):
+                with self.subTest(lifecycle_source_lineage=path):
+                    if path in lifecycle_changes:
+                        self.assertNotEqual(expected, current[path])
+                    else:
+                        self.assertEqual(expected, current[path])
+        for path in ('tests/test_b0_od_integration_worker_lifecycle.py',
+                     'tests/test_b0_od_integration_abort_acquisition.py'):
+            self.assertIn(path, current)
         self.assertIn('tests/test_b0_od_integration_inconclusive_handoff.py', current)
         publication = manifest['publication_checkpoint']
         self.assertEqual(publication['reviewed_archive_sha256'],
