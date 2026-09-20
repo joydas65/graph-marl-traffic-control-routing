@@ -22,8 +22,8 @@
       "original_component": "b0_od_integration_v1/integration.py",
       "original_validated_sha256": "fa99994afb7e453df39b8efc441b2cf5174304c657fadecebf2ee40bb81df4ab",
       "public_path": "scripts/b0/od_integration_v1/integration.py",
-      "public_sha256": "9c472cca52f50350fa5b4fa0bb851dd28d8a727f947bab288c97abea6e2ca82f",
-      "adjustment": "Operational-status correction: explicit unchanged-clock step-abort readback, verified prefix assessment, full-H measurement remains invalid. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved.",
+      "public_sha256": "28d841460c8668fa05c7cee8e32661628344b9cd85b6a1298296e47c3ca119a1",
+      "adjustment": "Operational-status correction: explicit unchanged-clock step-abort readback, verified prefix assessment, full-H measurement remains invalid. Finalization schema-2 extension: explicit references, versioned evidence and offline fixtures; scientific assertions preserved. Call-local bounded active-membership event sweep with original fallback; all validation boundaries retained.",
       "initial_publication_sha256": "fa99994afb7e453df39b8efc441b2cf5174304c657fadecebf2ee40bb81df4ab",
       "initial_publication_adjustment": "NONE",
       "accepted_checkpoint_sha256": "aee3028c1e2fd6d8972955bbd5375cff083a1787f5ab26409182d28338a5de37",
@@ -135,7 +135,7 @@
     "supported_abort": "OSError raised by simulationStep, verified unchanged-clock boundary and consistent observed prefix; not a blanket TECHNICAL-label rule."
   },
   "additional_public_test_sha256": {
-    "tests/test_b0_od_integration_projection.py": "0c5d57f97d3361ffee629df0f36787de92157596255f145a0b872cd72484ebe7",
+    "tests/test_b0_od_integration_projection.py": "4a2567b389b6203eed5f7143cfb71bc2fe01de35878a4d985a38047a4cb06a1d",
     "tests/test_b0_od_integration_operational.py": "cc855016fe3c3d2d595f3815787aa6f10d639d738245c90bb6ab7a89a79c290d"
   },
   "accepted_checkpoint": {
@@ -197,7 +197,7 @@
       "scripts/b0/od_integration_v1/__init__.py": "ce9ebb3cb49eaf584ca9d7c8dbea62af1461add513c25d34bc2357f70bb7fd6c",
       "scripts/b0/od_integration_v1/evidence.py": "19146748f828369bc4286816f8725c560b8ede956677cc09e34cd1035bb501c2",
       "scripts/b0/od_integration_v1/finalization.py": "a3da71244f6e8a9bd63a8b324dd85be186b4847023440e7b87df735dac75d4a8",
-      "scripts/b0/od_integration_v1/integration.py": "9c472cca52f50350fa5b4fa0bb851dd28d8a727f947bab288c97abea6e2ca82f",
+      "scripts/b0/od_integration_v1/integration.py": "28d841460c8668fa05c7cee8e32661628344b9cd85b6a1298296e47c3ca119a1",
       "scripts/b0/od_integration_v1/live_binding.py": "5729d5c991e9c056145d7ae94e36e90a7b08775830f0b077d30c1622ba8f0303",
       "scripts/b0/od_integration_v1/native_mapping.py": "04497999bf864c9e7f97f831bffe7ccad2f40403c807977bf6b34640a110a543",
       "scripts/b0/od_integration_v1/native_supervisor.py": "44fea29280a66dbf8538180a5072aa7f445e0ea9487e0ca8edaee5629fda6c82",
@@ -217,7 +217,7 @@
       "tests/test_b0_od_integration_operational.py": "cc855016fe3c3d2d595f3815787aa6f10d639d738245c90bb6ab7a89a79c290d",
       "tests/test_b0_od_integration_origin.py": "68c288181d827ac9ae6332a4b3fd591f3292af488611a40c5528ff3c70705c9d",
       "tests/test_b0_od_integration_owned_runtime.py": "ef7817885a4486e9d736a0d95116117101a7b8b575305251d11112e8a9c419f9",
-      "tests/test_b0_od_integration_projection.py": "0c5d57f97d3361ffee629df0f36787de92157596255f145a0b872cd72484ebe7",
+      "tests/test_b0_od_integration_projection.py": "4a2567b389b6203eed5f7143cfb71bc2fe01de35878a4d985a38047a4cb06a1d",
       "tests/test_b0_od_integration_qualification.py": "a0dedc0a4e56375808c02150751ca4bbacd67df0f6bd2eaa9dff4e4e1fd02e55",
       "tests/b0_od_integration_fixtures.py": "16586bcd84f822057e1cef14bddff80f1bcf1b916596931bf815d43dd5ea0849",
       "tests/run_b0_od_integration_offline.py": "417934d8e2e598033bc09de14a2c2cacffd5103c0d221bd2b32f72035a84d77a",
@@ -472,5 +472,24 @@
     "abort_cleanup_ack_implemented": false,
     "ready_to_run": false,
     "scope": "Genuine worker pre-completion abort reservation and exact returned-Popen ownership; supervisor and scientific contracts unchanged. Post-DONE acceptance and parent-loss guarantees not added."
+  },
+  "active_membership_optimization": {
+    "date": "2026-09-20",
+    "accepted_base": "736994bdf2ded68c4c0c2f432a599b1a796bada9",
+    "accepted_tree": "d46acb8f23563b4530f447a06aad0fe0cfc7013b",
+    "prior_manifest_sha256": "3597dda8a20b31136d1d2c974900253502ddf1c502b9ada16cbcc28f360d6a50",
+    "changed_production_paths": [
+      "scripts/b0/od_integration_v1/integration.py"
+    ],
+    "prior_production_sha256": {
+      "scripts/b0/od_integration_v1/integration.py": "9c472cca52f50350fa5b4fa0bb851dd28d8a727f947bab288c97abea6e2ca82f"
+    },
+    "prior_projection_test_sha256": "0c5d57f97d3361ffee629df0f36787de92157596255f145a0b872cd72484ebe7",
+    "current_test_sha256": {
+      "tests/b0_active_membership_oracle.py": "7ed3d4c2fcf3ee0194425abb643c8d105dcc7db52bfba3b98eb11c3e89292073",
+      "tests/test_b0_od_integration_active_membership.py": "56ea0241805fd678d29b7fa12263ad1141ab4526fde634e73292bd3620c53bf7"
+    },
+    "native_validation_executed": false,
+    "ready_to_run": false
   }
 }

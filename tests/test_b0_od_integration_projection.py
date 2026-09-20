@@ -87,13 +87,26 @@ class PublicIntegrationProjectionTests(unittest.TestCase):
         lifecycle_changes = {'scripts/b0/od_integration_v1/native_supervisor.py',
                              'scripts/b0/od_integration_v1/native_worker.py'}
         self.assertEqual(set(lifecycle['changed_production_paths']), lifecycle_changes)
+        optimization = manifest['active_membership_optimization']
+        self.assertEqual(optimization['accepted_base'], '736994bdf2ded68c4c0c2f432a599b1a796bada9')
+        self.assertEqual(optimization['changed_production_paths'],
+                         ['scripts/b0/od_integration_v1/integration.py'])
+        self.assertFalse(optimization['native_validation_executed'])
+        self.assertFalse(optimization['ready_to_run'])
+        lineage_current = dict(current)
+        lineage_current.update(optimization['prior_production_sha256'])
+        for path, expected in optimization['prior_production_sha256'].items():
+            self.assertNotEqual(expected, current[path])
+        for path, expected in optimization['current_test_sha256'].items():
+            with self.subTest(active_membership_identity=path):
+                self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected)
         for path, expected in pre_lifecycle.items():
             if path.startswith('scripts/'):
                 with self.subTest(lifecycle_source_lineage=path):
                     if path in lifecycle_changes:
                         self.assertNotEqual(expected, current[path])
                     else:
-                        self.assertEqual(expected, current[path])
+                        self.assertEqual(expected, lineage_current[path])
         for path in ('tests/test_b0_od_integration_worker_lifecycle.py',
                      'tests/test_b0_od_integration_abort_acquisition.py'):
             self.assertIn(path, current)

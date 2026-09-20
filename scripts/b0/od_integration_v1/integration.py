@@ -609,12 +609,45 @@ def _validate_run(record, *, prefix=False, references=None, legacy_revision=None
             for row in obs["tripinfo_records"]:
                 if any(_number(float(row.get(key, -1))) > h for key in ("depart", "arrival")):
                     raise ValueError("TRIPINFO_OUTSIDE_OBSERVED_PREFIX")
+        # ACTIVE_MEMBERSHIP_INDEX_BEGIN
+        # Only bounded, plain integral event data takes the call-local sweep.
+        # Unsupported evidence retains the original scan and diagnostic order.
+        departures = obs.get("departed_events") if type(obs) is dict else None
+        arrivals = obs.get("arrival_events") if type(obs) is dict else None
+        active_events = None
+        if (type(departures) is dict and type(arrivals) is dict
+                and len(departures) <= len(measured["ledger"])
+                and len(arrivals) <= len(measured["ledger"])
+                and all(type(v) is str and type(times) is list and len(times) == 1
+                        and (type(times[0]) is int or
+                             (type(times[0]) is float and times[0].is_integer()))
+                        and 0 <= times[0] <= h
+                        for events in (departures, arrivals) for v, times in events.items())):
+            active_events = {}
+            for v, times in departures.items():
+                first = max(1, int(times[0]))
+                stop = int(arrivals[v][0]) if v in arrivals else h + 1
+                if first < stop:
+                    active_events.setdefault(first, [[], []])[0].append(v)
+                    if stop <= h:
+                        active_events.setdefault(stop, [[], []])[1].append(v)
+            indexed_active = set()
+        # ACTIVE_MEMBERSHIP_INDEX_END
         halted_counts = {key: 0 for key in measured["ledger"]}
         for time, sample in enumerate(controls["steps"], 1):
             if sample["time"] != time or sample["controls_sha256"] != expected_sha:
                 raise ValueError("CONTROL_TIME_OR_BINDING")
             active = sample["active_ids"]; halted = sample["halting_ids"]
-            expected_active = {v for v, times in obs["departed_events"].items() if len(times)==1 and times[0] <= time and (v not in obs["arrival_events"] or time < obs["arrival_events"][v][0])}
+            # ACTIVE_MEMBERSHIP_QUERY_BEGIN
+            if active_events is None:
+                expected_active = {v for v, times in obs["departed_events"].items() if len(times)==1 and times[0] <= time and (v not in obs["arrival_events"] or time < obs["arrival_events"][v][0])}
+            else:
+                if time in active_events:
+                    entering, leaving = active_events[time]
+                    indexed_active.update(entering)
+                    indexed_active.difference_update(leaving)
+                expected_active = indexed_active
+            # ACTIVE_MEMBERSHIP_QUERY_END
             if len(active) != len(set(active)) or set(active) != expected_active or len(halted) != len(set(halted)) or not set(halted) <= set(active) or obs["queue_trace"][time-1] != [time,len(halted)]:
                 raise ValueError("ACTIVE_OR_HALTING_EVIDENCE")
             for v in halted:
