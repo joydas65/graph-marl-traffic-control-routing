@@ -86,6 +86,7 @@ class Operations:
         self.log, self.go = [], None
         self.disabled = False
         self.reap_code = 0
+        self.candidate = None
         self.messages = [(.1, dict(type='READY', pid=WORKER_PID))]
         if child_reported:
             self.messages.append((.15, dict(type='CHILD', pid=CHILD_PID)))
@@ -94,7 +95,7 @@ class Operations:
         if prior_failure is not None:
             self.messages.append((.35, dict(type='FIRST_FAILURE', failure=prior_failure)))
         self.messages.extend([(.4, dict(type='PHASE', phase='FINALIZE')),
-                              (done_at, 'DONE')])
+                              (done_at, 'DONE'), (done_at, 'COMPLETION_ARMED')])
 
     def bootstrap(self, p, bounds):
         assert p is self.plan
@@ -124,6 +125,10 @@ class Operations:
                 value['cleanup_handoff'] = None
             if self.mutate is not None:
                 self.mutate(value)
+            self.candidate = {key: item for key, item in value.items() if key != 'type'}
+        elif value == 'COMPLETION_ARMED':
+            value = supervisor._completion_marker(self.plan, self.candidate,
+                worker_pid=WORKER_PID, token=self.go['cleanup_token'])
         return value
 
     def observe_worker(self, handle):
@@ -159,6 +164,10 @@ class Operations:
         self.clock.now = deadline
         if self.pause_action is not None:
             self.pause_action(self)
+
+    def completion_tail(self, handle, deadline):
+        assert handle is self.handle
+        return dict(state='QUIET')
 
     def reap(self, handle, deadline):
         assert handle is self.handle and self.disabled
