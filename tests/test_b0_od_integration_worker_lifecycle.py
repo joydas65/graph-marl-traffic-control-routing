@@ -80,6 +80,7 @@ class LifecycleTests(unittest.TestCase):
         bounds = supervisor.SupervisorBounds(fixtures.BOUNDS, 2, 20, 3, 4)
         return (json.dumps(dict(type='GO', plan=asdict(f.plan), bounds=asdict(bounds),
             startup_deadline=3, total_deadline=20,
+            completion_protocol=supervisor.COMPLETION_PROTOCOL,
             cleanup_token=terminal_fixtures.TOKEN))+'\n').encode()
 
     def run_main(self, control, execute=None, lifecycle=None):
@@ -279,6 +280,8 @@ class LifecycleTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(life.term_state, 'COMPLETED_HANDOFF')
         self.assertIsNone(life.first_error)
+        self.assertEqual([message['type'] for message in control.messages()],
+                         ['READY', 'DONE', 'COMPLETION_ARMED'])
 
     def test_parent_loss_after_possible_acquisition_is_not_clean_success(self):
         for ending in (b'', OSError('synthetic control failure'), b'unexpected'):

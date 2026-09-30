@@ -93,6 +93,25 @@ class PublicIntegrationProjectionTests(unittest.TestCase):
                          ['scripts/b0/od_integration_v1/integration.py'])
         self.assertFalse(optimization['native_validation_executed'])
         self.assertFalse(optimization['ready_to_run'])
+        arming = manifest['completion_arming_protocol']
+        self.assertEqual(arming['accepted_base'], 'c7689d6376bf23d1002614c140713d4679be610c')
+        self.assertEqual(arming['accepted_tree'], 'aa8ae6d5a29937bb2a5413463e8f81ec9e237a57')
+        self.assertEqual(arming['protocol'], 'B0_WORKER_COMPLETION_ARMED_V1')
+        self.assertEqual(arming['changed_production_paths'],
+                         ['scripts/b0/od_integration_v1/native_supervisor.py'])
+        self.assertEqual(arming['prior_validation']['integration'], {'tests':426, 'subtests':663})
+        self.assertFalse(arming['native_validation_executed'])
+        self.assertFalse(arming['deadlines_changed'])
+        self.assertFalse(arming['abort_cleanup_ack_implemented'])
+        self.assertFalse(arming['ready_to_run'])
+        for path, expected in arming['prior_source_test_sha256'].items():
+            if path.startswith('scripts/'):
+                with self.subTest(completion_source_lineage=path):
+                    if path in arming['changed_production_paths']:
+                        self.assertNotEqual(expected, current[path])
+                    else:
+                        self.assertEqual(expected, current[path])
+        self.assertIn('tests/test_b0_od_integration_completion_arming.py', current)
         lineage_current = dict(current)
         lineage_current.update(optimization['prior_production_sha256'])
         for path, expected in optimization['prior_production_sha256'].items():

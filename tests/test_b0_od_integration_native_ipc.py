@@ -166,6 +166,100 @@ class NativeIPCTests(unittest.TestCase):
                 self.ops.receive(self.h,1.)
             read.assert_called_once_with(92,1)
 
+    def test_completion_tail_rejects_buffered_bytes_without_another_read(self):
+        for raw in (b'{"type":"COMPLETION_ARMED"}\n',b'{'):
+            with self.subTest(raw_length=len(raw)):
+                self.ops.buffer=raw
+                self.ops.selector=Mock(side_effect=AssertionError('buffered bytes need no select'))
+                with patch.object(n.os,'read',side_effect=AssertionError('unexpected read')) as read:
+                    self.assertEqual(self.ops.completion_tail(self.h,1.),
+                                     {'state':'TRAILING','byte_count':len(raw)})
+                read.assert_not_called()
+        self.h.wait.assert_not_called()
+
+    def test_completion_tail_reads_only_bounded_owned_pipe_bytes(self):
+        self.ops.selector=lambda r,w,e,t:(r,[],[])
+        with patch.object(n.os,'read',return_value=b'x') as read:
+            self.assertEqual(self.ops.completion_tail(self.h,1.),
+                             {'state':'TRAILING','byte_count':1})
+        read.assert_called_once_with(92,min(4096,self.ops.MAX_MESSAGE))
+        self.assertEqual(self.ops.buffer,b'x')
+        self.h.wait.assert_not_called()
+
+    def test_completion_tail_quiet_observation_does_not_reset_grace(self):
+        self.clock.now=.75
+        budgets=[]
+        def quiet(readable,writable,exceptional,budget):
+            self.assertEqual(readable,[92])
+            self.assertEqual(writable,[])
+            budgets.append(budget)
+            self.clock.now+=budget
+            return [],[],[]
+        self.ops.selector=quiet
+        with patch.object(n.os,'read',side_effect=AssertionError('not readable')) as read:
+            self.assertEqual(self.ops.completion_tail(self.h,1.),{'state':'QUIET'})
+        self.assertEqual(self.clock.now,1.)
+        self.assertAlmostEqual(sum(budgets),.25)
+        read.assert_not_called()
+        self.h.wait.assert_not_called()
+
+    def test_completion_tail_eof_reports_channel_only_not_worker_cleanup(self):
+        self.ops.selector=lambda r,w,e,t:(r,[],[])
+        with patch.object(n.os,'read',return_value=b''):
+            self.assertEqual(self.ops.completion_tail(self.h,1.),{'state':'EOF'})
+        self.h.wait.assert_not_called()
+        self.assertIsNone(self.h.returncode)
+
+    def test_completion_tail_interrupted_reads_keep_original_grace(self):
+        def ready(r,w,e,budget):
+            self.clock.now+=budget
+            return r,[],[]
+        self.ops.selector=ready
+        with patch.object(n.os,'read',side_effect=[BlockingIOError(),InterruptedError(),b'']) as read:
+            self.assertEqual(self.ops.completion_tail(self.h,1.),{'state':'EOF'})
+        self.assertEqual(read.call_count,3)
+        self.assertAlmostEqual(self.clock.now,.3)
+        self.h.wait.assert_not_called()
+
+    def test_completion_tail_read_error_remains_visible(self):
+        self.ops.selector=lambda r,w,e,t:(r,[],[])
+        with patch.object(n.os,'read',side_effect=PermissionError('synthetic pipe denial')):
+            with self.assertRaises(PermissionError):
+                self.ops.completion_tail(self.h,1.)
+        self.h.wait.assert_not_called()
+
+    def test_completion_marker_partial_frame_needs_newline_before_original_deadline(self):
+        plan=SimpleNamespace(run_id='synthetic-framed-completion',binding={'fixture':'framing'})
+        candidate={'synthetic_candidate':True}
+        marker=n._completion_marker(plan,candidate,worker_pid=self.h.pid,token='0'*32)
+        raw=json.dumps(marker,separators=(',',':')).encode()+b'\n'
+        for deadline,expires in ((1.,False),(.5,True)):
+            with self.subTest(deadline=deadline):
+                self.clock.now=0.
+                self.ops.buffer=b''
+                def ready(r,w,e,budget):
+                    return r,[],[]
+                pieces=iter((raw[:15],raw[15:-1],raw[-1:]))
+                def read(fd,count):
+                    self.assertEqual(fd,92)
+                    self.clock.now+=.2
+                    return next(pieces)
+                self.ops.selector=ready
+                with patch.object(n.os,'read',side_effect=read):
+                    self.assertIsNone(self.ops.receive(self.h,deadline))
+                    self.assertIsNone(self.ops.receive(self.h,deadline))
+                    self.assertNotIn(b'\n',self.ops.buffer)
+                    if expires:
+                        with self.assertRaises(TimeoutError):
+                            self.ops.receive(self.h,deadline)
+                    else:
+                        received=self.ops.receive(self.h,deadline)
+                        self.assertEqual(received,marker)
+                        n._validate_completion_marker(received,plan,candidate,
+                            worker_pid=self.h.pid,token='0'*32)
+                self.assertAlmostEqual(self.clock.now,.6)
+        self.h.wait.assert_not_called()
+
     def test_group_and_worker_signals_target_only_retained_handle(self):
         with patch.object(n.os,'killpg') as group, patch.object(n.os,'kill') as worker:
             self.ops.signal_group(self.h,'TERM'); self.ops.signal_group(self.h,'KILL')
@@ -198,11 +292,15 @@ class NativeIPCTests(unittest.TestCase):
         class Ops:
             def bootstrap(self,*args): return h
             def verify_scope(self,handle): return handle is h
-            def send(self,handle,message,deadline): calls.append(message['type'])
+            def send(self,handle,message,deadline):
+                calls.append(message['type'])
+                messages.append(n._completion_marker(f.plan,done,
+                    worker_pid=h.pid,token=message['cleanup_token']))
             def receive(self,handle,deadline): return messages.pop(0)
             def signal_group(self,handle,sig): calls.append(sig)
             def signal_worker(self,*args): raise AssertionError('unverified scope')
             def pause(self,deadline): clock.now=deadline
+            def completion_tail(self,handle,deadline): return {'state':'QUIET'}
             def reap(self,handle,deadline): return -15
             def finish(self,handle): pass
         result=n.supervise(f.plan,n.SupervisorBounds(BOUNDS,2,20,10,3),ops=Ops(),clock=clock)

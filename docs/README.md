@@ -17,6 +17,7 @@ This directory is the durable, public-safe research memory for the dissertation.
 
 ## Evidence and decisions
 
+- [`decisions/0006-b0-completion-arming-protocol.md`](decisions/0006-b0-completion-arming-protocol.md): provisional DONE and bounded post-arming notification; unchanged scientific, cleanup and deadline boundaries, with native validation still pending.
 - [`experiments/b0-od-terminal-cleanup-correction-v1.md`](experiments/b0-od-terminal-cleanup-correction-v1.md): evidence-gated terminal cleanup correction and offline regressions; historical P2 failures retained, no native revalidation or readiness claim.
 - [`experiments/b0-od-active-membership-optimization-v1.md`](experiments/b0-od-active-membership-optimization-v1.md): call-local expected-active sweep, whole-validator equivalence and fixed paired offline timings; independent validation boundaries and historical native failures preserved.
 - [`progress/monthly-effort-log.md`](progress/monthly-effort-log.md): chronological effort and evidence log.

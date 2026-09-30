@@ -27,6 +27,38 @@ from . import evidence as io
 from .owned_runtime import RuntimeBounds
 
 
+COMPLETION_PROTOCOL = 'B0_WORKER_COMPLETION_ARMED_V1'
+MAX_COMPLETION_MESSAGE = 1024
+
+
+def _completion_marker(plan, candidate, *, worker_pid, token):
+    """Small local-arming correlation, not scientific or child-closure proof."""
+    if (type(candidate) is not dict or type(plan.run_id) is not str or
+            not io.NAME.fullmatch(plan.run_id) or type(plan.binding) is not dict or
+            type(worker_pid) is not int or worker_pid <= 1 or
+            type(token) is not str or len(token) != 32 or
+            any(c not in '0123456789abcdef' for c in token)):
+        raise ValueError('COMPLETION_CONTEXT_SCHEMA')
+    def digest(value):
+        return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=True,
+            allow_nan=False, separators=(',', ':')).encode()).hexdigest()
+    marker = dict(type='COMPLETION_ARMED', protocol=COMPLETION_PROTOCOL, version=1,
+        run_id=plan.run_id, worker_pid=worker_pid, token=token,
+        binding_sha256=digest(plan.binding), candidate_sha256=digest(candidate))
+    if len(json.dumps(marker, separators=(',', ':')).encode()) + 1 > MAX_COMPLETION_MESSAGE:
+        raise ValueError('COMPLETION_MESSAGE_TOO_LARGE')
+    return marker
+
+
+def _validate_completion_marker(message, plan, candidate, *, worker_pid, token):
+    expected = _completion_marker(plan, candidate, worker_pid=worker_pid, token=token)
+    # Exact types exclude bool/int equality and extra or missing fields.
+    if (type(message) is not dict or set(message) != set(expected) or
+            any(type(message[key]) is not type(value) or message[key] != value
+                for key, value in expected.items())):
+        raise ValueError('COMPLETION_ARMED_BINDING_OR_SCHEMA')
+
+
 @dataclass(frozen=True)
 class SupervisorBounds:
     runtime: RuntimeBounds
@@ -73,7 +105,9 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
     """
     if type(bounds) is not SupervisorBounds:
         raise ValueError('SUPERVISOR_BOUNDS_REQUIRED')
-    result = dict(record_kind='NATIVE_OPERATIONAL_RECEIPT', schema_version=1,
+    result = dict(record_kind='NATIVE_OPERATIONAL_RECEIPT', schema_version=2,
+        completion_protocol=COMPLETION_PROTOCOL, provisional_result=None,
+        completion_armed=None, post_completion_channel=None,
         run_id=plan.run_id, evidence_kind=plan.evidence_kind, ready_to_run=False,
         status='INTERRUPTED', first_failure=None, findings=[], worker_result=None,
         late_messages=[],
@@ -88,6 +122,7 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
     total_end = None
     exchange_end = None
     candidate = None
+    provisional = None
     owned_pid = None
     child_pid = None
     cleanup_token = None
@@ -108,6 +143,13 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
         if cancelled():
             raise InterruptedError('SUPERVISOR_CANCELLED')
         remaining(limit, clock)
+
+    def revoke_completion():
+        nonlocal candidate, child_wait_verified
+        candidate = None
+        child_wait_verified = False
+        result['worker_result'] = None
+        result['normal_finalization'] = False
 
     def disable_signalling():
         # One-way, including when a later wait fails or consumes ownership.
@@ -175,6 +217,8 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
             if type(message) is not dict or type(message.get('type')) is not str:
                 raise ValueError('WORKER_MESSAGE_SCHEMA')
             kind = message['type']
+            if provisional is not None and kind not in ('COMPLETION_ARMED', 'ERROR'):
+                raise ValueError('COMPLETION_ARMED_REQUIRED_AFTER_DONE')
             if kind == 'READY':
                 if (phase != 'BOOTSTRAP' or type(message.get('pid')) is not int
                         or message['pid'] != handle.pid):
@@ -188,6 +232,7 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
                 cleanup_token = os.urandom(16).hex()
                 ops.send(handle, {'type':'GO', 'total_deadline':total_end,
                                  'startup_deadline':deadline,
+                                 'completion_protocol':COMPLETION_PROTOCOL,
                                  'cleanup_token':cleanup_token}, deadline)
                 result['go_sent'] = True
                 check(deadline)
@@ -242,19 +287,30 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
             elif kind == 'DONE':
                 if phase != 'FINALIZE' or exchange_end is not None:
                     raise ValueError('DONE_BEFORE_FINALIZATION')
-                candidate = {key:value for key,value in message.items() if key != 'type'}
-                if candidate.get('cleanup_handoff') is not None:
+                provisional = {key:value for key,value in message.items() if key != 'type'}
+                result['provisional_result'] = provisional
+                if provisional.get('cleanup_handoff') is not None:
                     # Only small already-delivered IPC data; no evidence-file IO.
                     from .native_worker import validate_cleanup_handoff
-                    validate_cleanup_handoff(plan, candidate, worker_pid=owned_pid,
+                    validate_cleanup_handoff(plan, provisional, worker_pid=owned_pid,
                                              child_pid=child_pid, token=cleanup_token)
                     child_wait_verified = True
                     finding(phase, 'OWNED_CHILD_WAIT_VERIFIED')
                 else:
                     finding(phase, 'CHILD_WAIT_UNVERIFIED')
                 check(active_end)
+                finding(phase, 'DONE_PROVISIONAL_AWAITING_ARMED')
+            elif kind == 'COMPLETION_ARMED':
+                if provisional is None or phase != 'FINALIZE' or exchange_end is not None:
+                    raise ValueError('COMPLETION_ARMED_ORDER')
+                _validate_completion_marker(message, plan, provisional,
+                                            worker_pid=owned_pid, token=cleanup_token)
+                check(active_end)  # Same FINALIZE/total deadline; no new phase.
+                candidate = provisional
+                result['completion_armed'] = dict(message)
                 result['worker_result'] = candidate
                 result['normal_finalization'] = True
+                finding(phase, 'COMPLETION_ARMED_VERIFIED')
             else:
                 raise ValueError('UNKNOWN_WORKER_MESSAGE')
     except BaseException as error:
@@ -272,15 +328,21 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
         for name in getattr(error, 'bootstrap_cleanup_failures', ()):
             finding('BOOTSTRAP_CLEANUP', 'DESCRIPTOR_CLOSE_FAILED', exception=name)
         # candidate is never accepted through this path, even if files exist.
-        candidate = None
-        child_wait_verified = False
-        result['normal_finalization'] = False
+        revoke_completion()
     finally:
         if handle is not None:
             cleanup_end = clock() + bounds.cleanup
             # Reserve some of the ONE cleanup budget for kill and worker wait.
             grace_end = min(cleanup_end, clock()+min(bounds.runtime.terminate_wait, bounds.cleanup/2))
             method = ops.signal_group if result['ownership_verified'] else ops.signal_worker
+            if candidate is not None:
+                try:
+                    if cancelled():
+                        fail('CLEANUP', 'CANCELLED')
+                        revoke_completion()
+                except BaseException as error:
+                    fail('CLEANUP', 'CANCELLATION_CHECK_FAILED', exception=type(error).__name__)
+                    revoke_completion()
             for sig in ('TERM','KILL'):
                 try:
                     remaining(cleanup_end, clock)
@@ -293,7 +355,7 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
                             observed['state'] == 'TERMINAL'):
                         if cancelled():
                             fail('CLEANUP', 'CANCELLED')
-                            candidate = None
+                            revoke_completion()
                         else:
                             disable_signalling()
                             result['terminal_cleanup'] = True
@@ -310,6 +372,26 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
                         result['worker_ownership_unresolved'] = True
                         disable_signalling()
                 if sig == 'TERM':
+                    if candidate is not None:
+                        try:
+                            # Observe the owned pipe during the SAME grace, not
+                            # a new wait or an acknowledgement of science.
+                            tail = ops.completion_tail(handle, grace_end)
+                            if (type(tail) is not dict or
+                                    tail not in ({'state':'QUIET'}, {'state':'EOF'}) and not (
+                                        set(tail) == {'state', 'byte_count'} and
+                                        tail['state'] == 'TRAILING' and
+                                        type(tail['byte_count']) is int and
+                                        0 < tail['byte_count'] <= NativeIPC.MAX_MESSAGE)):
+                                raise ValueError('COMPLETION_CHANNEL_OBSERVATION_SCHEMA')
+                            result['post_completion_channel'] = dict(tail)
+                            if tail['state'] == 'TRAILING':
+                                fail('CLEANUP', 'POST_COMPLETION_BYTES', byte_count=tail['byte_count'])
+                                revoke_completion()
+                        except BaseException as error:
+                            fail('CLEANUP', 'COMPLETION_CHANNEL_UNRESOLVED',
+                                 exception=type(error).__name__)
+                            revoke_completion()
                     try:
                         ops.pause(grace_end)
                     except BaseException as error:
@@ -340,10 +422,10 @@ def supervise(plan, bounds, *, ops, clock=time.monotonic, cancelled=lambda: Fals
         try:
             if cancelled():
                 fail('CLEANUP', 'CANCELLED')
-                candidate = None
+                revoke_completion()
         except BaseException as error:
             fail('CLEANUP', 'CANCELLATION_CHECK_FAILED', exception=type(error).__name__)
-            candidate = None
+            revoke_completion()
     if candidate is not None and child_wait_verified and result['worker_reap_within_deadline']:
         result['child_scope'] = 'REPORTED_CHILD_REAPED_AND_WORKER_REAPED'
     if candidate is not None and result['worker_reaped']:
@@ -526,6 +608,31 @@ class NativeIPC:
         while self.clock() < deadline:
             self.selector([],[],[],min(deadline-self.clock(), .1))
 
+    def completion_tail(self, handle, deadline):
+        """Observe unexpected post-marker bytes within the existing TERM grace.
+
+        EOF is only channel closure. QUIET is only no observed trailing bytes;
+        neither supplies worker termination, reaping, or child-scope evidence.
+        No traffic after this bounded observation is claimed to be impossible.
+        """
+        if self.buffer:
+            return dict(state='TRAILING', byte_count=min(len(self.buffer), self.MAX_MESSAGE))
+        while self.clock() < deadline:
+            ready, _, _ = self.selector([handle.stdout.fileno()], [], [],
+                                       min(remaining(deadline, self.clock), .1))
+            if self.clock() >= deadline:
+                break
+            if ready:
+                try:
+                    chunk = os.read(handle.stdout.fileno(), min(4096, self.MAX_MESSAGE))
+                except (BlockingIOError, InterruptedError):
+                    continue
+                if not chunk:
+                    return dict(state='EOF')
+                self.buffer += chunk
+                return dict(state='TRAILING', byte_count=len(chunk))
+        return dict(state='QUIET')
+
     def reap(self, handle, deadline):
         self.disable_signalling(handle)
         return handle.wait(timeout=remaining(deadline,self.clock))
@@ -698,8 +805,9 @@ def worker_main(*, ops=None, lifecycle=None, execute=None):
     """Genuine worker entry; offline tests inject ALL native control operations.
 
     Pre-completion failures reserve the leader through parent TERM/grace/KILL.
-    Fully published DONE is NOT parent acceptance; post-DONE aborts are outside
-    the stronger reservation guarantee. Parent loss exits nonzero without any
+    DONE is provisional until a distinct post-arming notification. Neither
+    message means scientific acceptance; post-arm aborts are outside the
+    stronger reservation guarantee. Parent loss exits nonzero without any
     new launch, cleanup budget or claim about an unreported child.
     """
     ops = _WorkerControl() if ops is None else ops
@@ -748,6 +856,8 @@ def worker_main(*, ops=None, lifecycle=None, execute=None):
         message = json.loads(line)
         if message.get('type') != 'GO':
             raise ValueError('GO_REQUIRED')
+        if message.get('completion_protocol') != COMPLETION_PROTOCOL:
+            raise ValueError('COMPLETION_PROTOCOL_REQUIRED')
         remaining(message['startup_deadline'], ops.clock)
         data = dict(message['plan']); data['argv'] = tuple(data['argv'])
         plan = LaunchPlan(**data)
@@ -761,6 +871,8 @@ def worker_main(*, ops=None, lifecycle=None, execute=None):
             shutdown_requested=lifecycle.shutdown_requested)
         emit({'type': 'DONE', **payload}, forward=True)
         lifecycle.arm_completed()
+        emit(_completion_marker(plan, payload, worker_pid=pid,
+                                token=message['cleanup_token']), forward=True)
     except BaseException as error:
         if not installed:
             raise  # cannot promise reservation before handler installation

@@ -43,8 +43,11 @@ class SyntheticOperations:
         self.validation_calls = []
         self.reaped = False
         self.poll_interval = 0.1
+        self.go = None
+        self.candidate = None
 
     def bootstrap(self, plan, bounds):
+        self.plan = plan
         self.log.append(("bootstrap", self.clock()))
         self.clock.advance(self.bootstrap_elapsed)
         if self.post_handle_error is not None:
@@ -64,6 +67,7 @@ class SyntheticOperations:
         if handle is not self.handle:
             raise AssertionError("unowned handle send")
         self.log.append(("send", message, deadline, self.clock()))
+        self.go = message
         if self.clock() >= deadline:
             raise TimeoutError("synthetic send deadline")
 
@@ -78,6 +82,11 @@ class SyntheticOperations:
             self.clock.now = max(self.clock(), at)
             if isinstance(message, BaseException):
                 raise message
+            if message == "COMPLETION_ARMED":
+                return supervisor._completion_marker(self.plan, self.candidate,
+                    worker_pid=self.handle.pid, token=self.go["cleanup_token"])
+            if isinstance(message, dict) and message.get("type") == "DONE":
+                self.candidate = {key: value for key, value in message.items() if key != "type"}
             return message
         self.clock.now = min(deadline, self.clock() + self.poll_interval)
         return None
@@ -99,6 +108,11 @@ class SyntheticOperations:
     def pause(self, deadline):
         self.log.append(("pause", deadline, self.clock()))
         self.clock.now = max(self.clock(), deadline) + self.pause_overrun
+
+    def completion_tail(self, handle, deadline):
+        if handle is not self.handle:
+            raise AssertionError("unowned completion-tail observation")
+        return {"state": "QUIET"}
 
     def reap(self, handle, deadline):
         if handle is not self.handle:
@@ -163,14 +177,16 @@ def success_messages():
     return [ready(), (0.15, {"type": "CHILD", "pid": 49153}),
             phase(0.2, "CONNECT"), phase(0.3, "RUN"),
             (0.4, {"type": "EXCHANGE_BEGIN", "deadline": 1.4}),
-            (0.5, {"type": "EXCHANGE_END"}), phase(0.6, "FINALIZE"), done()]
+            (0.5, {"type": "EXCHANGE_END"}), phase(0.6, "FINALIZE"), done(),
+            (0.7, "COMPLETION_ARMED")]
 
 
 class SupervisorControlFlowTests(unittest.TestCase):
     def run_supervisor(self, messages=(), *, bounds=None, cancelled=None, **options):
         clock = SyntheticClock()
         ops = SyntheticOperations(clock, messages, **options)
-        plan = SimpleNamespace(run_id="synthetic-worker-run", evidence_kind="SYNTHETIC")
+        plan = SimpleNamespace(run_id="synthetic-worker-run", evidence_kind="SYNTHETIC",
+                               binding={"fixture": "synthetic-supervisor-control"})
         result = supervisor.supervise(plan, bounds or make_bounds(), ops=ops, clock=clock,
             cancelled=(lambda: False) if cancelled is None else lambda: cancelled(clock, ops))
         return result, ops, clock
@@ -195,7 +211,7 @@ class SupervisorControlFlowTests(unittest.TestCase):
         self.assertTrue(result["ownership_verified"])
         self.assertTrue(result["go_sent"])
         self.assertTrue(result["worker_reaped"])
-        # Legacy boolean-only DONE is not concrete run-bound child-wait proof.
+        # A completion marker does not make a bare boolean child-wait proof.
         self.assertEqual(result["child_scope"], "UNRESOLVED")
         self.assertFalse(result["terminal_cleanup"])
         self.assertNotIn("type", result["worker_result"])
@@ -207,8 +223,20 @@ class SupervisorControlFlowTests(unittest.TestCase):
         sends = [x for x in ops.log if x[0] == "send"]
         self.assertEqual(len(sends), 1)
         self.assertEqual(sends[0][1]["type"], "GO")
+        self.assertEqual(sends[0][1]["completion_protocol"], supervisor.COMPLETION_PROTOCOL)
         self.assertLess([x[0] for x in ops.log].index("verify_scope"),
                         [x[0] for x in ops.log].index("send"))
+        self.assert_owned_signals_then_reap(ops)
+
+    def test_legacy_done_only_does_not_earn_normal_completion(self):
+        result, ops, _ = self.run_supervisor(success_messages()[:-1])
+        self.assert_interrupt(result)
+        self.assertFalse(result["normal_finalization"])
+        self.assertFalse(result["completion_armed"])
+        self.assertIsNone(result["worker_result"])
+        self.assertIsNotNone(result["provisional_result"])
+        self.assertEqual(result["first_failure"]["operation"], "FINALIZE")
+        self.assertEqual(result["first_failure"]["code"], "TIMEOUT")
         self.assert_owned_signals_then_reap(ops)
 
     def test_explicit_initial_bootstrap_limitation_is_retained(self):
@@ -393,7 +421,7 @@ class SupervisorControlFlowTests(unittest.TestCase):
         self.assert_owned_signals_then_reap(ops)
 
     def test_done_without_child_reap_proof_keeps_scope_unresolved(self):
-        messages = success_messages(); messages[-1] = done(child_reaped=False)
+        messages = success_messages(); messages[-2] = done(child_reaped=False)
         result, _, _ = self.run_supervisor(messages)
         self.assertEqual(result["status"], "WORKER_COMPLETED")
         self.assertEqual(result["child_scope"], "UNRESOLVED")
